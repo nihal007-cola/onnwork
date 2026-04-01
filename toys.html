@@ -1,1 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NEED TOYS</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: #33ff99;
+      font-family: monospace;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      opacity: 0.12;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .box {
+      border: 1px solid rgba(0,255,100,0.3);
+      padding: 15px;
+      margin-top: 15px;
+      background: rgba(0,0,0,0.5);
+      box-shadow: 0 0 10px rgba(0,255,100,0.1);
+      transition: all 0.25s ease;
+      position: relative;
+      z-index: 2;
+      cursor: pointer;
+    }
+
+    .box:hover {
+      box-shadow: 0 0 20px rgba(0,255,100,0.4);
+      background: rgba(0,255,100,0.05);
+    }
+
+    .title {
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .desc {
+      font-size: 13px;
+      opacity: 0.85;
+      line-height: 1.5;
+    }
+
+    a {
+      color: #33ff99;
+      text-decoration: none;
+      display: block;
+    }
+
+    #transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+
+    #transition.active {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<a href="index.html">← BACK</a>
+
+<h2>> NEED TOYS</h2>
+
+<div class="box">
+  <a href="snake.html">
+    <div class="title">Snake</div>
+    <div class="desc">
+      Classic snake. Keyboard-controlled. Minimal distractions. Pure loop.
+    </div>
+  </a>
+</div>
+
+<div class="box">
+  <a href="#">
+    <div class="title">Matrix Typing</div>
+    <div class="desc">
+      A simple typing interface with live feedback. Speed, rhythm, and accuracy.
+    </div>
+  </a>
+</div>
+
+<div class="box">
+  <a href="#">
+    <div class="title">Allocation Simulator</div>
+    <div class="desc">
+      A simplified version of allocation logic. Understand flow, constraints, and decisions.
+    </div>
+  </a>
+</div>
+
+<div class="box">
+  <a href="#">
+    <div class="title">Signal Console</div>
+    <div class="desc">
+      Experimental interface. Inputs, outputs, and system responses.
+    </div>
+  </a>
+</div>
+
+<!-- TRANSITION -->
+<div id="transition"></div>
+
+<script>
+// MATRIX (SUBTLE)
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+const letters = "01";
+const fontSize = 14;
+let columns = Math.floor(canvas.width / fontSize);
+let drops = [];
+
+for (let x = 0; x < columns; x++) {
+  drops[x] = Math.random() * canvas.height;
+}
+
+function draw() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.07)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#00ff88";
+  ctx.font = fontSize + "px monospace";
+
+  for (let i = 0; i < drops.length; i++) {
+    const text = letters[Math.floor(Math.random() * letters.length)];
+    ctx.fillText(text, i * fontSize, drops[i]);
+
+    if (drops[i] > canvas.height && Math.random() > 0.98) {
+      drops[i] = 0;
+    }
+
+    drops[i] += 0.6;
+  }
+}
+
+setInterval(draw, 60);
+
+
+// PAGE TRANSITION
+const links = document.querySelectorAll("a");
+
+links.forEach(link => {
+  link.addEventListener("click", function(e) {
+    if (this.href && this.target !== "_blank") {
+      e.preventDefault();
+      const overlay = document.getElementById("transition");
+      overlay.classList.add("active");
+
+      setTimeout(() => {
+        window.location.href = this.href;
+      }, 300);
+    }
+  });
+});
+</script>
+
+</body>
+</html>
