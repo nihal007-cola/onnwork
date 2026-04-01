@@ -29,7 +29,7 @@
       max-width: 800px;
       margin: 15px auto;
 
-      background: rgba(0, 0, 0, 0.45); /* 🔥 MORE TRANSPARENT */
+      background: rgba(0, 0, 0, 0.45);
       border: 1px solid rgba(0, 255, 100, 0.2);
       box-shadow: 0 0 25px rgba(0, 255, 100, 0.1);
       backdrop-filter: blur(4px);
@@ -85,11 +85,39 @@
       text-align: center;
       text-decoration: none;
       color: #33ff99;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    .btn.highlight {
-      background: #00bcd4;
-      color: black;
+    /* Hover glow */
+    .btn:hover {
+      background: rgba(0, 255, 100, 0.15);
+      box-shadow: 0 0 15px rgba(0,255,100,0.6);
+    }
+
+    /* Click effect */
+    .btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 25px rgba(0,255,100,1);
+    }
+
+    /* MATRIX TRANSITION */
+    #transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+
+    #transition.active {
+      opacity: 1;
     }
 
     @media (max-width: 600px) {
@@ -126,14 +154,17 @@
   <div class="section-title">> OR EXPLORE:</div>
 
   <div class="buttons">
-    <a class="btn highlight" href="#">STUFF I CAN MAKE FOR YOU</a>
-    <a class="btn" href="#">THINGS I MIGHT DO FOR YOU</a>
-    <a class="btn" href="#">NEED TOYS</a>
-    <a class="btn" href="#">TERMS & CONDITIONS</a>
-    <a class="btn" href="#">PRIVACY POLICY</a>
+    <a class="btn" href="stuff.html">STUFF I CAN MAKE FOR YOU</a>
+    <a class="btn" href="things.html">THINGS I MIGHT DO FOR YOU</a>
+    <a class="btn" href="toys.html">NEED TOYS</a>
+    <a class="btn" href="terms.html">TERMS & CONDITIONS</a>
+    <a class="btn" href="privacy.html">PRIVACY POLICY</a>
   </div>
 
 </div>
+
+<!-- TRANSITION OVERLAY -->
+<div id="transition"></div>
 
 <script>
 const canvas = document.getElementById("matrix");
@@ -148,7 +179,7 @@ resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
 const letters = "01ONNWORKLAB";
-const fontSize = 12; // 🔥 smaller = denser matrix
+const fontSize = 12;
 let columns;
 let drops;
 
@@ -163,10 +194,10 @@ function initMatrix() {
 initMatrix();
 
 function draw() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.03)"; // 🔥 lighter fade = more visible trails
+  ctx.fillStyle = "rgba(0, 0, 0, 0.03)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#00ff88"; // 🔥 brighter matrix
+  ctx.fillStyle = "#00ff88";
   ctx.font = fontSize + "px monospace";
 
   for (let i = 0; i < drops.length; i++) {
@@ -182,6 +213,25 @@ function draw() {
 }
 
 setInterval(draw, 35);
+
+
+
+// PAGE TRANSITION SCRIPT
+const links = document.querySelectorAll("a");
+
+links.forEach(link => {
+  link.addEventListener("click", function(e) {
+    if (this.href && this.target !== "_blank") {
+      e.preventDefault();
+      const overlay = document.getElementById("transition");
+      overlay.classList.add("active");
+
+      setTimeout(() => {
+        window.location.href = this.href;
+      }, 300);
+    }
+  });
+});
 </script>
 
 </body>
