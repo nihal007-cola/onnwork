@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NEED TOYS</title>
+  <title>SNAKE</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -12,11 +12,12 @@
       color: #33ff99;
       font-family: monospace;
       padding: 20px;
+      text-align: center;
       position: relative;
       z-index: 1;
     }
 
-    canvas {
+    canvas.bg {
       position: fixed;
       top: 0;
       left: 0;
@@ -25,43 +26,25 @@
     }
 
     h2 {
-      margin-bottom: 10px;
       position: relative;
       z-index: 2;
     }
 
-    .box {
+    #gameCanvas {
+      background: rgba(0,0,0,0.8);
       border: 1px solid rgba(0,255,100,0.3);
-      padding: 15px;
-      margin-top: 15px;
-      background: rgba(0,0,0,0.5);
-      box-shadow: 0 0 10px rgba(0,255,100,0.1);
-      transition: all 0.25s ease;
+      margin-top: 20px;
       position: relative;
       z-index: 2;
-      cursor: pointer;
-    }
-
-    .box:hover {
-      box-shadow: 0 0 20px rgba(0,255,100,0.4);
-      background: rgba(0,255,100,0.05);
-    }
-
-    .title {
-      font-size: 15px;
-      margin-bottom: 6px;
-    }
-
-    .desc {
-      font-size: 13px;
-      opacity: 0.85;
-      line-height: 1.5;
     }
 
     a {
       color: #33ff99;
       text-decoration: none;
-      display: block;
+      display: inline-block;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
     }
 
     #transition {
@@ -85,92 +68,128 @@
 
 <body>
 
-<canvas id="matrix"></canvas>
+<canvas id="matrix" class="bg"></canvas>
 
-<a href="index.html">← BACK</a>
+<a href="toys.html">← BACK</a>
 
-<h2>> NEED TOYS</h2>
+<h2>> SNAKE</h2>
 
-<div class="box">
-  <a href="snake.html">
-    <div class="title">Snake</div>
-    <div class="desc">
-      Classic snake. Keyboard-controlled. Minimal distractions. Pure loop.
-    </div>
-  </a>
-</div>
+<canvas id="gameCanvas" width="400" height="400"></canvas>
 
-<div class="box">
-  <a href="#">
-    <div class="title">Matrix Typing</div>
-    <div class="desc">
-      A simple typing interface with live feedback. Speed, rhythm, and accuracy.
-    </div>
-  </a>
-</div>
-
-<div class="box">
-  <a href="#">
-    <div class="title">Allocation Simulator</div>
-    <div class="desc">
-      A simplified version of allocation logic. Understand flow, constraints, and decisions.
-    </div>
-  </a>
-</div>
-
-<div class="box">
-  <a href="#">
-    <div class="title">Signal Console</div>
-    <div class="desc">
-      Experimental interface. Inputs, outputs, and system responses.
-    </div>
-  </a>
-</div>
-
-<!-- TRANSITION -->
 <div id="transition"></div>
 
 <script>
-// MATRIX (SUBTLE)
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
+// MATRIX BACKGROUND
+const bg = document.getElementById("matrix");
+const bgCtx = bg.getContext("2d");
 
-function resizeCanvas() {
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
+function resizeBG() {
+  bg.height = window.innerHeight;
+  bg.width = window.innerWidth;
 }
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+resizeBG();
+window.addEventListener("resize", resizeBG);
 
 const letters = "01";
 const fontSize = 14;
-let columns = Math.floor(canvas.width / fontSize);
+let columns = Math.floor(bg.width / fontSize);
 let drops = [];
 
 for (let x = 0; x < columns; x++) {
-  drops[x] = Math.random() * canvas.height;
+  drops[x] = Math.random() * bg.height;
 }
 
-function draw() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.07)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+function drawMatrix() {
+  bgCtx.fillStyle = "rgba(0,0,0,0.07)";
+  bgCtx.fillRect(0, 0, bg.width, bg.height);
 
-  ctx.fillStyle = "#00ff88";
-  ctx.font = fontSize + "px monospace";
+  bgCtx.fillStyle = "#00ff88";
+  bgCtx.font = fontSize + "px monospace";
 
   for (let i = 0; i < drops.length; i++) {
     const text = letters[Math.floor(Math.random() * letters.length)];
-    ctx.fillText(text, i * fontSize, drops[i]);
+    bgCtx.fillText(text, i * fontSize, drops[i]);
 
-    if (drops[i] > canvas.height && Math.random() > 0.98) {
+    if (drops[i] > bg.height && Math.random() > 0.98) {
       drops[i] = 0;
     }
-
     drops[i] += 0.6;
   }
 }
 
-setInterval(draw, 60);
+setInterval(drawMatrix, 60);
+
+
+// SNAKE GAME (MIT STYLE SIMPLE IMPLEMENTATION)
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let snake = [{x: 200, y: 200}];
+let dx = 20;
+let dy = 0;
+let food = randomFood();
+let score = 0;
+
+function randomFood() {
+  return {
+    x: Math.floor(Math.random() * 20) * 20,
+    y: Math.floor(Math.random() * 20) * 20
+  };
+}
+
+function drawGame() {
+  ctx.fillStyle = "rgba(0,0,0,0.8)";
+  ctx.fillRect(0, 0, 400, 400);
+
+  // snake
+  ctx.fillStyle = "#33ff99";
+  snake.forEach(part => ctx.fillRect(part.x, part.y, 18, 18));
+
+  // food
+  ctx.fillStyle = "#00ffcc";
+  ctx.fillRect(food.x, food.y, 18, 18);
+
+  // move
+  const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+  snake.unshift(head);
+
+  // eat
+  if (head.x === food.x && head.y === food.y) {
+    score++;
+    food = randomFood();
+  } else {
+    snake.pop();
+  }
+
+  // collision
+  if (
+    head.x < 0 || head.y < 0 ||
+    head.x >= 400 || head.y >= 400 ||
+    snake.slice(1).some(p => p.x === head.x && p.y === head.y)
+  ) {
+    alert("Game Over | Score: " + score);
+    document.location.reload();
+  }
+}
+
+setInterval(drawGame, 120);
+
+
+// CONTROLS
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowUp" && dy === 0) {
+    dx = 0; dy = -20;
+  }
+  if (e.key === "ArrowDown" && dy === 0) {
+    dx = 0; dy = 20;
+  }
+  if (e.key === "ArrowLeft" && dx === 0) {
+    dx = -20; dy = 0;
+  }
+  if (e.key === "ArrowRight" && dx === 0) {
+    dx = 20; dy = 0;
+  }
+});
 
 
 // PAGE TRANSITION
@@ -178,15 +197,13 @@ const links = document.querySelectorAll("a");
 
 links.forEach(link => {
   link.addEventListener("click", function(e) {
-    if (this.href && this.target !== "_blank") {
-      e.preventDefault();
-      const overlay = document.getElementById("transition");
-      overlay.classList.add("active");
+    e.preventDefault();
+    const overlay = document.getElementById("transition");
+    overlay.classList.add("active");
 
-      setTimeout(() => {
-        window.location.href = this.href;
-      }, 300);
-    }
+    setTimeout(() => {
+      window.location.href = this.href;
+    }, 300);
   });
 });
 </script>
