@@ -214,19 +214,20 @@
       border-radius: 4px;
     }
 
-    /* Mobile touch command buttons */
+    /* Mobile specific styles - command input at bottom */
     .mobile-command-bar {
       display: none;
-      background: rgba(0, 0, 0, 0.9);
-      border-top: 1px solid #33ff9944;
-      padding: 8px;
+      background: rgba(0, 0, 0, 0.95);
+      border-top: 1px solid #33ff99;
+      padding: 10px;
       gap: 8px;
       flex-wrap: wrap;
       justify-content: center;
       backdrop-filter: blur(8px);
+      z-index: 20;
     }
     .cmd-btn {
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.8);
       border: 1px solid #33ff99;
       color: #33ff99;
       font-family: monospace;
@@ -244,18 +245,61 @@
       transform: scale(0.95);
     }
 
+    /* Mobile input container at bottom */
+    .mobile-input-container {
+      display: none;
+      background: rgba(0, 0, 0, 0.95);
+      border-top: 1px solid #33ff99;
+      padding: 10px;
+      gap: 8px;
+      align-items: center;
+      z-index: 20;
+    }
+    .mobile-input {
+      flex: 1;
+      background: black;
+      border: 1.5px solid #33ff99;
+      padding: 10px;
+      color: #33ff99;
+      font-family: monospace;
+      font-size: 14px;
+      outline: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    .mobile-send-btn {
+      background: #33ff99;
+      border: none;
+      color: black;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .mobile-send-btn:active {
+      transform: scale(0.95);
+    }
+
     @media (max-width: 850px) {
       .main-dashboard {
         flex-direction: column;
         gap: 10px;
         padding: 10px;
+        padding-bottom: 0;
       }
-      .console-panel { flex: 1; min-height: 180px; }
-      .drawing-arena { flex: 2; min-height: 250px; }
-      .reference-panel { flex: 0.5; max-height: 120px; }
+      .console-panel { flex: 1; min-height: 160px; }
+      .drawing-arena { flex: 2; min-height: 220px; }
+      .reference-panel { flex: 0.4; max-height: 100px; }
       .top-bar { padding: 8px 12px; }
       .logo-title { font-size: 0.85rem; }
+      
+      /* Hide desktop input, show mobile input at bottom */
+      .input-area { display: none; }
       .mobile-command-bar { display: flex; }
+      .mobile-input-container { display: flex; }
     }
   </style>
 </head>
@@ -272,7 +316,7 @@
       <div class="console-header">⚡ TERMINAL :: COMMAND HISTORY</div>
       <div class="console-history" id="consoleHistory"></div>
       <div class="input-area">
-        <input type="text" id="cmd" placeholder="fd 80 rt 90 repeat 4 [fd 100 rt 90]" autofocus spellcheck="false" enterkeyhint="send">
+        <input type="text" id="cmd" placeholder="fd 80 rt 90 repeat 4 [fd 100 rt 90]" autofocus spellcheck="false">
       </div>
     </div>
 
@@ -298,7 +342,7 @@
     </div>
   </div>
 
-  <!-- Mobile Quick Command Bar -->
+  <!-- Mobile Quick Command Buttons -->
   <div class="mobile-command-bar" id="mobileCommandBar">
     <button class="cmd-btn" data-cmd="fd 50">↑ FD 50</button>
     <button class="cmd-btn" data-cmd="bk 50">↓ BK 50</button>
@@ -308,6 +352,12 @@
     <button class="cmd-btn" data-cmd="pd">✍️ PD</button>
     <button class="cmd-btn" data-cmd="clear">🗑️ CLEAR</button>
     <button class="cmd-btn" data-cmd="home">🏠 HOME</button>
+  </div>
+
+  <!-- Mobile Input at Bottom - keyboard dismisses properly -->
+  <div class="mobile-input-container" id="mobileInputContainer">
+    <input type="text" id="mobileCmd" class="mobile-input" placeholder="fd 80 rt 90 repeat 4 [fd 100 rt 90]" spellcheck="false" enterkeyhint="send">
+    <button class="mobile-send-btn" id="mobileSendBtn">⚡ RUN</button>
   </div>
 </div>
 
@@ -324,8 +374,10 @@
     };
     
     const consoleHistory = document.getElementById("consoleHistory");
-    const cmdInput = document.getElementById("cmd");
     const penStatusSpan = document.getElementById("penStatus");
+    const desktopCmd = document.getElementById("cmd");
+    const mobileCmd = document.getElementById("mobileCmd");
+    const mobileSendBtn = document.getElementById("mobileSendBtn");
     
     function updatePenIndicator() {
       penStatusSpan.innerText = turtle.pen ? "DOWN ✍️" : "UP ✏️";
@@ -568,6 +620,15 @@
       updatePenIndicator();
     }
     
+    // Process command and dismiss keyboard on mobile
+    function processAndDismissKeyboard(inputElement, commandValue) {
+      if (commandValue && commandValue.trim() !== "") {
+        runLogoCommand(commandValue);
+      }
+      inputElement.value = "";
+      inputElement.blur();  // This dismisses the keyboard on mobile
+    }
+    
     function attachCanvasResize() {
       const wrapper = document.querySelector(".canvas-wrapper");
       if (!wrapper) return;
@@ -613,14 +674,28 @@
       addConsoleLine("🔥 SOLID BRIGHT LINES — enhanced visibility!");
       addConsoleLine("📐 GRID ALWAYS VISIBLE");
       
-      cmdInput.addEventListener("keydown", (e) => {
+      // Desktop command listener
+      desktopCmd.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
-          const val = cmdInput.value;
+          const val = desktopCmd.value;
           if (val.length > 0) runLogoCommand(val);
-          cmdInput.value = "";
-          cmdInput.focus();
+          desktopCmd.value = "";
+          desktopCmd.focus();
         }
+      });
+      
+      // Mobile command input - dismisses keyboard after send
+      mobileCmd.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          processAndDismissKeyboard(mobileCmd, mobileCmd.value);
+        }
+      });
+      
+      mobileSendBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        processAndDismissKeyboard(mobileCmd, mobileCmd.value);
       });
       
       // Mobile command buttons
@@ -631,6 +706,13 @@
           const cmd = btn.dataset.cmd;
           if (cmd) {
             runLogoCommand(cmd);
+            // Also blur any active input to dismiss keyboard if open
+            if (mobileCmd === document.activeElement) {
+              mobileCmd.blur();
+            }
+            if (desktopCmd === document.activeElement) {
+              desktopCmd.blur();
+            }
           }
         });
         btn.addEventListener("touchstart", (e) => {
@@ -638,8 +720,17 @@
           const cmd = btn.dataset.cmd;
           if (cmd) {
             runLogoCommand(cmd);
+            if (mobileCmd === document.activeElement) {
+              mobileCmd.blur();
+            }
           }
         });
+      });
+      
+      // Prevent canvas from losing drawing when keyboard closes
+      canvas.addEventListener("touchstart", (e) => {
+        // Just prevent default to avoid any weirdness, but don't blur inputs
+        e.preventDefault();
       });
       
       const backBtn = document.getElementById("backBtn");
