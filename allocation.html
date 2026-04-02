@@ -158,6 +158,8 @@
     let animationId = null;
     let gameOverFlag = false;
     let playerName = "ACE";
+    let powerupActivationMessage = "";
+    let powerupMessageTimer = 0;
     
     // ----- GAME DATA -----
     let score = 0;
@@ -333,6 +335,11 @@
       levelSpan.innerText = level;
     }
     
+    function showPowerupMessage(msg) {
+      powerupActivationMessage = msg;
+      powerupMessageTimer = 60;
+    }
+    
     function applyDifficulty() {
       let multiplier = 1 + (level-1) * 0.2;
       currentSpawnDelay = Math.max(18, Math.floor(baseSpawnDelay / multiplier));
@@ -365,17 +372,25 @@
         player.rapidFireTimer = 600;
         currentShootDelay = 5;
         playPowerup();
+        showPowerupMessage("⚡ RAPID FIRE ACTIVATED! ⚡");
         return true;
       } else if(type === 'shield' && inventory.shield > 0) {
         inventory.shield--;
         player.shieldTimer = 500;
         playPowerup();
+        showPowerupMessage("🛡️ SHIELD ACTIVATED! 🛡️");
         return true;
       } else if(type === 'double' && inventory.double > 0) {
         inventory.double--;
         player.doubleDamageTimer = 450;
         playPowerup();
+        showPowerupMessage("💥 DOUBLE DAMAGE ACTIVATED! 💥");
         return true;
+      } else if((type === 'rapid' && inventory.rapid === 0) ||
+                (type === 'shield' && inventory.shield === 0) ||
+                (type === 'double' && inventory.double === 0)) {
+        showPowerupMessage("⚠️ NO POWERUP IN INVENTORY! ⚠️");
+        return false;
       }
       return false;
     }
@@ -385,12 +400,18 @@
       else if(type === 'shield') inventory.shield++;
       else if(type === 'double') inventory.double++;
       playPowerup();
+      let msg = "";
+      if(type === 'rapid') msg = "🔴 RAPID FIRE COLLECTED! Press R to activate";
+      else if(type === 'shield') msg = "🔵 SHIELD COLLECTED! Press S to activate";
+      else msg = "🟣 DOUBLE DAMAGE COLLECTED! Press D to activate";
+      showPowerupMessage(msg);
     }
     
     function damagePlayer(amount) {
       if(player.invincibleTimer > 0) return;
       if(player.shieldTimer > 0) {
         player.shieldTimer = Math.max(0, player.shieldTimer - 30);
+        showPowerupMessage("🛡️ SHIELD ABSORBED DAMAGE! 🛡️");
         return;
       }
       player.health = Math.max(0, player.health - amount);
@@ -428,6 +449,8 @@
       shootCooldown = 0;
       currentShootDelay = baseShootDelay;
       currentSpawnDelay = baseSpawnDelay;
+      powerupActivationMessage = "";
+      powerupMessageTimer = 0;
       updateUI();
       applyDifficulty();
       if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -441,15 +464,29 @@
     function updateGame() {
       if(!gameRunning || paused) return;
       
+      if(powerupMessageTimer > 0) powerupMessageTimer--;
+      
       if(shootCooldown > 0) shootCooldown--;
       if(player.invincibleTimer > 0) player.invincibleTimer--;
       if(player.rapidFireTimer > 0) {
         player.rapidFireTimer--;
-        if(player.rapidFireTimer <= 0) currentShootDelay = baseShootDelay;
-        else currentShootDelay = 5;
+        if(player.rapidFireTimer <= 0) {
+          currentShootDelay = baseShootDelay;
+          showPowerupMessage("⚡ RAPID FIRE EXPIRED ⚡");
+        } else currentShootDelay = 5;
       } else currentShootDelay = baseShootDelay;
-      if(player.doubleDamageTimer > 0) player.doubleDamageTimer--;
-      if(player.shieldTimer > 0) player.shieldTimer--;
+      if(player.doubleDamageTimer > 0) {
+        player.doubleDamageTimer--;
+        if(player.doubleDamageTimer <= 0) {
+          showPowerupMessage("💥 DOUBLE DAMAGE EXPIRED 💥");
+        }
+      }
+      if(player.shieldTimer > 0) {
+        player.shieldTimer--;
+        if(player.shieldTimer <= 0) {
+          showPowerupMessage("🛡️ SHIELD EXPIRED 🛡️");
+        }
+      }
       
       let moveY = 0;
       let moveX = 0;
@@ -543,6 +580,7 @@
                 enemiesKilled = 0;
                 applyDifficulty();
                 updateUI();
+                showPowerupMessage(`⭐ LEVEL ${level}! ⭐`);
               }
               updateUI();
             }
@@ -609,8 +647,13 @@
         ctx.beginPath();
         ctx.arc(px+2, py, 18, 0, Math.PI*2);
         ctx.strokeStyle = '#88ffcc';
-        ctx.lineWidth = 2;
-        ctx.shadowBlur = 10;
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(px+2, py, 22, 0, Math.PI*2);
+        ctx.strokeStyle = '#33ff99';
+        ctx.lineWidth = 1.5;
         ctx.stroke();
       }
       
@@ -652,7 +695,7 @@
       
       for(let p of powerups) {
         ctx.fillStyle = '#ff66cc';
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 10;
         ctx.fillRect(p.x, p.y, 14, 14);
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 14px monospace';
@@ -673,15 +716,16 @@
       ctx.font = 'bold 12px monospace';
       ctx.fillText(`HEALTH ${player.health}`, 20, 16);
       
-      ctx.font = 'bold 13px monospace';
+      ctx.font = 'bold 14px monospace';
       ctx.fillStyle = '#33ff99';
-      ctx.shadowBlur = 3;
-      ctx.fillText(`INVENTORY:  R:${inventory.rapid}  S:${inventory.shield}  D:${inventory.double}`, 20, 50);
+      ctx.shadowBlur = 4;
+      ctx.fillText(`INVENTORY:  R:${inventory.rapid}  S:${inventory.shield}  D:${inventory.double}`, 20, 52);
       
-      let yOff = 70;
+      let yOff = 74;
       if(player.rapidFireTimer > 0) {
         ctx.fillStyle = '#aaff88';
-        ctx.fillText(`⚡ RAPID ${Math.floor(player.rapidFireTimer/60)}s`, 20, yOff);
+        ctx.font = 'bold 12px monospace';
+        ctx.fillText(`⚡ RAPID FIRE ${Math.floor(player.rapidFireTimer/60)}s`, 20, yOff);
         yOff+=18;
       }
       if(player.shieldTimer > 0) {
@@ -694,41 +738,73 @@
         ctx.fillText(`💥 DOUBLE DMG ${Math.floor(player.doubleDamageTimer/60)}s`, 20, yOff);
       }
       
+      if(powerupMessageTimer > 0 && powerupActivationMessage) {
+        ctx.font = 'bold 16px monospace';
+        ctx.fillStyle = '#ffff88';
+        ctx.shadowBlur = 8;
+        ctx.textAlign = 'center';
+        ctx.fillText(powerupActivationMessage, W/2, 80);
+        ctx.textAlign = 'left';
+      }
+      
       ctx.font = 'bold 22px monospace';
       ctx.fillStyle = '#33ff99';
       ctx.shadowBlur = 10;
       let displayName = playerNameInput.value.toUpperCase().slice(0,4);
       if(displayName === "") displayName = "ACE";
-      ctx.fillText(`${displayName}  |  SCORE: ${score}`, W-280, 38);
+      ctx.fillText(`${displayName}  |  SCORE: ${score}`, W-310, 40);
       
       if(!gameRunning && !gameOverFlag) {
         ctx.font = 'bold 28px monospace';
         ctx.fillStyle = '#33ff99';
         ctx.shadowBlur = 8;
-        ctx.fillText('⚡ SPACE ATTACK ⚡', W/2-160, H/2-40);
+        ctx.textAlign = 'center';
+        ctx.fillText('⚡ SPACE ATTACK ⚡', W/2, H/2-80);
+        ctx.font = '14px monospace';
+        ctx.fillStyle = '#88ffaa';
+        ctx.fillText('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', W/2, H/2-45);
         ctx.font = '16px monospace';
-        ctx.fillText('PRESS [ENTER] TO START', W/2-130, H/2+20);
-        ctx.fillText('←↑↓→ / WASD  |  SPACE  |  P', W/2-140, H/2+60);
-        ctx.fillText('R / S / D  →  USE POWERUPS', W/2-120, H/2+90);
+        ctx.fillStyle = '#33ff99';
+        ctx.fillText('←↑↓→  or  WASD  →  MOVE SHIP', W/2, H/2-15);
+        ctx.fillText('[SPACE]  →  FIRE WEAPONS', W/2, H/2+10);
+        ctx.fillText('[P]  →  PAUSE GAME', W/2, H/2+35);
+        ctx.fillText('[R] [S] [D]  →  USE POWERUPS', W/2, H/2+60);
+        ctx.fillText('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', W/2, H/2+85);
+        ctx.font = 'bold 18px monospace';
+        ctx.fillStyle = '#ffff88';
+        ctx.fillText('PRESS [ENTER] TO START', W/2, H/2+125);
+        ctx.font = '12px monospace';
+        ctx.fillStyle = '#88ffaa';
+        ctx.fillText('💡 TIP: Collect pink R / S / D cubes → then press R/S/D to activate!', W/2, H/2+165);
+        ctx.textAlign = 'left';
       }
       if(gameOverFlag && !gameRunning) {
         ctx.fillStyle = '#33ff99';
         ctx.font = 'bold 32px monospace';
-        ctx.fillText('GAME OVER', W/2-105, H/2-40);
-        ctx.font = '20px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('☠️ GAME OVER ☠️', W/2, H/2-60);
+        ctx.font = '22px monospace';
         let finalName = playerNameInput.value.toUpperCase().slice(0,4) || "ACE";
-        ctx.fillText(`${finalName}  |  FINAL SCORE: ${score}`, W/2-150, H/2+10);
+        ctx.fillStyle = '#ffff88';
+        ctx.fillText(`${finalName}  |  FINAL SCORE: ${score}`, W/2, H/2-10);
         ctx.font = '16px monospace';
-        ctx.fillText('PRESS [ENTER] TO RESTART', W/2-125, H/2+60);
+        ctx.fillStyle = '#33ff99';
+        ctx.fillText('PRESS [ENTER] TO RESTART', W/2, H/2+45);
+        ctx.fillText('PRESS [ESC] TO RETURN TO TOYS', W/2, H/2+80);
+        ctx.textAlign = 'left';
       }
       if(paused && gameRunning) {
-        ctx.globalAlpha = 0.8;
+        ctx.globalAlpha = 0.85;
         ctx.fillStyle = '#000000';
         ctx.fillRect(0,0,W,H);
         ctx.globalAlpha = 1;
         ctx.fillStyle = '#33ff99';
-        ctx.font = '28px monospace';
-        ctx.fillText('⏸ PAUSED', W/2-70, H/2);
+        ctx.font = 'bold 32px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('⏸ GAME PAUSED', W/2, H/2);
+        ctx.font = '14px monospace';
+        ctx.fillText('PRESS [P] TO RESUME', W/2, H/2+45);
+        ctx.textAlign = 'left';
       }
       ctx.shadowBlur = 0;
     }
@@ -782,11 +858,7 @@
       }
       if(code === 'Escape') {
         e.preventDefault();
-        if(gameRunning && !gameOverFlag) {
-          window.location.href = 'toys.html';
-        } else {
-          window.location.href = 'toys.html';
-        }
+        window.location.href = 'toys.html';
       }
     });
     
