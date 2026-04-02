@@ -37,10 +37,11 @@
       display: block;
       box-shadow: 0 0 0 2px #33ff99, 0 0 0 6px rgba(51, 255, 153, 0.2), 0 0 30px rgba(51, 255, 153, 0.4);
       border-radius: 8px;
-      cursor: none;
+      cursor: pointer;
       width: 100%;
       height: auto;
       background: black;
+      touch-action: none;
     }
 
     .info-panel {
@@ -133,7 +134,6 @@
       flex-wrap: wrap;
     }
 
-    /* Mobile Touch Controls */
     .touch-controls {
       display: none;
       width: 100%;
@@ -165,6 +165,7 @@
       min-width: 70px;
       backdrop-filter: blur(4px);
       box-shadow: 0 0 10px rgba(51,255,153,0.3);
+      touch-action: manipulation;
     }
 
     .touch-btn:active {
@@ -212,7 +213,6 @@
     <button id="pauseBtn">⏸ PAUSE</button>
   </div>
   
-  <!-- Mobile Touch Controls -->
   <div class="touch-controls" id="touchControls">
     <div class="touch-row">
       <div class="touch-btn" data-action="move-left">◀ LEFT</div>
@@ -234,16 +234,13 @@
 
 <script>
   (function(){
-    // ----- CANVAS -----
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // ----- FIXED DIMENSIONS -----
     const W = 1000, H = 562;
     canvas.width = W;
     canvas.height = H;
     
-    // Scale canvas for mobile display
     function scaleCanvas() {
       const container = canvas.parentElement;
       const maxWidth = Math.min(window.innerWidth - 24, 1000);
@@ -254,7 +251,6 @@
     window.addEventListener('resize', scaleCanvas);
     scaleCanvas();
     
-    // ----- GLOBAL STATE -----
     let gameRunning = false;
     let paused = false;
     let animationId = null;
@@ -262,19 +258,16 @@
     let powerupActivationMessage = "";
     let powerupMessageTimer = 0;
     
-    // ----- GAME DATA -----
     let score = 0;
     let level = 1;
     let enemiesKilled = 0;
     let levelThreshold = 8;
     
-    // ----- PLAYER -----
-    const PLAYER_SIZE = 18;
     let player = {
       x: 80,
       y: H/2,
-      width: PLAYER_SIZE,
-      height: PLAYER_SIZE,
+      width: 18,
+      height: 18,
       health: 100,
       maxHealth: 100,
       invincibleTimer: 0,
@@ -283,14 +276,8 @@
       shieldTimer: 0
     };
     
-    // ----- INVENTORY SYSTEM -----
-    let inventory = {
-      rapid: 0,
-      shield: 0,
-      double: 0
-    };
+    let inventory = { rapid: 0, shield: 0, double: 0 };
     
-    // ----- BULLETS -----
     let playerBullets = [];
     let enemyBullets = [];
     const PLAYER_BULLET_SPEED = 7;
@@ -299,13 +286,11 @@
     let baseShootDelay = 12;
     let currentShootDelay = 12;
     
-    // ----- ENEMIES -----
     let enemies = [];
     let spawnCounter = 0;
     let baseSpawnDelay = 45;
     let currentSpawnDelay = 45;
     
-    // Touch control state
     let touchMoveLeft = false;
     let touchMoveRight = false;
     let touchMoveUp = false;
@@ -325,51 +310,24 @@
         this.shootCooldown = 0;
         switch(type){
           case 'basic':
-            this.width = 24;
-            this.height = 18;
-            this.health = 1;
-            this.speed = 1.6;
-            this.scoreVal = 10;
-            break;
+            this.width = 24; this.height = 18; this.health = 1; this.speed = 1.6; this.scoreVal = 10; break;
           case 'fast':
-            this.width = 18;
-            this.height = 14;
-            this.health = 1;
-            this.speed = 3.2;
-            this.scoreVal = 15;
-            break;
+            this.width = 18; this.height = 14; this.health = 1; this.speed = 3.2; this.scoreVal = 15; break;
           case 'tank':
-            this.width = 32;
-            this.height = 28;
-            this.health = 4;
-            this.speed = 1.0;
-            this.scoreVal = 40;
-            break;
+            this.width = 32; this.height = 28; this.health = 4; this.speed = 1.0; this.scoreVal = 40; break;
           case 'shooter':
-            this.width = 26;
-            this.height = 22;
-            this.health = 2;
-            this.speed = 1.3;
-            this.scoreVal = 25;
-            this.shootCooldown = 0;
-            break;
+            this.width = 26; this.height = 22; this.health = 2; this.speed = 1.3; this.scoreVal = 25; this.shootCooldown = 0; break;
         }
       }
     }
     
-    // ----- POWERUPS -----
     let powerups = [];
     class Powerup {
       constructor(x, y, type) {
-        this.x = x;
-        this.y = y;
-        this.type = type;
-        this.width = 16;
-        this.height = 16;
+        this.x = x; this.y = y; this.type = type; this.width = 16; this.height = 16;
       }
     }
     
-    // ----- SOUND ENGINE -----
     let audioCtx = null;
     function initAudio() {
       if(audioCtx) return;
@@ -432,7 +390,6 @@
       osc.stop(audioCtx.currentTime + 0.3);
     }
     
-    // ----- UI elements -----
     const scoreSpan = document.getElementById('scoreValue');
     const levelSpan = document.getElementById('levelValue');
     const pauseBtn = document.getElementById('pauseBtn');
@@ -459,11 +416,9 @@
       if(level >= 2 && rand < 0.2 + (level*0.03)) type = 'fast';
       else if(level >= 3 && rand < 0.35 + (level*0.02)) type = 'shooter';
       else if(level >= 4 && rand < 0.5) type = 'tank';
-      else type = 'basic';
       if(level >= 5 && Math.random() < 0.25) type = 'tank';
       let yPos = 30 + Math.random() * (H - 80);
-      let enemy = new Enemy(W + 20, yPos, type);
-      enemies.push(enemy);
+      enemies.push(new Enemy(W + 20, yPos, type));
     }
     
     function spawnPowerup(x, y) {
@@ -585,19 +540,14 @@
       } else currentShootDelay = baseShootDelay;
       if(player.doubleDamageTimer > 0) {
         player.doubleDamageTimer--;
-        if(player.doubleDamageTimer <= 0) {
-          showPowerupMessage("💥 DOUBLE DAMAGE EXPIRED 💥");
-        }
+        if(player.doubleDamageTimer <= 0) showPowerupMessage("💥 DOUBLE DAMAGE EXPIRED 💥");
       }
       if(player.shieldTimer > 0) {
         player.shieldTimer--;
-        if(player.shieldTimer <= 0) {
-          showPowerupMessage("🛡️ SHIELD EXPIRED 🛡️");
-        }
+        if(player.shieldTimer <= 0) showPowerupMessage("🛡️ SHIELD EXPIRED 🛡️");
       }
       
-      let moveY = 0;
-      let moveX = 0;
+      let moveY = 0, moveX = 0;
       if(keys.ArrowUp || keys.KeyW || touchMoveUp) moveY = -1;
       if(keys.ArrowDown || keys.KeyS || touchMoveDown) moveY = 1;
       if(keys.ArrowLeft || keys.KeyA || touchMoveLeft) moveX = -1;
@@ -607,20 +557,10 @@
       player.y = Math.min(Math.max(player.y, 25), H - 25);
       player.x = Math.min(Math.max(player.x, 30), W - 50);
       
-      let shouldShoot = (keys.Space || touchFire) && shootCooldown === 0 && gameRunning;
+      let shouldShoot = (keys.Space || touchFire) && shootCooldown === 0;
       if(shouldShoot) {
-        playerBullets.push({
-          x: player.x + 12,
-          y: player.y - 3,
-          w: 8, h: 4,
-          damage: player.doubleDamageTimer > 0 ? 2 : 1
-        });
-        playerBullets.push({
-          x: player.x + 12,
-          y: player.y + 3,
-          w: 8, h: 4,
-          damage: player.doubleDamageTimer > 0 ? 2 : 1
-        });
+        playerBullets.push({ x: player.x + 12, y: player.y - 3, w: 8, h: 4, damage: player.doubleDamageTimer > 0 ? 2 : 1 });
+        playerBullets.push({ x: player.x + 12, y: player.y + 3, w: 8, h: 4, damage: player.doubleDamageTimer > 0 ? 2 : 1 });
         playShoot();
         shootCooldown = currentShootDelay;
       }
@@ -881,7 +821,7 @@
         ctx.fillText('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', W/2, H/2+90);
         ctx.font = 'bold 16px monospace';
         ctx.fillStyle = '#ffff88';
-        ctx.fillText('PRESS [ENTER] OR TAP SCREEN', W/2, H/2+125);
+        ctx.fillText('TAP ANYWHERE TO START', W/2, H/2+125);
         ctx.font = '11px monospace';
         ctx.fillStyle = '#88ffaa';
         ctx.fillText('💡 TIP: Collect pink cubes → then press R/S/D to activate!', W/2, H/2+160);
@@ -898,8 +838,7 @@
         ctx.fillText(`${finalName}  |  FINAL SCORE: ${score}`, W/2, H/2);
         ctx.font = '14px monospace';
         ctx.fillStyle = '#33ff99';
-        ctx.fillText('PRESS [ENTER] TO RESTART', W/2, H/2+50);
-        ctx.fillText('TAP ANYWHERE / PRESS ESC', W/2, H/2+80);
+        ctx.fillText('TAP SCREEN TO RESTART', W/2, H/2+50);
         ctx.textAlign = 'left';
       }
       if(paused && gameRunning) {
@@ -929,6 +868,33 @@
       KeyW: false, KeyS: false, KeyA: false, KeyD: false, Space: false
     };
     
+    function startGameOnMobile() {
+      if(!gameRunning && !gameOverFlag) {
+        resetGame();
+        paused = false;
+        gameRunning = true;
+        gameOverFlag = false;
+        pauseBtn.innerText = '⏸ PAUSE';
+        if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      } else if(gameOverFlag && !gameRunning) {
+        resetGame();
+        paused = false;
+        gameRunning = true;
+        gameOverFlag = false;
+        pauseBtn.innerText = '⏸ PAUSE';
+        if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      }
+    }
+    
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startGameOnMobile();
+    });
+    
+    canvas.addEventListener('mousedown', () => {
+      startGameOnMobile();
+    });
+    
     window.addEventListener('keydown', (e) => {
       let code = e.code;
       if(keys.hasOwnProperty(code)) {
@@ -956,14 +922,7 @@
       }
       if(code === 'Enter') {
         e.preventDefault();
-        if(!gameRunning || gameOverFlag) {
-          resetGame();
-          paused = false;
-          gameRunning = true;
-          gameOverFlag = false;
-          pauseBtn.innerText = '⏸ PAUSE';
-          if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        }
+        startGameOnMobile();
       }
       if(code === 'Escape') {
         e.preventDefault();
@@ -976,12 +935,12 @@
       if(keys.hasOwnProperty(code)) keys[code] = false;
     });
     
-    // Touch Controls Setup
     function initTouchControls() {
       const btns = document.querySelectorAll('.touch-btn');
       btns.forEach(btn => {
         btn.addEventListener('touchstart', (e) => {
           e.preventDefault();
+          startGameOnMobile();
           const action = btn.dataset.action;
           switch(action) {
             case 'move-left': touchMoveLeft = true; break;
@@ -1013,6 +972,7 @@
         });
         btn.addEventListener('mousedown', (e) => {
           e.preventDefault();
+          startGameOnMobile();
           const action = btn.dataset.action;
           switch(action) {
             case 'move-left': touchMoveLeft = true; break;
