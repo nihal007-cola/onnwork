@@ -55,11 +55,44 @@
     .status {
       display: flex;
       gap: 24px;
+      align-items: center;
     }
 
     .status span {
       color: #33ff99;
       text-shadow: 0 0 5px #33ff99;
+    }
+
+    .player-name-input {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(0,0,0,0.5);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid #33ff99;
+    }
+
+    .player-name-input label {
+      font-size: 11px;
+      opacity: 0.8;
+    }
+
+    .player-name-input input {
+      background: black;
+      border: 1px solid #33ff99;
+      color: #33ff99;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 2px 6px;
+      width: 70px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .player-name-input input:focus {
+      outline: none;
+      box-shadow: 0 0 8px #33ff99;
     }
 
     button {
@@ -95,7 +128,14 @@
 <div class="game-container">
   <canvas id="gameCanvas" width="1000" height="562"></canvas>
   <div class="info-panel">
-    <div class="status">⚡ SCORE: <span id="scoreValue">0</span> &nbsp;| LVL: <span id="levelValue">1</span></div>
+    <div class="status">
+      <span>⚡ SCORE: <span id="scoreValue">0</span></span>
+      <span>| LVL: <span id="levelValue">1</span></span>
+      <div class="player-name-input">
+        <label>👤 PILOT:</label>
+        <input type="text" id="playerNameInput" maxlength="4" placeholder="ACE" value="ACE">
+      </div>
+    </div>
     <div class="controls-hint">←↑↓→ / WASD &nbsp;| [SPACE] FIRE &nbsp;| [P] PAUSE &nbsp;| [R] RAPID &nbsp;| [S] SHIELD &nbsp;| [D] DOUBLE</div>
     <button id="pauseBtn">⏸ PAUSE</button>
   </div>
@@ -117,6 +157,7 @@
     let paused = false;
     let animationId = null;
     let gameOverFlag = false;
+    let playerName = "ACE";
     
     // ----- GAME DATA -----
     let score = 0;
@@ -285,6 +326,7 @@
     const scoreSpan = document.getElementById('scoreValue');
     const levelSpan = document.getElementById('levelValue');
     const pauseBtn = document.getElementById('pauseBtn');
+    const playerNameInput = document.getElementById('playerNameInput');
     
     function updateUI() {
       scoreSpan.innerText = score;
@@ -323,15 +365,19 @@
         player.rapidFireTimer = 600;
         currentShootDelay = 5;
         playPowerup();
+        return true;
       } else if(type === 'shield' && inventory.shield > 0) {
         inventory.shield--;
         player.shieldTimer = 500;
         playPowerup();
+        return true;
       } else if(type === 'double' && inventory.double > 0) {
         inventory.double--;
         player.doubleDamageTimer = 450;
         playPowerup();
+        return true;
       }
+      return false;
     }
     
     function collectPowerup(type) {
@@ -405,7 +451,6 @@
       if(player.doubleDamageTimer > 0) player.doubleDamageTimer--;
       if(player.shieldTimer > 0) player.shieldTimer--;
       
-      // Player movement with horizontal
       let moveY = 0;
       let moveX = 0;
       if(keys.ArrowUp || keys.KeyW) moveY = -1;
@@ -628,7 +673,6 @@
       ctx.font = 'bold 12px monospace';
       ctx.fillText(`HEALTH ${player.health}`, 20, 16);
       
-      // Inventory display
       ctx.font = 'bold 13px monospace';
       ctx.fillStyle = '#33ff99';
       ctx.shadowBlur = 3;
@@ -650,11 +694,12 @@
         ctx.fillText(`💥 DOUBLE DMG ${Math.floor(player.doubleDamageTimer/60)}s`, 20, yOff);
       }
       
-      // Score emphasis
-      ctx.font = 'bold 20px monospace';
+      ctx.font = 'bold 22px monospace';
       ctx.fillStyle = '#33ff99';
-      ctx.shadowBlur = 8;
-      ctx.fillText(`SCORE: ${score}`, W-150, 35);
+      ctx.shadowBlur = 10;
+      let displayName = playerNameInput.value.toUpperCase().slice(0,4);
+      if(displayName === "") displayName = "ACE";
+      ctx.fillText(`${displayName}  |  SCORE: ${score}`, W-280, 38);
       
       if(!gameRunning && !gameOverFlag) {
         ctx.font = 'bold 28px monospace';
@@ -670,8 +715,10 @@
         ctx.fillStyle = '#33ff99';
         ctx.font = 'bold 32px monospace';
         ctx.fillText('GAME OVER', W/2-105, H/2-40);
-        ctx.font = '18px monospace';
-        ctx.fillText(`FINAL SCORE: ${score}`, W/2-90, H/2+10);
+        ctx.font = '20px monospace';
+        let finalName = playerNameInput.value.toUpperCase().slice(0,4) || "ACE";
+        ctx.fillText(`${finalName}  |  FINAL SCORE: ${score}`, W/2-150, H/2+10);
+        ctx.font = '16px monospace';
         ctx.fillText('PRESS [ENTER] TO RESTART', W/2-125, H/2+60);
       }
       if(paused && gameRunning) {
@@ -731,6 +778,14 @@
           gameOverFlag = false;
           pauseBtn.innerText = '⏸ PAUSE';
           if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }
+      }
+      if(code === 'Escape') {
+        e.preventDefault();
+        if(gameRunning && !gameOverFlag) {
+          window.location.href = 'toys.html';
+        } else {
+          window.location.href = 'toys.html';
         }
       }
     });
