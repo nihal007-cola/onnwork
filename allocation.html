@@ -96,7 +96,7 @@
   <canvas id="gameCanvas" width="1000" height="562"></canvas>
   <div class="info-panel">
     <div class="status">⚡ SCORE: <span id="scoreValue">0</span> &nbsp;| LVL: <span id="levelValue">1</span></div>
-    <div class="controls-hint">←↑↓→ / W S &nbsp;| [SPACE] FIRE &nbsp;| [P] PAUSE</div>
+    <div class="controls-hint">←↑↓→ / WASD &nbsp;| [SPACE] FIRE &nbsp;| [P] PAUSE &nbsp;| [R] RAPID &nbsp;| [S] SHIELD &nbsp;| [D] DOUBLE</div>
     <button id="pauseBtn">⏸ PAUSE</button>
   </div>
 </div>
@@ -113,7 +113,7 @@
     canvas.height = H;
     
     // ----- GLOBAL STATE -----
-    let gameRunning = false;      // actual simulation
+    let gameRunning = false;
     let paused = false;
     let animationId = null;
     let gameOverFlag = false;
@@ -122,7 +122,7 @@
     let score = 0;
     let level = 1;
     let enemiesKilled = 0;
-    let levelThreshold = 8;       // kills to next level
+    let levelThreshold = 8;
     
     // ----- PLAYER -----
     const PLAYER_SIZE = 18;
@@ -139,22 +139,28 @@
       shieldTimer: 0
     };
     
+    // ----- INVENTORY SYSTEM -----
+    let inventory = {
+      rapid: 0,
+      shield: 0,
+      double: 0
+    };
+    
     // ----- BULLETS -----
     let playerBullets = [];
     let enemyBullets = [];
     const PLAYER_BULLET_SPEED = 7;
     const ENEMY_BULLET_SPEED = 3.8;
     let shootCooldown = 0;
-    let baseShootDelay = 12;      // frames
+    let baseShootDelay = 12;
     let currentShootDelay = 12;
     
     // ----- ENEMIES -----
     let enemies = [];
     let spawnCounter = 0;
-    let baseSpawnDelay = 45;       // frames between spawns
+    let baseSpawnDelay = 45;
     let currentSpawnDelay = 45;
     
-    // enemy types: basic, fast, tank, shooter
     class Enemy {
       constructor(x, y, type) {
         this.x = x;
@@ -206,13 +212,13 @@
       constructor(x, y, type) {
         this.x = x;
         this.y = y;
-        this.type = type; // 'rapid', 'shield', 'double'
-        this.width = 14;
-        this.height = 14;
+        this.type = type;
+        this.width = 16;
+        this.height = 16;
       }
     }
     
-    // ----- SOUND ENGINE (Web Audio, retro synth)-----
+    // ----- SOUND ENGINE -----
     let audioCtx = null;
     function initAudio() {
       if(audioCtx) return;
@@ -280,7 +286,6 @@
     const levelSpan = document.getElementById('levelValue');
     const pauseBtn = document.getElementById('pauseBtn');
     
-    // ----- Helper Functions -----
     function updateUI() {
       scoreSpan.innerText = score;
       levelSpan.innerText = level;
@@ -289,7 +294,6 @@
     function applyDifficulty() {
       let multiplier = 1 + (level-1) * 0.2;
       currentSpawnDelay = Math.max(18, Math.floor(baseSpawnDelay / multiplier));
-      // enemy speed boost per level
     }
     
     function spawnEnemy() {
@@ -313,15 +317,27 @@
       }
     }
     
-    function applyPowerup(type) {
-      if(type === 'rapid') {
-        player.rapidFireTimer = 600; // frames ~10 sec
+    function activatePowerupFromInventory(type) {
+      if(type === 'rapid' && inventory.rapid > 0) {
+        inventory.rapid--;
+        player.rapidFireTimer = 600;
         currentShootDelay = 5;
-      } else if(type === 'shield') {
+        playPowerup();
+      } else if(type === 'shield' && inventory.shield > 0) {
+        inventory.shield--;
         player.shieldTimer = 500;
-      } else if(type === 'double') {
+        playPowerup();
+      } else if(type === 'double' && inventory.double > 0) {
+        inventory.double--;
         player.doubleDamageTimer = 450;
+        playPowerup();
       }
+    }
+    
+    function collectPowerup(type) {
+      if(type === 'rapid') inventory.rapid++;
+      else if(type === 'shield') inventory.shield++;
+      else if(type === 'double') inventory.double++;
       playPowerup();
     }
     
@@ -344,7 +360,6 @@
     }
     
     function resetGame() {
-      // reset state
       gameRunning = true;
       gameOverFlag = false;
       paused = false;
@@ -359,6 +374,7 @@
       player.shieldTimer = 0;
       player.x = 80;
       player.y = H/2;
+      inventory = { rapid: 0, shield: 0, double: 0 };
       playerBullets = [];
       enemyBullets = [];
       enemies = [];
@@ -371,17 +387,14 @@
       if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }
     
-    // Collision helpers
     function rectCollide(r1, r2) {
       return !(r2.x > r1.x + r1.w || r2.x + r2.w < r1.x ||
         r2.y > r1.y + r1.h || r2.y + r2.h < r1.y);
     }
     
-    // ----- GAME UPDATE LOOP -----
     function updateGame() {
       if(!gameRunning || paused) return;
       
-      // cooldown timers
       if(shootCooldown > 0) shootCooldown--;
       if(player.invincibleTimer > 0) player.invincibleTimer--;
       if(player.rapidFireTimer > 0) {
@@ -392,14 +405,18 @@
       if(player.doubleDamageTimer > 0) player.doubleDamageTimer--;
       if(player.shieldTimer > 0) player.shieldTimer--;
       
-      // Player movement
-      let move = 0;
-      if(keys.ArrowUp || keys.KeyW) move = -1;
-      if(keys.ArrowDown || keys.KeyS) move = 1;
-      player.y += move * 5.5;
+      // Player movement with horizontal
+      let moveY = 0;
+      let moveX = 0;
+      if(keys.ArrowUp || keys.KeyW) moveY = -1;
+      if(keys.ArrowDown || keys.KeyS) moveY = 1;
+      if(keys.ArrowLeft || keys.KeyA) moveX = -1;
+      if(keys.ArrowRight || keys.KeyD) moveX = 1;
+      player.y += moveY * 5.5;
+      player.x += moveX * 5.5;
       player.y = Math.min(Math.max(player.y, 25), H - 25);
+      player.x = Math.min(Math.max(player.x, 30), W - 50);
       
-      // Shooting
       if(keys.Space && shootCooldown === 0 && gameRunning) {
         playerBullets.push({
           x: player.x + 12,
@@ -417,7 +434,6 @@
         shootCooldown = currentShootDelay;
       }
       
-      // Move bullets
       for(let i=0; i<playerBullets.length; i++) {
         playerBullets[i].x += PLAYER_BULLET_SPEED;
         if(playerBullets[i].x > W) playerBullets.splice(i,1), i--;
@@ -427,7 +443,6 @@
         if(enemyBullets[i].x + 6 < 0) enemyBullets.splice(i,1), i--;
       }
       
-      // Enemy spawn logic
       if(spawnCounter <= 0) {
         spawnEnemy();
         let extra = Math.floor(level / 2);
@@ -435,7 +450,6 @@
         spawnCounter = currentSpawnDelay;
       } else spawnCounter--;
       
-      // Enemy movement, shooting, collision with player
       for(let i=0; i<enemies.length; i++) {
         let e = enemies[i];
         e.x -= e.speed;
@@ -445,7 +459,6 @@
             e.shootCooldown = 45;
           } else e.shootCooldown--;
         }
-        // collision with player
         if(rectCollide({x:e.x, y:e.y, w:e.width, h:e.height}, {x:player.x-8, y:player.y-8, w:16, h:16})) {
           damagePlayer(20);
           playExplosion();
@@ -456,7 +469,6 @@
         if(e.x + e.width < 0) enemies.splice(i,1), i--;
       }
       
-      // Enemy bullets vs player
       for(let i=0; i<enemyBullets.length; i++) {
         let b = enemyBullets[i];
         if(rectCollide({x:b.x, y:b.y, w:6, h:4}, {x:player.x-8, y:player.y-8, w:16, h:16})) {
@@ -466,7 +478,6 @@
         }
       }
       
-      // Bullet-Enemy collisions & score
       for(let i=0; i<playerBullets.length; i++) {
         let bullet = playerBullets[i];
         let hit = false;
@@ -481,7 +492,6 @@
               spawnPowerup(e.x + e.width/2, e.y + e.height/2);
               enemies.splice(j,1);
               playExplosion();
-              // level progression
               if(enemiesKilled >= levelThreshold) {
                 level++;
                 levelThreshold = Math.floor(levelThreshold + 7 + level*0.5);
@@ -497,25 +507,21 @@
         if(hit) { playerBullets.splice(i,1); i--; }
       }
       
-      // Powerup collection
       for(let i=0; i<powerups.length; i++) {
         let p = powerups[i];
-        if(rectCollide({x:p.x, y:p.y, w:14, h:14}, {x:player.x-10, y:player.y-10, w:20, h:20})) {
-          applyPowerup(p.type);
+        if(rectCollide({x:p.x, y:p.y, w:16, h:16}, {x:player.x-10, y:player.y-10, w:20, h:20})) {
+          collectPowerup(p.type);
           powerups.splice(i,1);
           i--;
         }
       }
       
-      // health regen on low? no auto but keep UI fresh
       if(player.health <= 0) gameOver();
     }
     
-    // ----- DRAW EVERYTHING (neon terminal style)-----
     function draw() {
       if(!ctx) return;
       ctx.clearRect(0, 0, W, H);
-      // grid background
       ctx.strokeStyle = '#33ff99';
       ctx.lineWidth = 0.6;
       ctx.globalAlpha = 0.18;
@@ -532,7 +538,6 @@
       ctx.globalAlpha = 1;
       ctx.shadowBlur = 0;
       
-      // player ship (triangle + glow)
       ctx.shadowColor = '#33ff99';
       ctx.shadowBlur = 6;
       ctx.fillStyle = '#33ff99';
@@ -550,13 +555,11 @@
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      // engine glow
       ctx.fillStyle = '#88ffaa';
       ctx.beginPath();
       ctx.rect(px-10, py-2, 6, 4);
       ctx.fill();
       
-      // shield effect
       if(player.shieldTimer > 0) {
         ctx.beginPath();
         ctx.arc(px+2, py, 18, 0, Math.PI*2);
@@ -566,7 +569,6 @@
         ctx.stroke();
       }
       
-      // enemies
       for(let e of enemies) {
         ctx.fillStyle = '#33ff99';
         ctx.shadowBlur = 5;
@@ -597,25 +599,24 @@
         }
       }
       
-      // bullets
       ctx.fillStyle = '#ffff88';
       ctx.shadowBlur = 5;
       for(let b of playerBullets) ctx.fillRect(b.x, b.y, 8, 4);
       ctx.fillStyle = '#ffaa66';
       for(let b of enemyBullets) ctx.fillRect(b.x, b.y, 6, 4);
       
-      // powerups
       for(let p of powerups) {
         ctx.fillStyle = '#ff66cc';
         ctx.shadowBlur = 8;
-        ctx.fillRect(p.x, p.y, 12, 12);
+        ctx.fillRect(p.x, p.y, 14, 14);
         ctx.fillStyle = '#ffffff';
-        if(p.type === 'rapid') ctx.fillText('R', p.x+3, p.y+10);
-        else if(p.type === 'shield') ctx.fillText('S', p.x+3, p.y+10);
-        else ctx.fillText('D', p.x+3, p.y+10);
+        ctx.font = 'bold 14px monospace';
+        ctx.shadowBlur = 4;
+        if(p.type === 'rapid') ctx.fillText('R', p.x+4, p.y+11);
+        else if(p.type === 'shield') ctx.fillText('S', p.x+4, p.y+11);
+        else ctx.fillText('D', p.x+4, p.y+11);
       }
       
-      // health bar
       let healthPercent = player.health / player.maxHealth;
       ctx.fillStyle = '#111111';
       ctx.fillRect(20, 18, 200, 14);
@@ -627,8 +628,13 @@
       ctx.font = 'bold 12px monospace';
       ctx.fillText(`HEALTH ${player.health}`, 20, 16);
       
-      // powerup timers display
-      let yOff = 40;
+      // Inventory display
+      ctx.font = 'bold 13px monospace';
+      ctx.fillStyle = '#33ff99';
+      ctx.shadowBlur = 3;
+      ctx.fillText(`INVENTORY:  R:${inventory.rapid}  S:${inventory.shield}  D:${inventory.double}`, 20, 50);
+      
+      let yOff = 70;
       if(player.rapidFireTimer > 0) {
         ctx.fillStyle = '#aaff88';
         ctx.fillText(`⚡ RAPID ${Math.floor(player.rapidFireTimer/60)}s`, 20, yOff);
@@ -644,7 +650,12 @@
         ctx.fillText(`💥 DOUBLE DMG ${Math.floor(player.doubleDamageTimer/60)}s`, 20, yOff);
       }
       
-      // start / game over overlays
+      // Score emphasis
+      ctx.font = 'bold 20px monospace';
+      ctx.fillStyle = '#33ff99';
+      ctx.shadowBlur = 8;
+      ctx.fillText(`SCORE: ${score}`, W-150, 35);
+      
       if(!gameRunning && !gameOverFlag) {
         ctx.font = 'bold 28px monospace';
         ctx.fillStyle = '#33ff99';
@@ -652,7 +663,8 @@
         ctx.fillText('⚡ SPACE ATTACK ⚡', W/2-160, H/2-40);
         ctx.font = '16px monospace';
         ctx.fillText('PRESS [ENTER] TO START', W/2-130, H/2+20);
-        ctx.fillText('←↑↓→  |  SPACE  |  P', W/2-115, H/2+60);
+        ctx.fillText('←↑↓→ / WASD  |  SPACE  |  P', W/2-140, H/2+60);
+        ctx.fillText('R / S / D  →  USE POWERUPS', W/2-120, H/2+90);
       }
       if(gameOverFlag && !gameRunning) {
         ctx.fillStyle = '#33ff99';
@@ -674,19 +686,17 @@
       ctx.shadowBlur = 0;
     }
     
-    // ----- GAME LOOP (animation)-----
-    let lastTimestamp = 0;
     function gameLoop() {
       updateGame();
       draw();
       animationId = requestAnimationFrame(gameLoop);
     }
     
-    // ----- KEYBOARD HANDLING -----
     const keys = {
       ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false,
-      KeyW: false, KeyS: false, Space: false
+      KeyW: false, KeyS: false, KeyA: false, KeyD: false, Space: false
     };
+    
     window.addEventListener('keydown', (e) => {
       let code = e.code;
       if(keys.hasOwnProperty(code)) {
@@ -700,6 +710,18 @@
           pauseBtn.innerText = paused ? '▶ RESUME' : '⏸ PAUSE';
         }
       }
+      if(code === 'KeyR') {
+        e.preventDefault();
+        if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('rapid');
+      }
+      if(code === 'KeyS' && !keys.Space) {
+        e.preventDefault();
+        if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('shield');
+      }
+      if(code === 'KeyD') {
+        e.preventDefault();
+        if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('double');
+      }
       if(code === 'Enter') {
         e.preventDefault();
         if(!gameRunning || gameOverFlag) {
@@ -712,17 +734,18 @@
         }
       }
     });
+    
     window.addEventListener('keyup', (e) => {
       let code = e.code;
       if(keys.hasOwnProperty(code)) keys[code] = false;
     });
+    
     pauseBtn.addEventListener('click', () => {
       if(!gameRunning || gameOverFlag) return;
       paused = !paused;
       pauseBtn.innerText = paused ? '▶ RESUME' : '⏸ PAUSE';
     });
     
-    // init audio on first user click anywhere
     function unlockAudio() {
       initAudio();
       if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -730,11 +753,10 @@
     }
     document.addEventListener('click', unlockAudio);
     
-    // initial start screen
     gameRunning = false;
     gameOverFlag = false;
     paused = false;
-    resetGame();  // sets data but not running
+    resetGame();
     gameRunning = false;
     updateUI();
     gameLoop();
