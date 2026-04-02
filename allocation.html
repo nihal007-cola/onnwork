@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>SPACE ATTACK · NEON TERMINAL SHOOTER</title>
   <style>
     * {
@@ -10,6 +10,7 @@
       padding: 0;
       box-sizing: border-box;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -19,43 +20,51 @@
       justify-content: center;
       align-items: center;
       font-family: 'Courier New', 'Fira Code', monospace;
-      padding: 20px;
+      padding: 12px;
+      overflow-x: hidden;
     }
 
     .game-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      width: 100%;
+      max-width: 1000px;
     }
 
     canvas {
       display: block;
       box-shadow: 0 0 0 2px #33ff99, 0 0 0 6px rgba(51, 255, 153, 0.2), 0 0 30px rgba(51, 255, 153, 0.4);
-      border-radius: 4px;
+      border-radius: 8px;
       cursor: none;
+      width: 100%;
+      height: auto;
+      background: black;
     }
 
     .info-panel {
       width: 100%;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 20px;
-      background: rgba(0, 0, 0, 0.7);
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.85);
       border: 1px solid #33ff99;
-      padding: 8px 20px;
+      padding: 8px 16px;
       border-radius: 40px;
       backdrop-filter: blur(4px);
       font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
       letter-spacing: 1px;
     }
 
     .status {
       display: flex;
-      gap: 24px;
+      gap: 16px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .status span {
@@ -65,16 +74,16 @@
 
     .player-name-input {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
       background: rgba(0,0,0,0.5);
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 20px;
       border: 1px solid #33ff99;
     }
 
     .player-name-input label {
-      font-size: 11px;
+      font-size: 10px;
       opacity: 0.8;
     }
 
@@ -83,9 +92,9 @@
       border: 1px solid #33ff99;
       color: #33ff99;
       font-family: monospace;
-      font-size: 12px;
+      font-size: 11px;
       padding: 2px 6px;
-      width: 70px;
+      width: 65px;
       text-align: center;
       letter-spacing: 1px;
     }
@@ -101,8 +110,8 @@
       color: #33ff99;
       font-family: monospace;
       font-weight: bold;
-      font-size: 14px;
-      padding: 4px 16px;
+      font-size: 12px;
+      padding: 4px 14px;
       border-radius: 30px;
       cursor: pointer;
       transition: all 0.2s;
@@ -117,10 +126,73 @@
     }
 
     .controls-hint {
-      font-size: 11px;
+      font-size: 9px;
       opacity: 0.7;
       display: flex;
-      gap: 20px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Mobile Touch Controls */
+    .touch-controls {
+      display: none;
+      width: 100%;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .touch-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .touch-btn {
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #33ff99;
+      color: #33ff99;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 20px;
+      padding: 12px 20px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.05s linear;
+      text-align: center;
+      min-width: 70px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 10px rgba(51,255,153,0.3);
+    }
+
+    .touch-btn:active {
+      background: #33ff99;
+      color: black;
+      transform: scale(0.95);
+      box-shadow: 0 0 20px #33ff99;
+    }
+
+    .fire-btn {
+      background: rgba(51,255,153,0.2);
+      border-color: #ffff88;
+      color: #ffff88;
+      min-width: 90px;
+    }
+
+    .power-btn {
+      font-size: 16px;
+      padding: 10px 16px;
+      min-width: 60px;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 8px; }
+      .info-panel { flex-direction: column; align-items: stretch; gap: 8px; }
+      .status { justify-content: space-between; }
+      .controls-hint { display: none; }
+      .touch-controls { display: flex; flex-direction: column; }
     }
   </style>
 </head>
@@ -136,8 +208,27 @@
         <input type="text" id="playerNameInput" maxlength="4" placeholder="ACE" value="ACE">
       </div>
     </div>
-    <div class="controls-hint">←↑↓→ / WASD &nbsp;| [SPACE] FIRE &nbsp;| [P] PAUSE &nbsp;| [R] RAPID &nbsp;| [S] SHIELD &nbsp;| [D] DOUBLE</div>
+    <div class="controls-hint">←↑↓→ / WASD | [SPACE] FIRE | [P] PAUSE | [R][S][D] POWER</div>
     <button id="pauseBtn">⏸ PAUSE</button>
+  </div>
+  
+  <!-- Mobile Touch Controls -->
+  <div class="touch-controls" id="touchControls">
+    <div class="touch-row">
+      <div class="touch-btn" data-action="move-left">◀ LEFT</div>
+      <div class="touch-btn" data-action="move-right">RIGHT ▶</div>
+    </div>
+    <div class="touch-row">
+      <div class="touch-btn" data-action="move-up">▲ UP</div>
+      <div class="touch-btn" data-action="move-down">DOWN ▼</div>
+      <div class="touch-btn fire-btn" data-action="fire">🔫 FIRE</div>
+    </div>
+    <div class="touch-row">
+      <div class="touch-btn power-btn" data-action="power-rapid">⚡ R</div>
+      <div class="touch-btn power-btn" data-action="power-shield">🛡️ S</div>
+      <div class="touch-btn power-btn" data-action="power-double">💥 D</div>
+      <div class="touch-btn" data-action="pause">⏸ P</div>
+    </div>
   </div>
 </div>
 
@@ -152,12 +243,22 @@
     canvas.width = W;
     canvas.height = H;
     
+    // Scale canvas for mobile display
+    function scaleCanvas() {
+      const container = canvas.parentElement;
+      const maxWidth = Math.min(window.innerWidth - 24, 1000);
+      const scale = maxWidth / W;
+      canvas.style.width = `${W * scale}px`;
+      canvas.style.height = `${H * scale}px`;
+    }
+    window.addEventListener('resize', scaleCanvas);
+    scaleCanvas();
+    
     // ----- GLOBAL STATE -----
     let gameRunning = false;
     let paused = false;
     let animationId = null;
     let gameOverFlag = false;
-    let playerName = "ACE";
     let powerupActivationMessage = "";
     let powerupMessageTimer = 0;
     
@@ -203,6 +304,13 @@
     let spawnCounter = 0;
     let baseSpawnDelay = 45;
     let currentSpawnDelay = 45;
+    
+    // Touch control state
+    let touchMoveLeft = false;
+    let touchMoveRight = false;
+    let touchMoveUp = false;
+    let touchMoveDown = false;
+    let touchFire = false;
     
     class Enemy {
       constructor(x, y, type) {
@@ -268,14 +376,14 @@
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
     function playShoot() {
-      if(!audioCtx) return;
+      if(!audioCtx || !gameRunning) return;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       osc.type = 'square';
       osc.frequency.value = 880;
-      gain.gain.value = 0.15;
+      gain.gain.value = 0.12;
       osc.start();
       gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.15);
       osc.stop(audioCtx.currentTime + 0.15);
@@ -291,7 +399,7 @@
       const gain = audioCtx.createGain();
       noise.connect(gain);
       gain.connect(audioCtx.destination);
-      gain.gain.value = 0.2;
+      gain.gain.value = 0.18;
       noise.start();
       gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
       noise.stop(audioCtx.currentTime + 0.3);
@@ -304,7 +412,7 @@
       gain.connect(audioCtx.destination);
       osc.type = 'sawtooth';
       osc.frequency.value = 150;
-      gain.gain.value = 0.2;
+      gain.gain.value = 0.18;
       osc.start();
       gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25);
       osc.stop(audioCtx.currentTime + 0.25);
@@ -317,7 +425,7 @@
       gain.connect(audioCtx.destination);
       osc.type = 'sine';
       osc.frequency.value = 523.25;
-      gain.gain.value = 0.12;
+      gain.gain.value = 0.1;
       osc.start();
       osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.2);
       gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
@@ -490,16 +598,17 @@
       
       let moveY = 0;
       let moveX = 0;
-      if(keys.ArrowUp || keys.KeyW) moveY = -1;
-      if(keys.ArrowDown || keys.KeyS) moveY = 1;
-      if(keys.ArrowLeft || keys.KeyA) moveX = -1;
-      if(keys.ArrowRight || keys.KeyD) moveX = 1;
+      if(keys.ArrowUp || keys.KeyW || touchMoveUp) moveY = -1;
+      if(keys.ArrowDown || keys.KeyS || touchMoveDown) moveY = 1;
+      if(keys.ArrowLeft || keys.KeyA || touchMoveLeft) moveX = -1;
+      if(keys.ArrowRight || keys.KeyD || touchMoveRight) moveX = 1;
       player.y += moveY * 5.5;
       player.x += moveX * 5.5;
       player.y = Math.min(Math.max(player.y, 25), H - 25);
       player.x = Math.min(Math.max(player.x, 30), W - 50);
       
-      if(keys.Space && shootCooldown === 0 && gameRunning) {
+      let shouldShoot = (keys.Space || touchFire) && shootCooldown === 0 && gameRunning;
+      if(shouldShoot) {
         playerBullets.push({
           x: player.x + 12,
           y: player.y - 3,
@@ -739,7 +848,7 @@
       }
       
       if(powerupMessageTimer > 0 && powerupActivationMessage) {
-        ctx.font = 'bold 16px monospace';
+        ctx.font = 'bold 15px monospace';
         ctx.fillStyle = '#ffff88';
         ctx.shadowBlur = 8;
         ctx.textAlign = 'center';
@@ -747,50 +856,50 @@
         ctx.textAlign = 'left';
       }
       
-      ctx.font = 'bold 22px monospace';
+      ctx.font = 'bold 20px monospace';
       ctx.fillStyle = '#33ff99';
       ctx.shadowBlur = 10;
       let displayName = playerNameInput.value.toUpperCase().slice(0,4);
       if(displayName === "") displayName = "ACE";
-      ctx.fillText(`${displayName}  |  SCORE: ${score}`, W-310, 40);
+      ctx.fillText(`${displayName}  |  SCORE: ${score}`, W-290, 38);
       
       if(!gameRunning && !gameOverFlag) {
-        ctx.font = 'bold 28px monospace';
+        ctx.font = 'bold 24px monospace';
         ctx.fillStyle = '#33ff99';
         ctx.shadowBlur = 8;
         ctx.textAlign = 'center';
-        ctx.fillText('⚡ SPACE ATTACK ⚡', W/2, H/2-80);
-        ctx.font = '14px monospace';
-        ctx.fillStyle = '#88ffaa';
-        ctx.fillText('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', W/2, H/2-45);
-        ctx.font = '16px monospace';
-        ctx.fillStyle = '#33ff99';
-        ctx.fillText('←↑↓→  or  WASD  →  MOVE SHIP', W/2, H/2-15);
-        ctx.fillText('[SPACE]  →  FIRE WEAPONS', W/2, H/2+10);
-        ctx.fillText('[P]  →  PAUSE GAME', W/2, H/2+35);
-        ctx.fillText('[R] [S] [D]  →  USE POWERUPS', W/2, H/2+60);
-        ctx.fillText('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', W/2, H/2+85);
-        ctx.font = 'bold 18px monospace';
-        ctx.fillStyle = '#ffff88';
-        ctx.fillText('PRESS [ENTER] TO START', W/2, H/2+125);
+        ctx.fillText('⚡ SPACE ATTACK ⚡', W/2, H/2-70);
         ctx.font = '12px monospace';
         ctx.fillStyle = '#88ffaa';
-        ctx.fillText('💡 TIP: Collect pink R / S / D cubes → then press R/S/D to activate!', W/2, H/2+165);
+        ctx.fillText('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', W/2, H/2-40);
+        ctx.font = '14px monospace';
+        ctx.fillStyle = '#33ff99';
+        ctx.fillText('←↑↓→ / WASD  →  MOVE', W/2, H/2-10);
+        ctx.fillText('[SPACE] / FIRE BTN  →  SHOOT', W/2, H/2+15);
+        ctx.fillText('[P] / PAUSE BTN  →  PAUSE', W/2, H/2+40);
+        ctx.fillText('[R][S][D]  →  USE POWERUPS', W/2, H/2+65);
+        ctx.fillText('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', W/2, H/2+90);
+        ctx.font = 'bold 16px monospace';
+        ctx.fillStyle = '#ffff88';
+        ctx.fillText('PRESS [ENTER] OR TAP SCREEN', W/2, H/2+125);
+        ctx.font = '11px monospace';
+        ctx.fillStyle = '#88ffaa';
+        ctx.fillText('💡 TIP: Collect pink cubes → then press R/S/D to activate!', W/2, H/2+160);
         ctx.textAlign = 'left';
       }
       if(gameOverFlag && !gameRunning) {
         ctx.fillStyle = '#33ff99';
-        ctx.font = 'bold 32px monospace';
+        ctx.font = 'bold 28px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('☠️ GAME OVER ☠️', W/2, H/2-60);
-        ctx.font = '22px monospace';
+        ctx.fillText('☠️ GAME OVER ☠️', W/2, H/2-50);
+        ctx.font = '18px monospace';
         let finalName = playerNameInput.value.toUpperCase().slice(0,4) || "ACE";
         ctx.fillStyle = '#ffff88';
-        ctx.fillText(`${finalName}  |  FINAL SCORE: ${score}`, W/2, H/2-10);
-        ctx.font = '16px monospace';
+        ctx.fillText(`${finalName}  |  FINAL SCORE: ${score}`, W/2, H/2);
+        ctx.font = '14px monospace';
         ctx.fillStyle = '#33ff99';
-        ctx.fillText('PRESS [ENTER] TO RESTART', W/2, H/2+45);
-        ctx.fillText('PRESS [ESC] TO RETURN TO TOYS', W/2, H/2+80);
+        ctx.fillText('PRESS [ENTER] TO RESTART', W/2, H/2+50);
+        ctx.fillText('TAP ANYWHERE / PRESS ESC', W/2, H/2+80);
         ctx.textAlign = 'left';
       }
       if(paused && gameRunning) {
@@ -799,11 +908,11 @@
         ctx.fillRect(0,0,W,H);
         ctx.globalAlpha = 1;
         ctx.fillStyle = '#33ff99';
-        ctx.font = 'bold 32px monospace';
+        ctx.font = 'bold 28px monospace';
         ctx.textAlign = 'center';
         ctx.fillText('⏸ GAME PAUSED', W/2, H/2);
         ctx.font = '14px monospace';
-        ctx.fillText('PRESS [P] TO RESUME', W/2, H/2+45);
+        ctx.fillText('PRESS [P] / PAUSE BTN TO RESUME', W/2, H/2+45);
         ctx.textAlign = 'left';
       }
       ctx.shadowBlur = 0;
@@ -867,6 +976,75 @@
       if(keys.hasOwnProperty(code)) keys[code] = false;
     });
     
+    // Touch Controls Setup
+    function initTouchControls() {
+      const btns = document.querySelectorAll('.touch-btn');
+      btns.forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          const action = btn.dataset.action;
+          switch(action) {
+            case 'move-left': touchMoveLeft = true; break;
+            case 'move-right': touchMoveRight = true; break;
+            case 'move-up': touchMoveUp = true; break;
+            case 'move-down': touchMoveDown = true; break;
+            case 'fire': touchFire = true; break;
+            case 'pause': 
+              if(gameRunning && !gameOverFlag) {
+                paused = !paused;
+                pauseBtn.innerText = paused ? '▶ RESUME' : '⏸ PAUSE';
+              }
+              break;
+            case 'power-rapid': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('rapid'); break;
+            case 'power-shield': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('shield'); break;
+            case 'power-double': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('double'); break;
+          }
+        });
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          const action = btn.dataset.action;
+          switch(action) {
+            case 'move-left': touchMoveLeft = false; break;
+            case 'move-right': touchMoveRight = false; break;
+            case 'move-up': touchMoveUp = false; break;
+            case 'move-down': touchMoveDown = false; break;
+            case 'fire': touchFire = false; break;
+          }
+        });
+        btn.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const action = btn.dataset.action;
+          switch(action) {
+            case 'move-left': touchMoveLeft = true; break;
+            case 'move-right': touchMoveRight = true; break;
+            case 'move-up': touchMoveUp = true; break;
+            case 'move-down': touchMoveDown = true; break;
+            case 'fire': touchFire = true; break;
+            case 'pause': 
+              if(gameRunning && !gameOverFlag) {
+                paused = !paused;
+                pauseBtn.innerText = paused ? '▶ RESUME' : '⏸ PAUSE';
+              }
+              break;
+            case 'power-rapid': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('rapid'); break;
+            case 'power-shield': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('shield'); break;
+            case 'power-double': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('double'); break;
+          }
+        });
+        btn.addEventListener('mouseup', (e) => {
+          e.preventDefault();
+          const action = btn.dataset.action;
+          switch(action) {
+            case 'move-left': touchMoveLeft = false; break;
+            case 'move-right': touchMoveRight = false; break;
+            case 'move-up': touchMoveUp = false; break;
+            case 'move-down': touchMoveDown = false; break;
+            case 'fire': touchFire = false; break;
+          }
+        });
+      });
+    }
+    
     pauseBtn.addEventListener('click', () => {
       if(!gameRunning || gameOverFlag) return;
       paused = !paused;
@@ -877,8 +1055,10 @@
       initAudio();
       if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
     }
     document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
     
     gameRunning = false;
     gameOverFlag = false;
@@ -886,6 +1066,7 @@
     resetGame();
     gameRunning = false;
     updateUI();
+    initTouchControls();
     gameLoop();
   })();
 </script>
