@@ -214,70 +214,82 @@
       border-radius: 4px;
     }
 
-    .mobile-command-bar {
+    /* Mobile specific styles */
+    .mobile-controls {
       display: none;
+      flex-direction: column;
       background: rgba(0, 0, 0, 0.95);
-      border-top: 1px solid #33ff99;
-      padding: 10px;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      backdrop-filter: blur(8px);
+      border-top: 2px solid #33ff99;
+      padding: 12px;
+      gap: 12px;
       z-index: 20;
     }
-    .cmd-btn {
-      background: rgba(0, 0, 0, 0.8);
-      border: 1px solid #33ff99;
-      color: #33ff99;
-      font-family: monospace;
-      font-weight: bold;
-      font-size: 12px;
-      padding: 8px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.05s linear;
-      touch-action: manipulation;
-    }
-    .cmd-btn:active {
-      background: #33ff99;
-      color: black;
-      transform: scale(0.95);
-    }
-
-    .mobile-input-container {
-      display: none;
-      background: rgba(0, 0, 0, 0.95);
-      border-top: 1px solid #33ff99;
-      padding: 10px;
-      gap: 8px;
+    
+    .mobile-input-row {
+      display: flex;
+      gap: 10px;
       align-items: center;
-      z-index: 20;
     }
-    .mobile-input {
+    
+    .mobile-input-field {
       flex: 1;
-      background: black;
-      border: 1.5px solid #33ff99;
-      padding: 10px;
+      background: #000000;
+      border: 2px solid #33ff99;
+      padding: 12px;
       color: #33ff99;
       font-family: monospace;
       font-size: 14px;
       outline: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: bold;
     }
-    .mobile-send-btn {
+    
+    .mobile-input-field:focus {
+      box-shadow: 0 0 12px #33ff99;
+      background: #021a0a;
+    }
+    
+    .mobile-send {
       background: #33ff99;
       border: none;
-      color: black;
+      color: #000000;
       font-family: monospace;
       font-weight: bold;
-      font-size: 14px;
-      padding: 10px 20px;
-      border-radius: 8px;
+      font-size: 16px;
+      padding: 12px 24px;
+      border-radius: 10px;
       cursor: pointer;
       touch-action: manipulation;
     }
-    .mobile-send-btn:active {
+    
+    .mobile-send:active {
+      transform: scale(0.95);
+      background: #88ffbb;
+    }
+    
+    .quick-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    
+    .quick-btn {
+      background: rgba(0, 0, 0, 0.8);
+      border: 1.5px solid #33ff99;
+      color: #33ff99;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 13px;
+      padding: 8px 14px;
+      border-radius: 25px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    
+    .quick-btn:active {
+      background: #33ff99;
+      color: #000000;
       transform: scale(0.95);
     }
 
@@ -288,14 +300,15 @@
         padding: 10px;
         padding-bottom: 0;
       }
-      .console-panel { flex: 1; min-height: 160px; }
+      .console-panel { flex: 1; min-height: 140px; }
       .drawing-arena { flex: 2; min-height: 220px; }
       .reference-panel { flex: 0.4; max-height: 100px; }
       .top-bar { padding: 8px 12px; }
       .logo-title { font-size: 0.85rem; }
+      
+      /* Hide desktop input, show mobile controls */
       .input-area { display: none; }
-      .mobile-command-bar { display: flex; }
-      .mobile-input-container { display: flex; }
+      .mobile-controls { display: flex; }
     }
   </style>
 </head>
@@ -335,23 +348,26 @@
       <div class="hint"><strong>home</strong> → reset</div>
       <div class="hint"><strong>clear</strong> → erase</div>
       <div class="hint"><strong>repeat 4 [fd 80 rt 90]</strong></div>
+      <div class="hint"><strong>repeat 36 [fd 12 rt 10]</strong> → circle</div>
     </div>
   </div>
 
-  <div class="mobile-command-bar" id="mobileCommandBar">
-    <button class="cmd-btn" data-cmd="fd 50">↑ FD 50</button>
-    <button class="cmd-btn" data-cmd="bk 50">↓ BK 50</button>
-    <button class="cmd-btn" data-cmd="rt 90">↻ RT 90</button>
-    <button class="cmd-btn" data-cmd="lt 90">↺ LT 90</button>
-    <button class="cmd-btn" data-cmd="pu">✏️ PU</button>
-    <button class="cmd-btn" data-cmd="pd">✍️ PD</button>
-    <button class="cmd-btn" data-cmd="clear">🗑️ CLEAR</button>
-    <button class="cmd-btn" data-cmd="home">🏠 HOME</button>
-  </div>
-
-  <div class="mobile-input-container" id="mobileInputContainer">
-    <input type="text" id="mobileCmd" class="mobile-input" placeholder="fd 80 rt 90 repeat 4 [fd 100 rt 90]" spellcheck="false" enterkeyhint="send">
-    <button class="mobile-send-btn" id="mobileSendBtn">⚡ RUN</button>
+  <!-- Mobile Controls - Visible on touch devices -->
+  <div class="mobile-controls" id="mobileControls">
+    <div class="mobile-input-row">
+      <input type="text" id="mobileCmdInput" class="mobile-input-field" placeholder="Type command... fd 80 rt 90" spellcheck="false" enterkeyhint="send">
+      <button class="mobile-send" id="mobileSendBtn">RUN</button>
+    </div>
+    <div class="quick-buttons">
+      <button class="quick-btn" data-cmd="fd 50">↑ FD 50</button>
+      <button class="quick-btn" data-cmd="bk 50">↓ BK 50</button>
+      <button class="quick-btn" data-cmd="rt 90">↻ RT 90</button>
+      <button class="quick-btn" data-cmd="lt 90">↺ LT 90</button>
+      <button class="quick-btn" data-cmd="pu">✏️ PU</button>
+      <button class="quick-btn" data-cmd="pd">✍️ PD</button>
+      <button class="quick-btn" data-cmd="home">🏠 HOME</button>
+      <button class="quick-btn" data-cmd="clear">🗑️ CLEAR</button>
+    </div>
   </div>
 </div>
 
@@ -377,7 +393,7 @@
     const consoleHistory = document.getElementById("consoleHistory");
     const penStatusSpan = document.getElementById("penStatus");
     const desktopCmd = document.getElementById("cmd");
-    const mobileCmd = document.getElementById("mobileCmd");
+    const mobileCmdInput = document.getElementById("mobileCmdInput");
     const mobileSendBtn = document.getElementById("mobileSendBtn");
     
     function updatePenIndicator() {
@@ -756,7 +772,9 @@
       addConsoleLine("🎨 type 'clear' to reset, 'home' to center turtle");
       addConsoleLine("🔥 NEON LINES with GLOW — enhanced visibility!");
       addConsoleLine("📐 GRID ALWAYS VISIBLE");
+      addConsoleLine("📱 Mobile: Use input field or quick buttons below");
       
+      // Desktop command listener
       desktopCmd.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
@@ -767,27 +785,29 @@
         }
       });
       
-      mobileCmd.addEventListener("keydown", (e) => {
+      // Mobile command input
+      mobileCmdInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
-          processAndDismissKeyboard(mobileCmd, mobileCmd.value);
+          processAndDismissKeyboard(mobileCmdInput, mobileCmdInput.value);
         }
       });
       
       mobileSendBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        processAndDismissKeyboard(mobileCmd, mobileCmd.value);
+        processAndDismissKeyboard(mobileCmdInput, mobileCmdInput.value);
       });
       
-      const cmdBtns = document.querySelectorAll(".cmd-btn");
-      cmdBtns.forEach(btn => {
+      // Quick command buttons
+      const quickBtns = document.querySelectorAll(".quick-btn");
+      quickBtns.forEach(btn => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           const cmd = btn.dataset.cmd;
           if (cmd) {
             runLogoCommand(cmd);
-            if (mobileCmd === document.activeElement) {
-              mobileCmd.blur();
+            if (mobileCmdInput === document.activeElement) {
+              mobileCmdInput.blur();
             }
             if (desktopCmd === document.activeElement) {
               desktopCmd.blur();
@@ -799,8 +819,8 @@
           const cmd = btn.dataset.cmd;
           if (cmd) {
             runLogoCommand(cmd);
-            if (mobileCmd === document.activeElement) {
-              mobileCmd.blur();
+            if (mobileCmdInput === document.activeElement) {
+              mobileCmdInput.blur();
             }
           }
         });
