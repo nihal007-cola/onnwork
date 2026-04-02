@@ -166,11 +166,11 @@
       display: block;
       width: 100%;
       height: 100%;
-      background: #0a0f0a;
-      box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+      background: #000000;
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
       cursor: crosshair;
     }
-    /* retro scanline effect overlay (optional but cool) */
+    /* retro scanline effect overlay - reduced opacity to not interfere */
     .canvas-wrapper::after {
       content: "";
       position: absolute;
@@ -179,7 +179,7 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      background: repeating-linear-gradient(0deg, rgba(0,255,100,0.02) 0px, rgba(0,255,100,0.02) 2px, transparent 2px, transparent 6px);
+      background: repeating-linear-gradient(0deg, rgba(0,255,100,0.008) 0px, rgba(0,255,100,0.008) 2px, transparent 2px, transparent 6px);
       z-index: 2;
     }
 
@@ -325,35 +325,35 @@
     }
     
     function setupCanvasStyle() {
-      ctx.lineWidth = 3.2;        // THICKER LINES for visibility
+      ctx.lineWidth = 3.5;        // SOLID, VISIBLE THICKNESS
       ctx.strokeStyle = "#33ff99";
       ctx.shadowColor = "#33ff99";
-      ctx.shadowBlur = 10;         // GLOW EFFECT
+      ctx.shadowBlur = 3;         // MINIMAL GLOW - preserves density
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.fillStyle = "#33ff99";
+      ctx.globalAlpha = 1.0;      // FULLY OPAQUE LINES
     }
     
     // draw a visible retro turtle cursor (triangle + eye)
     function drawTurtleCursor() {
       // save context
       ctx.save();
-      ctx.shadowBlur = 6;
+      ctx.shadowBlur = 4;
       ctx.fillStyle = "#33ff99";
       ctx.strokeStyle = "#ccffcc";
-      ctx.lineWidth = 1.5;
-      const size = 10;
+      ctx.lineWidth = 1.8;
+      const size = 11;
       const angleRad = turtle.angle * Math.PI / 180;
       const headX = turtle.x + Math.cos(angleRad) * size;
       const headY = turtle.y + Math.sin(angleRad) * size;
       // triangle points
-      const backAngle = angleRad + Math.PI;
-      const leftAngle = angleRad + (2.2);
-      const rightAngle = angleRad - (2.2);
-      const leftX = turtle.x + Math.cos(leftAngle) * (size * 0.7);
-      const leftY = turtle.y + Math.sin(leftAngle) * (size * 0.7);
-      const rightX = turtle.x + Math.cos(rightAngle) * (size * 0.7);
-      const rightY = turtle.y + Math.sin(rightAngle) * (size * 0.7);
+      const leftAngle = angleRad + (2.3);
+      const rightAngle = angleRad - (2.3);
+      const leftX = turtle.x + Math.cos(leftAngle) * (size * 0.75);
+      const leftY = turtle.y + Math.sin(leftAngle) * (size * 0.75);
+      const rightX = turtle.x + Math.cos(rightAngle) * (size * 0.75);
+      const rightY = turtle.y + Math.sin(rightAngle) * (size * 0.75);
       ctx.beginPath();
       ctx.moveTo(headX, headY);
       ctx.lineTo(leftX, leftY);
@@ -365,12 +365,12 @@
       ctx.stroke();
       // eye
       ctx.beginPath();
-      ctx.arc(turtle.x + Math.cos(angleRad) * 5, turtle.y + Math.sin(angleRad) * 5, 2.2, 0, Math.PI * 2);
+      ctx.arc(turtle.x + Math.cos(angleRad) * 5.5, turtle.y + Math.sin(angleRad) * 5.5, 2.2, 0, Math.PI * 2);
       ctx.fillStyle = "#ffffff";
       ctx.fill();
       ctx.fillStyle = "#000";
       ctx.beginPath();
-      ctx.arc(turtle.x + Math.cos(angleRad) * 5.5, turtle.y + Math.sin(angleRad) * 5.5, 1, 0, Math.PI * 2);
+      ctx.arc(turtle.x + Math.cos(angleRad) * 6, turtle.y + Math.sin(angleRad) * 6, 1.1, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -378,11 +378,11 @@
     // clear screen and re-set background but keep drawing zone clean
     function clearCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // draw a subtle grid (retro feel, but doesn't interfere)
+      // draw a subtle grid (retro feel, but doesn't interfere) - minimal opacity
       ctx.save();
-      ctx.globalAlpha = 0.12;
+      ctx.globalAlpha = 0.09;
       ctx.strokeStyle = "#33ff99";
-      ctx.lineWidth = 0.5;
+      ctx.lineWidth = 0.6;
       for (let i = 0; i < canvas.width; i += 40) {
         ctx.beginPath();
         ctx.moveTo(i, 0);
@@ -598,7 +598,7 @@
       addConsoleLine("🐢 ONN LOGO ENGINE — READY");
       addConsoleLine("✨ DRAWING AREA is ACTIVE — TRY: repeat 36 [fd 12 rt 10]");
       addConsoleLine("🎨 type 'clear' to reset, 'home' to center turtle");
-      addConsoleLine("🔥 tip: thicker glowing lines, visible turtle cursor!");
+      addConsoleLine("🔥 SOLID BRIGHT LINES — enhanced visibility!");
       
       // command listener
       cmdInput.addEventListener("keydown", (e) => {
