@@ -106,7 +106,7 @@
     <h2>> ONN LOGO ENGINE</h2>
 
     <div class="console" id="console"></div>
-    <input id="cmd" placeholder="fd 100 | rt 90 | repeat 4 [fd 100 rt 90]" autofocus>
+    <input id="cmd" placeholder="fd 100 rt 90 repeat 4 [fd 100 rt 90]" autofocus>
   </div>
 
   <div class="right">
@@ -134,11 +134,13 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// TURTLE STATE
-let x = canvas.width / 2;
-let y = canvas.height / 2;
-let angle = 0;
-let pen = true;
+// TURTLE
+let turtle = {
+  x: canvas.width/2,
+  y: canvas.height/2,
+  angle: 0,
+  pen: true
+};
 
 ctx.strokeStyle = "#00ff88";
 ctx.lineWidth = 2;
@@ -155,56 +157,37 @@ function addLine(text){
   consoleBox.scrollTop = consoleBox.scrollHeight;
 }
 
-// TURTLE FUNCTIONS
+// MOVE
 function move(dist){
-  const rad = angle * Math.PI / 180;
-  const nx = x + Math.cos(rad) * dist;
-  const ny = y + Math.sin(rad) * dist;
+  const rad = turtle.angle * Math.PI / 180;
+  const nx = turtle.x + Math.cos(rad) * dist;
+  const ny = turtle.y + Math.sin(rad) * dist;
 
-  if(pen){
+  if(turtle.pen){
     ctx.beginPath();
-    ctx.moveTo(x, y);
+    ctx.moveTo(turtle.x, turtle.y);
     ctx.lineTo(nx, ny);
     ctx.stroke();
   }
 
-  x = nx;
-  y = ny;
+  turtle.x = nx;
+  turtle.y = ny;
 }
 
-function executeCommand(cmd){
-  const parts = cmd.split(" ");
-
-  switch(parts[0]){
-
-    case "fd":
-      move(parseFloat(parts[1]));
-      break;
-
-    case "bk":
-      move(-parseFloat(parts[1]));
-      break;
-
-    case "rt":
-      angle += parseFloat(parts[1]);
-      break;
-
-    case "lt":
-      angle -= parseFloat(parts[1]);
-      break;
-
-    case "pu":
-      pen = false;
-      break;
-
-    case "pd":
-      pen = true;
-      break;
+// COMMAND EXEC
+function run(cmd, val){
+  switch(cmd){
+    case "fd": move(val); break;
+    case "bk": move(-val); break;
+    case "rt": turtle.angle += val; break;
+    case "lt": turtle.angle -= val; break;
+    case "pu": turtle.pen = false; break;
+    case "pd": turtle.pen = true; break;
 
     case "home":
-      x = canvas.width/2;
-      y = canvas.height/2;
-      angle = 0;
+      turtle.x = canvas.width/2;
+      turtle.y = canvas.height/2;
+      turtle.angle = 0;
       break;
 
     case "clear":
@@ -212,37 +195,82 @@ function executeCommand(cmd){
       break;
 
     default:
-      addLine("unknown command");
+      addLine("unknown: " + cmd);
   }
 }
 
-// REPEAT PARSER
-function execute(input){
-  addLine("> " + input);
+// TOKENIZER
+function tokenize(str){
+  return str
+    .replace(/\[/g, " [ ")
+    .replace(/\]/g, " ] ")
+    .trim()
+    .split(/\s+/);
+}
 
-  if(input.startsWith("repeat")){
-    const match = input.match(/repeat (\\d+) \\[(.*)\\]/);
-    if(match){
-      const count = parseInt(match[1]);
-      const commands = match[2].split(/(?=fd|bk|rt|lt|pu|pd)/);
+// INTERPRETER
+function interpret(tokens){
 
-      for(let i=0;i<count;i++){
-        commands.forEach(c=>{
-          executeCommand(c.trim());
-        });
+  let i = 0;
+
+  while(i < tokens.length){
+
+    let token = tokens[i];
+
+    if(token === "repeat"){
+      let count = parseInt(tokens[i+1]);
+
+      if(tokens[i+2] !== "["){
+        addLine("syntax error: missing [");
+        return;
       }
-      return;
-    }
-  }
 
-  executeCommand(input);
+      let depth = 1;
+      let j = i+3;
+
+      while(j < tokens.length && depth > 0){
+        if(tokens[j] === "[") depth++;
+        if(tokens[j] === "]") depth--;
+        j++;
+      }
+
+      let block = tokens.slice(i+3, j-1);
+
+      for(let r=0; r<count; r++){
+        interpret(block);
+      }
+
+      i = j;
+      continue;
+    }
+
+    if(["fd","bk","rt","lt"].includes(token)){
+      run(token, parseFloat(tokens[i+1]));
+      i += 2;
+      continue;
+    }
+
+    if(["pu","pd","home","clear"].includes(token)){
+      run(token);
+      i += 1;
+      continue;
+    }
+
+    addLine("unknown: " + token);
+    i++;
+  }
 }
 
 // INPUT
 input.addEventListener("keydown", function(e){
-  if(e.key==="Enter"){
-    execute(input.value.toLowerCase().trim());
-    input.value="";
+  if(e.key === "Enter"){
+    let val = input.value.toLowerCase().trim();
+    addLine("> " + val);
+
+    let tokens = tokenize(val);
+    interpret(tokens);
+
+    input.value = "";
   }
 });
 
