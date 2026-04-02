@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NEED TOYS</title>
+  <title>ONN SYSTEM TOOLS</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -21,40 +21,48 @@
       top: 0;
       left: 0;
       z-index: 0;
-      opacity: 0.12;
+      opacity: 0.15;
     }
 
     h2 {
       margin-bottom: 10px;
       position: relative;
       z-index: 2;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px #33ff99;
     }
 
     .box {
-      border: 1px solid rgba(0,255,100,0.3);
+      border: 1px solid #33ff99;
       padding: 15px;
       margin-top: 15px;
-      background: rgba(0,0,0,0.5);
-      box-shadow: 0 0 10px rgba(0,255,100,0.1);
+      background: rgba(0,0,0,0.65);
+      box-shadow: 0 0 12px rgba(51,255,153,0.2);
       transition: all 0.25s ease;
       position: relative;
       z-index: 2;
       cursor: pointer;
+      backdrop-filter: blur(2px);
     }
 
     .box:hover {
-      box-shadow: 0 0 20px rgba(0,255,100,0.4);
-      background: rgba(0,255,100,0.05);
+      box-shadow: 0 0 28px rgba(51,255,153,0.6);
+      background: rgba(51,255,153,0.08);
+      transform: translateY(-2px);
+      border-color: #33ff99;
     }
 
     .title {
       font-size: 15px;
       margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      font-weight: bold;
+      text-shadow: 0 0 4px #33ff99;
     }
 
     .desc {
       font-size: 13px;
-      opacity: 0.85;
+      opacity: 0.9;
       line-height: 1.5;
     }
 
@@ -82,6 +90,23 @@
     #transition.active {
       opacity: 1;
     }
+    
+    .back-link {
+      position: relative;
+      z-index: 2;
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #33ff99;
+      text-decoration: none;
+      border-bottom: 1px solid #33ff99;
+      padding-bottom: 2px;
+      transition: all 0.2s;
+    }
+    
+    .back-link:hover {
+      text-shadow: 0 0 8px #33ff99;
+      border-bottom-color: #33ff99;
+    }
   </style>
 </head>
 
@@ -89,22 +114,22 @@
 
 <canvas id="matrix"></canvas>
 
-<a href="index.html">← BACK</a>
+<a href="index.html" class="back-link">← BACK</a>
 
-<h2>> NEED TOYS</h2>
+<h2>> ONN SYSTEM TOOLS</h2>
 
 <div class="box">
   <a href="mswlogo.html">
-    <div class="title">MSWLogo Engine</div>
+    <div class="title">ONN LOGO ENGINE</div>
     <div class="desc">
-      Command-driven turtle graphics. Type instructions. System draws.
+      MSW-style turtle graphics system. Command-driven drawing engine.
     </div>
   </a>
 </div>
 
 <div class="box">
   <a href="allocation.html">
-    <div class="title">Allocation Simulator</div>
+    <div class="title">ALLOCATION SIMULATOR</div>
     <div class="desc">
       Simulate constraints, flow, and allocation decisions. 
       A simplified abstraction of production logic.
@@ -114,27 +139,26 @@
 
 <div class="box">
   <a href="signal.html">
-    <div class="title">Signal Console</div>
+    <div class="title">SIGNAL CONSOLE</div>
     <div class="desc">
-      Input → system → output. Observe how structured signals behave.
+      Input → system → output. Observe structured signal behavior.
     </div>
   </a>
 </div>
 
 <div class="box">
   <a href="playground.html">
-    <div class="title">System Playground</div>
+    <div class="title">SYSTEM PLAYGROUND</div>
     <div class="desc">
       Experimental layer. Small tools, ideas, and controlled chaos.
     </div>
   </a>
 </div>
 
-<!-- TRANSITION -->
 <div id="transition"></div>
 
 <script>
-// MATRIX BACKGROUND
+// MATRIX BACKGROUND - enhanced glow and density
 const canvas = document.getElementById("matrix");
 const ctx = canvas.getContext("2d");
 
@@ -155,10 +179,12 @@ for (let x = 0; x < columns; x++) {
 }
 
 function draw() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.07)";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.06)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#00ff88";
+  ctx.fillStyle = "#33ff99";
+  ctx.shadowColor = "#33ff99";
+  ctx.shadowBlur = 4;
   ctx.font = fontSize + "px monospace";
 
   for (let i = 0; i < drops.length; i++) {
@@ -169,15 +195,17 @@ function draw() {
       drops[i] = 0;
     }
 
-    drops[i] += 0.6;
+    drops[i] += 0.7;
   }
+  
+  ctx.shadowBlur = 0;
 }
 
-setInterval(draw, 60);
+setInterval(draw, 55);
 
 
 // TRANSITION
-const links = document.querySelectorAll("a");
+const links = document.querySelectorAll("a:not(.back-link)");
 
 links.forEach(link => {
   link.addEventListener("click", function(e) {
@@ -192,6 +220,22 @@ links.forEach(link => {
     }
   });
 });
+
+// Also handle back link separately with transition
+const backLink = document.querySelector(".back-link");
+if (backLink) {
+  backLink.addEventListener("click", function(e) {
+    if (this.href && this.target !== "_blank") {
+      e.preventDefault();
+      const overlay = document.getElementById("transition");
+      overlay.classList.add("active");
+
+      setTimeout(() => {
+        window.location.href = this.href;
+      }, 300);
+    }
+  });
+}
 </script>
 
 </body>
