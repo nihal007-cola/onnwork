@@ -1,619 +1,108 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>MATRIX DOOM TERMINAL</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>MATRIX DOOM TERMINAL</title>
 
-        body {
-            background: #000000;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', 'Fira Code', monospace;
-            overflow: hidden;
-            position: relative;
-        }
+<style>
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;}
+body{background:#000;min-height:100vh;display:flex;justify-content:center;align-items:center;font-family:monospace;overflow:hidden;position:relative;}
+#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.25;}
+.terminal-container{position:relative;z-index:10;width:90%;max-width:800px;background:rgba(0,0,0,.85);border:2px solid #00ff00;border-radius:12px;padding:2rem;box-shadow:0 0 20px rgba(0,255,0,.3);}
+.terminal{color:#00ff00;font-size:1.2rem;line-height:1.6;}
+.terminal-line{margin-bottom:.5rem;}
+.press-enter{margin-top:1.5rem;text-align:center;font-weight:bold;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:.6;}50%{opacity:1;}}
+.doom-wrapper{position:fixed;top:0;left:0;width:100%;height:100%;z-index:20;background:#000;display:none;flex-direction:column;justify-content:center;align-items:center;}
+canvas{width:100%;max-height:85vh;border:2px solid #00ff00;}
+.loading-text{color:#00ff00;margin-top:1rem;}
+</style>
 
-        /* Matrix rain effect canvas (background) */
-        #matrix-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.25;
-            pointer-events: none;
-        }
-
-        /* Terminal container */
-        .terminal-container {
-            position: relative;
-            z-index: 10;
-            width: 90%;
-            max-width: 800px;
-            background: rgba(0, 0, 0, 0.85);
-            border: 2px solid #00ff00;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 10px rgba(0, 255, 0, 0.1);
-            backdrop-filter: blur(2px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-
-        .terminal {
-            color: #00ff00;
-            font-size: 1.2rem;
-            line-height: 1.6;
-            text-shadow: 0 0 5px #00ff00;
-        }
-
-        .terminal-line {
-            margin-bottom: 0.5rem;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1.2rem;
-            background-color: #00ff00;
-            vertical-align: middle;
-            margin-left: 4px;
-            animation: blink 1s step-end infinite;
-            box-shadow: 0 0 5px #00ff00;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        .glitch {
-            animation: glitch 0.3s ease-in-out 2;
-        }
-
-        @keyframes glitch {
-            0% { text-shadow: -2px 0 red, 2px 0 blue; opacity: 0.8; }
-            50% { text-shadow: 2px 0 red, -2px 0 blue; opacity: 1; }
-            100% { text-shadow: 0 0 #00ff00; }
-        }
-
-        .press-enter {
-            margin-top: 1.5rem;
-            text-align: center;
-            font-weight: bold;
-            letter-spacing: 2px;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; text-shadow: 0 0 2px #00ff00; }
-            50% { opacity: 1; text-shadow: 0 0 12px #00ff00; }
-        }
-
-        /* DOOM Canvas wrapper (hidden initially) */
-        .doom-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 20;
-            background: #000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-            max-height: 85vh;
-            background: black;
-            cursor: none;
-            border: 2px solid #00ff00;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
-        }
-
-        /* Mobile touch controls */
-        .touch-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.8);
-            border-top: 1px solid #00ff00;
-            backdrop-filter: blur(8px);
-            z-index: 30;
-            transition: opacity 0.3s;
-        }
-
-        .ctrl-btn {
-            background: #0a0a0a;
-            border: 2px solid #00ff00;
-            color: #00ff00;
-            font-family: monospace;
-            font-size: 1.8rem;
-            font-weight: bold;
-            padding: 12px 24px;
-            border-radius: 60px;
-            cursor: pointer;
-            text-align: center;
-            box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
-            transition: 0.05s linear;
-            touch-action: manipulation;
-            min-width: 80px;
-        }
-
-        .ctrl-btn:active {
-            background: #00ff00;
-            color: black;
-            transform: scale(0.96);
-        }
-
-        .loading-text {
-            color: #00ff00;
-            font-family: monospace;
-            font-size: 1rem;
-            text-align: center;
-            margin-top: 1rem;
-        }
-
-        @media (max-width: 700px) {
-            .ctrl-btn {
-                padding: 8px 16px;
-                font-size: 1.4rem;
-                min-width: 65px;
-            }
-            .terminal-container {
-                padding: 1.2rem;
-            }
-            .terminal {
-                font-size: 0.9rem;
-            }
-        }
-
-        /* Fallback error */
-        .error-message {
-            color: #ff3333;
-            text-align: center;
-            background: #110000;
-            border: 1px solid red;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-    </style>
 </head>
+
 <body>
 
 <canvas id="matrix-bg"></canvas>
 
 <div id="terminalContainer" class="terminal-container">
-    <div id="terminal" class="terminal"></div>
-    <div id="enterPrompt" class="press-enter" style="display: none;">[ PRESS ENTER TO JACK IN ]</div>
+<div id="terminal" class="terminal"></div>
+<div id="enterPrompt" class="press-enter" style="display:none;">[ PRESS ENTER TO JACK IN ]</div>
 </div>
 
 <div id="doomWrapper" class="doom-wrapper">
-    <canvas id="doomCanvas" tabindex="0"></canvas>
-    <div id="loadingProgress" class="loading-text">Initializing DOOM engine...</div>
-</div>
-
-<div id="touchControls" class="touch-controls" style="display: none;">
-    <div class="ctrl-btn" data-action="left">◀ LEFT</div>
-    <div class="ctrl-btn" data-action="right">RIGHT ▶</div>
-    <div class="ctrl-btn" data-action="fire">🔥 FIRE</div>
+<canvas id="doomCanvas"></canvas>
+<div id="loadingProgress" class="loading-text">Initializing DOOM engine...</div>
 </div>
 
 <script>
-    (function(){
-        // ---------- MATRIX RAIN BACKGROUND ----------
-        const bgCanvas = document.getElementById('matrix-bg');
-        let bgCtx = bgCanvas.getContext('2d');
-        let matrixColumns = [];
-        let matrixChars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
-        
-        function resizeMatrix() {
-            bgCanvas.width = window.innerWidth;
-            bgCanvas.height = window.innerHeight;
-            const fontSize = 18;
-            const columns = Math.floor(bgCanvas.width / fontSize);
-            matrixColumns = Array(columns).fill(1);
-        }
-        
-        function drawMatrix() {
-            if (!bgCtx) return;
-            bgCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
-            bgCtx.fillStyle = '#0f0';
-            bgCtx.font = '18px monospace';
-            for(let i = 0; i < matrixColumns.length; i++) {
-                const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                const x = i * 18;
-                const y = matrixColumns[i] * 18;
-                bgCtx.fillText(char, x, y);
-                if(y > bgCanvas.height && Math.random() > 0.975) matrixColumns[i] = 0;
-                matrixColumns[i]++;
-            }
-        }
-        
-        window.addEventListener('resize', () => {
-            resizeMatrix();
-        });
-        resizeMatrix();
-        setInterval(drawMatrix, 50);
-        
-        // ---------- TERMINAL BOOT SEQUENCE ----------
-        const terminalDiv = document.getElementById('terminal');
-        const terminalContainer = document.getElementById('terminalContainer');
-        const enterPromptDiv = document.getElementById('enterPrompt');
-        const doomWrapper = document.getElementById('doomWrapper');
-        const touchControlsDiv = document.getElementById('touchControls');
-        const loadingProgressSpan = document.getElementById('loadingProgress');
-        
-        const bootMessages = [
-            "> INITIALIZING ONN TERMINAL v2.6.9...",
-            "> ACCESSING SECURE NODE [matrix.doom.net]...",
-            "> DECRYPTING PACKETS USING AES-256-GCM...",
-            "> BYPASSING FIREWALL [■■■■■■■■■■] 100%",
-            "> LOADING NEURAL INTERFACE MODULE...",
-            "> ESTABLISHING LINK TO DIMENSION SHIFT...",
-            "> FREEDOOM.WAD HASH VERIFIED: OK",
-            "> WASM MODULES STAGED: doom.wasm + doom.js",
-            "> ACCESS GRANTED. WELCOME, OPERATOR."
-        ];
-        
-        let lineIndex = 0;
-        let charIndex = 0;
-        let currentLine = "";
-        let isTyping = false;
-        let bootFinished = false;
-        
-        function typeNextLine() {
-            if(lineIndex >= bootMessages.length) {
-                // boot complete -> show press enter
-                if(!bootFinished){
-                    bootFinished = true;
-                    enterPromptDiv.style.display = "block";
-                    const cursorElem = document.querySelector('.cursor');
-                    if(cursorElem) cursorElem.remove();
-                }
-                return;
-            }
-            if(!isTyping){
-                currentLine = bootMessages[lineIndex];
-                charIndex = 0;
-                isTyping = true;
-                const lineElement = document.createElement('div');
-                lineElement.className = 'terminal-line';
-                lineElement.id = `line-${lineIndex}`;
-                terminalDiv.appendChild(lineElement);
-                typeCharacter(lineIndex);
-            }
-        }
-        
-        function typeCharacter(idx) {
-            if(idx !== lineIndex) return;
-            const lineElem = document.getElementById(`line-${lineIndex}`);
-            if(!lineElem) return;
-            if(charIndex < currentLine.length){
-                lineElem.textContent = currentLine.substring(0, charIndex+1);
-                charIndex++;
-                setTimeout(() => typeCharacter(lineIndex), 45 + Math.random() * 20);
-            } else {
-                // line done
-                isTyping = false;
-                lineIndex++;
-                // glitch effect randomly on some lines
-                if(Math.random() > 0.6){
-                    const glitchElem = document.getElementById(`line-${lineIndex-1}`);
-                    if(glitchElem) glitchElem.classList.add('glitch');
-                }
-                setTimeout(typeNextLine, 180);
-            }
-        }
-        
-        // start boot sequence
-        typeNextLine();
-        
-        // optional flicker effect on container
-        function addFlicker() {
-            setInterval(() => {
-                if(terminalContainer.style.opacity !== '0' && !doomWrapper.style.display) {
-                    if(Math.random() > 0.95) {
-                        terminalContainer.style.transform = `translate(${Math.random() * 2 - 1}px, ${Math.random() * 2 - 1}px)`;
-                        setTimeout(() => { terminalContainer.style.transform = ''; }, 50);
-                    }
-                }
-            }, 800);
-        }
-        addFlicker();
-        
-        // ---------- PRESS ENTER HANDLER ----------
-        let gameStarted = false;
-        
-        function startDOOM() {
-            if(gameStarted) return;
-            gameStarted = true;
-            
-            // fade out terminal
-            terminalContainer.style.transition = "opacity 0.8s ease, transform 0.5s";
-            terminalContainer.style.opacity = "0";
-            terminalContainer.style.transform = "scale(0.95)";
-            
-            setTimeout(() => {
-                terminalContainer.style.display = "none";
-                doomWrapper.style.display = "flex";
-                // trigger loading and doom initialization
-                initDoomEngine();
-            }, 800);
-        }
-        
-        // Listen for Enter key or tap on prompt
-        function onEnterPress() {
-            if(bootFinished && !gameStarted) {
-                startDOOM();
-            }
-        }
-        
-        window.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter' && bootFinished && !gameStarted) {
-                e.preventDefault();
-                onEnterPress();
-            }
-        });
-        
-        enterPromptDiv.addEventListener('click', () => {
-            if(bootFinished && !gameStarted) onEnterPress();
-        });
-        
-        // ---------- DOOM ENGINE INTEGRATION ----------
-        let Module = null;
-        let doomInitialized = false;
-        
-        // helper to update loading progress text
-        function setProgress(text) {
-            if(loadingProgressSpan) loadingProgressSpan.innerText = text;
-        }
-        
-        function initDoomEngine() {
-            setProgress("Loading doom.js & WebAssembly modules... 0%");
-            
-            // dynamically inject doom.js script
-            const script = document.createElement('script');
-            script.src = 'doom.js';
-            script.onerror = () => {
-                setProgress("ERROR: Failed to load doom.js. Check file existence.");
-                console.error("Failed to load doom.js");
-                showError("Cannot load doom.js - verify that doom.js, doom.wasm, and freedoom.wad exist in the same directory.");
-            };
-            script.onload = () => {
-                setProgress("doom.js loaded. Preparing Emscripten Module... 50%");
-                // wait for Module object to be defined by doom.js
-                waitForModule();
-            };
-            document.head.appendChild(script);
-        }
-        
-        function waitForModule() {
-            if(typeof Module !== 'undefined') {
-                configureAndRun();
-            } else {
-                // Poll for Module global (emscripten creates var Module)
-                let attempts = 0;
-                const interval = setInterval(() => {
-                    if(typeof Module !== 'undefined') {
-                        clearInterval(interval);
-                        configureAndRun();
-                    } else if(attempts > 80) {
-                        clearInterval(interval);
-                        showError("Timeout: Module not found. Check doom.js compatibility.");
-                    }
-                    attempts++;
-                }, 100);
-            }
-        }
-        
-        function configureAndRun() {
-            setProgress("Configuring Emscripten canvas & arguments... 70%");
-            const canvasElem = document.getElementById('doomCanvas');
-            if(!canvasElem) {
-                showError("Canvas element missing");
-                return;
-            }
-            
-            // Ensure Module is configured correctly for Emscripten DOOM port
-            // typical DOOM (prboom, chocolate-doom) Emscripten builds use:
-            // - canvas: HTML5 canvas element
-            // - arguments: ["-iwad", "freedoom.wad"]
-            // - print, printErr etc.
-            if(!Module) Module = {};
-            
-            Module.canvas = canvasElem;
-            Module.arguments = ["-iwad", "freedoom.wad"];
-            Module.print = (text) => { console.log("[DOOM]:", text); setProgress(`DOOM: ${text.substring(0, 40)}`); };
-            Module.printErr = (text) => { console.warn("[DOOM ERR]:", text); };
-            
-            // set canvas size for good rendering, emscripten will resize
-            function resizeCanvas() {
-                const container = doomWrapper;
-                const w = Math.min(window.innerWidth, window.innerHeight * 1.33);
-                const h = window.innerHeight * 0.85;
-                canvasElem.style.width = `${Math.min(window.innerWidth - 20, 1024)}px`;
-                canvasElem.style.height = 'auto';
-                if(canvasElem.width !== canvasElem.clientWidth) {
-                    canvasElem.width = canvasElem.clientWidth;
-                    canvasElem.height = canvasElem.clientWidth * 0.75;
-                }
-            }
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
-            
-            // Handle file system preloading for freedoom.wad if needed? 
-            // Emscripten builds often fetch using preloaded resource, but we can also mount.
-            // Usually doom.js will XHR the .wad file based on the argument. We'll ensure freedoom.wad is reachable.
-            // Additional fallback: If the Module fails, show error.
-            
-            setProgress("Launching DOOM... 90% (this may take a moment)");
-            
-            // Because doom.js might reinitialize Module, we store our hooks.
-            // Some emscripten ports look for 'Module' global before instantiation.
-            window.Module = Module;
-            
-            // Now trigger the main() of doom.js if not auto-called? Usually script onload calls main.
-            // But emscripten generates a Module that runs automatically. We just need to ensure no conflict.
-            // If doom.js is already loaded, it might start automatically. But we need to force start if not.
-            // Many Emscripten apps start once the wasm is ready. We'll check if 'main' function exists.
-            setTimeout(() => {
-                if(!doomInitialized) {
-                    // try to invoke module._main if needed, but safer to rely on emscripten auto-start.
-                    setProgress("Warming up DOOM engine...");
-                }
-            }, 300);
-            
-            // success detection: if canvas gets graphics or we listen for errors
-            let errorTimeout = setTimeout(() => {
-                if(!doomInitialized) {
-                    const ctx = canvasElem.getContext('2d');
-                    if(ctx && canvasElem.width > 10) {
-                        doomInitialized = true;
-                        setProgress("DOOM ACTIVE. Use keyboard or on-screen controls.");
-                        showTouchControls();
-                    } else {
-                        showError("DOOM failed to start. Check browser console & ensure freedoom.wad is present.");
-                    }
-                }
-            }, 8000);
-            
-            // Listen for Module post-run
-            if(Module && Module.preRun) {
-                const oldPreRun = Module.preRun;
-                Module.preRun = () => { if(oldPreRun) oldPreRun(); };
-            }
-            if(Module && Module.postRun) {
-                const oldPostRun = Module.postRun;
-                Module.postRun = () => {
-                    doomInitialized = true;
-                    clearTimeout(errorTimeout);
-                    setProgress("DOOM READY. Enjoy!");
-                    showTouchControls();
-                };
-            } else {
-                // fallback: if after 3 secs canvas has content, assume ok
-                setTimeout(() => {
-                    const ctx = canvasElem.getContext('2d');
-                    const imgData = ctx.getImageData(0,0,10,10);
-                    if(imgData.data.some(v=>v!==0)) {
-                        doomInitialized = true;
-                        clearTimeout(errorTimeout);
-                        setProgress("DOOM Running");
-                        showTouchControls();
-                    }
-                }, 4000);
-            }
-        }
-        
-        function showError(msg) {
-            setProgress(msg);
-            const errDiv = document.createElement('div');
-            errDiv.className = 'error-message';
-            errDiv.innerText = `⚠️ ${msg} ⚠️\nCheck that doom.js, doom.wasm, freedoom.wad are in the SAME folder.`;
-            doomWrapper.appendChild(errDiv);
-            console.error(msg);
-        }
-        
-        function showTouchControls() {
-            touchControlsDiv.style.display = "flex";
-            // attach touch events for mobile controls
-            const leftBtn = document.querySelector('[data-action="left"]');
-            const rightBtn = document.querySelector('[data-action="right"]');
-            const fireBtn = document.querySelector('[data-action="fire"]');
-            
-            // Simulate keyboard events for DOOM (arrow keys, Ctrl / Space)
-            function sendKeyEvent(type, keyCode, key) {
-                const event = new KeyboardEvent(type, {
-                    key: key,
-                    code: key,
-                    keyCode: keyCode,
-                    which: keyCode,
-                    bubbles: true
-                });
-                document.dispatchEvent(event);
-                if(type === 'keydown') {
-                    // also target canvas to ensure focus
-                    const canv = document.getElementById('doomCanvas');
-                    if(canv) canv.dispatchEvent(event);
-                }
-            }
-            
-            let leftActive = false, rightActive = false, fireActive = false;
-            
-            function leftDown(e) { e.preventDefault(); if(!leftActive) { leftActive=true; sendKeyEvent('keydown', 37, 'ArrowLeft'); } }
-            function leftUp(e) { e.preventDefault(); if(leftActive) { leftActive=false; sendKeyEvent('keyup', 37, 'ArrowLeft'); } }
-            function rightDown(e) { e.preventDefault(); if(!rightActive) { rightActive=true; sendKeyEvent('keydown', 39, 'ArrowRight'); } }
-            function rightUp(e) { e.preventDefault(); if(rightActive) { rightActive=false; sendKeyEvent('keyup', 39, 'ArrowRight'); } }
-            function fireDown(e) { e.preventDefault(); if(!fireActive) { fireActive=true; sendKeyEvent('keydown', 32, ' '); sendKeyEvent('keydown', 17, 'Control'); } }
-            function fireUp(e) { e.preventDefault(); if(fireActive) { fireActive=false; sendKeyEvent('keyup', 32, ' '); sendKeyEvent('keyup', 17, 'Control'); } }
-            
-            leftBtn.addEventListener('mousedown', leftDown);
-            leftBtn.addEventListener('mouseup', leftUp);
-            leftBtn.addEventListener('mouseleave', leftUp);
-            leftBtn.addEventListener('touchstart', leftDown, {passive:false});
-            leftBtn.addEventListener('touchend', leftUp);
-            leftBtn.addEventListener('touchcancel', leftUp);
-            
-            rightBtn.addEventListener('mousedown', rightDown);
-            rightBtn.addEventListener('mouseup', rightUp);
-            rightBtn.addEventListener('mouseleave', rightUp);
-            rightBtn.addEventListener('touchstart', rightDown, {passive:false});
-            rightBtn.addEventListener('touchend', rightUp);
-            rightBtn.addEventListener('touchcancel', rightUp);
-            
-            fireBtn.addEventListener('mousedown', fireDown);
-            fireBtn.addEventListener('mouseup', fireUp);
-            fireBtn.addEventListener('mouseleave', fireUp);
-            fireBtn.addEventListener('touchstart', fireDown, {passive:false});
-            fireBtn.addEventListener('touchend', fireUp);
-            fireBtn.addEventListener('touchcancel', fireUp);
-        }
-        
-        // Ensure that canvas gets focus for keyboard when clicked/tapped
-        document.addEventListener('click', (e) => {
-            if(doomWrapper.style.display === 'flex') {
-                const canv = document.getElementById('doomCanvas');
-                if(canv) canv.focus();
-            }
-        });
-        
-        // Also enable pointer lock or no? optional, not needed.
-        // Provide fallback for mobile: show instructions
-        setTimeout(() => {
-            if(!gameStarted && bootFinished) {
-                // small reminder for mobile
-                const promptDiv = enterPromptDiv;
-                if(promptDiv && window.innerWidth < 800) {
-                    promptDiv.style.fontSize = '1rem';
-                }
-            }
-        }, 1000);
-        
-    })();
+(function(){
+
+const DRIVE_WAD = "https://drive.google.com/uc?export=download&id=1eNV7gy_WhUQHDxFfbofJCF8LZlIZe_Zf";
+
+const terminal=document.getElementById("terminal");
+const enter=document.getElementById("enterPrompt");
+const wrapper=document.getElementById("doomWrapper");
+const container=document.getElementById("terminalContainer");
+const progress=document.getElementById("loadingProgress");
+
+const boot=[
+"> INITIALIZING ONN TERMINAL...",
+"> CONNECTING...",
+"> BYPASSING FIREWALL...",
+"> ACCESS GRANTED."
+];
+
+let i=0;
+
+function typeLine(){
+if(i>=boot.length){enter.style.display="block";return;}
+let line=document.createElement("div");
+terminal.appendChild(line);
+let text=boot[i],j=0;
+
+let t=setInterval(()=>{
+line.textContent+=text[j++];
+if(j>=text.length){clearInterval(t);i++;setTimeout(typeLine,300);}
+},25);
+}
+
+typeLine();
+
+window.addEventListener("keydown",(e)=>{
+if(e.key==="Enter"){start();}
+});
+
+enter.onclick=start;
+
+function start(){
+container.style.display="none";
+wrapper.style.display="flex";
+initDoom();
+}
+
+function initDoom(){
+
+progress.innerText="Loading DOOM...";
+
+let canvas=document.getElementById("doomCanvas");
+
+window.Module={
+canvas:canvas,
+arguments:["-iwad",DRIVE_WAD],
+print:(t)=>console.log(t),
+printErr:(t)=>console.error(t)
+};
+
+let script=document.createElement("script");
+script.src="doom.js";
+document.body.appendChild(script);
+
+}
+
+})();
 </script>
+
 </body>
 </html>
