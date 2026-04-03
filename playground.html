@@ -1,84 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Playground - BRIC Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRIC Console</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #111;
-      color: #0f0;
-      font-family: monospace;
-      text-align: center;
-    }
+<style>
+body { margin:0; background:#111; color:#0f0; font-family:monospace; text-align:center; }
 
-    /* 🔙 Back Button */
-    .topbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: #000;
-      padding: 10px;
-      text-align: left;
-      border-bottom: 2px solid #0f0;
-    }
+.topbar {
+  position:fixed; top:0; width:100%; background:#000;
+  padding:10px; text-align:left; border-bottom:2px solid #0f0;
+}
 
-    .back-btn {
-      color: #0f0;
-      text-decoration: none;
-      font-size: 16px;
-      border: 1px solid #0f0;
-      padding: 5px 10px;
-      border-radius: 6px;
-    }
+.back-btn {
+  color:#0f0; text-decoration:none; border:1px solid #0f0;
+  padding:5px 10px; border-radius:6px;
+}
 
-    .container {
-      margin-top: 60px;
-    }
+.container { margin-top:60px; }
 
-    canvas {
-      background: black;
-      margin: 20px auto;
-      display: block;
-      border: 4px solid #0f0;
-    }
+canvas {
+  background:black;
+  border:4px solid #0f0;
+}
 
-    .controls {
-      display: grid;
-      grid-template-columns: repeat(3, 80px);
-      gap: 10px;
-      justify-content: center;
-      margin-top: 20px;
-    }
+.controls {
+  display:grid;
+  grid-template-columns:repeat(3,80px);
+  gap:10px;
+  justify-content:center;
+  margin-top:15px;
+}
 
-    button {
-      padding: 20px;
-      font-size: 18px;
-      background: #222;
-      color: #0f0;
-      border: 2px solid #0f0;
-      border-radius: 10px;
-    }
-
-    button:active {
-      background: #0f0;
-      color: #000;
-    }
-  </style>
+button {
+  padding:20px;
+  background:#222;
+  color:#0f0;
+  border:2px solid #0f0;
+  border-radius:10px;
+}
+button:active { background:#0f0; color:#000; }
+</style>
 </head>
 
 <body>
 
-<!-- 🔙 Back Button -->
 <div class="topbar">
   <a href="toys.html" class="back-btn">← Back</a>
 </div>
 
 <div class="container">
-
   <canvas id="screen" width="200" height="400"></canvas>
 
   <div class="controls">
@@ -89,108 +60,200 @@
     <button onclick="press(' ')">●</button>
     <button onclick="press('enter')">START</button>
   </div>
-
 </div>
 
 <script>
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
 
-const ROWS = 20;
-const COLS = 10;
-const SIZE = 20;
+const ROWS=20, COLS=10, SIZE=20;
 
-let grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+let keys={}, state="MENU", selected=0, level=1, score=0;
+let highScore = localStorage.getItem("bricHighScore") || 0;
 
-let keys = {};
-let state = "MENU";
-let selected = 0;
+const games = ["SNAKE","BLOCK","RACE","SHOOT","BREAK"];
 
-const games = ["SNAKE"];
-
-document.addEventListener("keydown", e => {
-  keys[e.key.toLowerCase()] = true;
-});
-
-document.addEventListener("keyup", e => {
-  keys[e.key.toLowerCase()] = false;
-});
-
-function press(k) {
-  keys[k] = true;
-  setTimeout(() => keys[k] = false, 100);
+function saveHigh(){
+  if(score > highScore){
+    highScore = score;
+    localStorage.setItem("bricHighScore", highScore);
+  }
 }
 
-function drawGrid() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      if (grid[r][c]) {
-        ctx.fillStyle = "#0f0";
-        ctx.fillRect(c * SIZE, r * SIZE, SIZE - 1, SIZE - 1);
+document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+function press(k){ keys[k]=true; setTimeout(()=>keys[k]=false,100); }
+
+function clearGrid(){
+  return Array.from({length:ROWS},()=>Array(COLS).fill(0));
+}
+
+let grid = clearGrid();
+
+function drawGrid(){
+  ctx.clearRect(0,0,200,400);
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(grid[r][c]){
+        ctx.fillStyle="#0f0";
+        ctx.fillRect(c*SIZE,r*SIZE,SIZE-1,SIZE-1);
       }
     }
   }
 }
 
-function drawMenu() {
-  ctx.fillStyle = "#0f0";
-  ctx.font = "16px monospace";
-  ctx.fillText("SELECT GAME", 20, 50);
+function text(t,y){
+  ctx.fillStyle="#0f0";
+  ctx.fillText(t,10,y);
+}
 
-  games.forEach((g, i) => {
-    ctx.fillText((i === selected ? "> " : "") + g, 40, 100 + i * 20);
+/* MENU */
+function menu(){
+  text("BRIC CONSOLE",40);
+  text("HI: "+highScore,60);
+
+  games.forEach((g,i)=>{
+    text((i==selected?"> ":"  ")+g,100+i*20);
   });
+
+  if(keys['w']) selected=(selected-1+games.length)%games.length;
+  if(keys['s']) selected=(selected+1)%games.length;
+
+  if(keys['enter']) state="LEVEL";
 }
 
-/* 🐍 SNAKE */
-let snake = [{x:5,y:5}];
-let dir = {x:1,y:0};
+/* LEVEL */
+function levelSelect(){
+  text("LEVEL: "+level,100);
+  if(keys['w']) level=Math.min(10,level+1);
+  if(keys['s']) level=Math.max(1,level-1);
 
-function updateSnake() {
-  if (keys['w']) dir = {x:0,y:-1};
-  if (keys['s']) dir = {x:0,y:1};
-  if (keys['a']) dir = {x:-1,y:0};
-  if (keys['d']) dir = {x:1,y:0};
-
-  let head = {
-    x: snake[0].x + dir.x,
-    y: snake[0].y + dir.y
-  };
-
-  if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
-    state = "MENU";
-    snake = [{x:5,y:5}];
-    return;
-  }
-
-  snake.unshift(head);
-  snake.pop();
-
-  grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
-  snake.forEach(p => grid[p.y][p.x] = 1);
+  if(keys['enter']) startGame();
 }
 
-function loop() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+/* GAME OVER */
+function gameOver(){
+  saveHigh();
+  text("GAME OVER",120);
+  text("SCORE:"+score,160);
+  text("ENTER MENU",200);
 
-  if (state === "MENU") {
-    drawMenu();
+  if(keys['enter']) state="MENU";
+}
 
-    if (keys['w']) selected = (selected - 1 + games.length) % games.length;
-    if (keys['s']) selected = (selected + 1) % games.length;
+/* START */
+function startGame(){
+  score=0;
+  grid=clearGrid();
 
-    if (keys['enter']) {
-      state = "PLAYING";
-    }
+  if(games[selected]=="SNAKE") initSnake();
+  if(games[selected]=="BLOCK") initBlock();
+  if(games[selected]=="RACE") initRace();
+  if(games[selected]=="SHOOT") initShoot();
+  if(games[selected]=="BREAK") initBreak();
+
+  state="PLAY";
+}
+
+/* SNAKE */
+let snake,dir;
+function initSnake(){ snake=[{x:5,y:5}]; dir={x:1,y:0}; }
+function snakeUpdate(){
+  if(keys['w']) dir={x:0,y:-1};
+  if(keys['s']) dir={x:0,y:1};
+  if(keys['a']) dir={x:-1,y:0};
+  if(keys['d']) dir={x:1,y:0};
+
+  let h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  if(h.x<0||h.x>=COLS||h.y<0||h.y>=ROWS){state="GAMEOVER";return;}
+
+  snake.unshift(h); snake.pop(); score++;
+  grid=clearGrid(); snake.forEach(p=>grid[p.y][p.x]=1);
+}
+
+/* BLOCK */
+let by;
+function initBlock(){ by=0; }
+function blockUpdate(){
+  by++; if(by>=ROWS){score+=10;by=0;}
+  grid=clearGrid(); grid[by][5]=1;
+}
+
+/* RACE */
+let carX,obs;
+function initRace(){carX=5;obs=[];}
+function raceUpdate(){
+  if(keys['a']) carX--; if(keys['d']) carX++;
+  if(Math.random()<0.2) obs.push({x:Math.floor(Math.random()*COLS),y:0});
+  obs.forEach(o=>o.y++);
+  if(obs.some(o=>o.x==carX && o.y==ROWS-1)) state="GAMEOVER";
+  score++;
+  grid=clearGrid();
+  grid[ROWS-1][carX]=1;
+  obs.forEach(o=>{ if(o.y<ROWS) grid[o.y][o.x]=1; });
+}
+
+/* SHOOT */
+let bullets,enemies;
+function initShoot(){bullets=[];enemies=[];}
+function shootUpdate(){
+  if(keys[' ']) bullets.push({x:5,y:18});
+  if(Math.random()<0.2) enemies.push({x:Math.floor(Math.random()*COLS),y:0});
+  bullets.forEach(b=>b.y--);
+  enemies.forEach(e=>e.y++);
+  enemies = enemies.filter(e=>e.y<ROWS);
+  bullets.forEach(b=>{
+    enemies = enemies.filter(e=>{
+      if(e.x==b.x && e.y==b.y){score+=5; return false;}
+      return true;
+    });
+  });
+  grid=clearGrid();
+  bullets.forEach(b=>grid[b.y]?.[b.x]=1);
+  enemies.forEach(e=>grid[e.y][e.x]=1);
+}
+
+/* BREAKOUT */
+let ballX=5,ballY=10,dx=1,dy=-1,paddle=4;
+function initBreak(){}
+function breakUpdate(){
+  if(keys['a']) paddle--; if(keys['d']) paddle++;
+  ballX+=dx; ballY+=dy;
+
+  if(ballX<=0||ballX>=COLS-1) dx*=-1;
+  if(ballY<=0) dy*=-1;
+
+  if(ballY==ROWS-1 && (ballX<paddle||ballX>paddle+2)){
+    state="GAMEOVER";
   }
 
-  else if (state === "PLAYING") {
-    updateSnake();
+  if(ballY==ROWS-1) dy=-1;
+
+  score++;
+
+  grid=clearGrid();
+  grid[ballY][ballX]=1;
+  for(let i=0;i<3;i++) grid[ROWS-1][paddle+i]=1;
+}
+
+/* LOOP */
+function loop(){
+  ctx.clearRect(0,0,200,400);
+
+  if(state=="MENU") menu();
+  else if(state=="LEVEL") levelSelect();
+  else if(state=="PLAY"){
+    if(games[selected]=="SNAKE") snakeUpdate();
+    if(games[selected]=="BLOCK") blockUpdate();
+    if(games[selected]=="RACE") raceUpdate();
+    if(games[selected]=="SHOOT") shootUpdate();
+    if(games[selected]=="BREAK") breakUpdate();
     drawGrid();
   }
+  else if(state=="GAMEOVER") gameOver();
 
-  setTimeout(loop, 120);
+  setTimeout(loop, 200 - level*15);
 }
 
 loop();
