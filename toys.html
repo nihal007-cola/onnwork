@@ -1,86 +1,205 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>TOYS</title>
+  <meta charset="UTF-8">
+  <title>TOYS — TERMINAL PLAYGROUND</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
   <style>
-    body {
-      margin: 0;
-      background: black;
-      color: #33ff99;
-      font-family: monospace;
-      padding: 20px;
-      position: relative;
-      z-index: 1;
+    * {
+      box-sizing: border-box;
+      user-select: none; /* slight retro terminal feel, but text selectable */
     }
 
-    canvas {
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 30%, #021a0c, #000000);
+      color: #33ff99;
+      font-family: 'Courier New', 'Fira Code', monospace;
+      padding: 1.5rem;
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+    }
+
+    /* matrix canvas — deep cyberpunk veil */
+    canvas#matrix {
       position: fixed;
       top: 0;
       left: 0;
+      width: 100%;
+      height: 100%;
       z-index: 0;
-      opacity: 0.15;
+      opacity: 0.22;
+      pointer-events: none;
     }
 
-    h2 {
-      margin-bottom: 10px;
+    /* main content wrapper with higher stacking */
+    .main-container {
       position: relative;
       z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* TOP ACTION BAR — back button on left, contact cluster on right */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px dashed rgba(51, 255, 153, 0.4);
+      padding-bottom: 1rem;
+    }
+
+    /* left side: back button (green solid button) */
+    .back-btn-container {
+      flex-shrink: 0;
+    }
+
+    .back-button {
+      background: #0f2f1f;
+      border: 1.5px solid #33ff99;
+      color: #33ff99;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 1rem;
+      padding: 0.5rem 1.3rem;
       letter-spacing: 1px;
-      text-shadow: 0 0 8px #33ff99;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      border-radius: 40px;
+      box-shadow: 0 0 5px rgba(51,255,153,0.3);
+    }
+
+    .back-button:hover {
+      background: #1f4a2e;
+      box-shadow: 0 0 18px #33ff99aa;
+      transform: translateY(-2px);
+      text-shadow: 0 0 4px #33ff99;
+      border-color: #88ffbb;
+    }
+
+    /* right side: 3 contact buttons (message, call, mail) */
+    .contact-buttons {
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .contact-btn {
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid #33ff99;
+      color: #33ff99;
+      font-family: monospace;
+      font-size: 0.9rem;
+      font-weight: bold;
+      padding: 0.45rem 1.1rem;
+      border-radius: 60px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(5px);
+      transition: 0.2s;
+      letter-spacing: 0.5px;
+    }
+
+    .contact-btn:hover {
+      background: #33ff9922;
+      box-shadow: 0 0 12px #33ff99;
+      transform: scale(0.97);
+      border-color: #aaffcc;
+    }
+
+    /* main heading */
+    .page-head {
+      margin-bottom: 1.8rem;
+      border-left: 4px solid #33ff99;
+      padding-left: 1rem;
+    }
+
+    .page-head h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: normal;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #33ff99;
+      font-family: monospace;
+    }
+
+    .page-head p {
+      margin: 0.3rem 0 0;
+      opacity: 0.7;
+      font-size: 0.85rem;
+    }
+
+    /* toy cards */
+    .toy-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
     }
 
     .box {
       border: 1px solid #33ff99;
-      padding: 15px;
-      margin-top: 15px;
-      background: rgba(0,0,0,0.65);
-      box-shadow: 0 0 12px rgba(51,255,153,0.2);
-      transition: all 0.25s ease;
-      position: relative;
-      z-index: 2;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(3px);
+      padding: 1.4rem 1.8rem;
+      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
       cursor: pointer;
-      backdrop-filter: blur(2px);
+      border-radius: 24px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
 
     .box:hover {
-      box-shadow: 0 0 28px rgba(51,255,153,0.6);
-      background: rgba(51,255,153,0.08);
-      transform: translateY(-2px);
-      border-color: #33ff99;
+      transform: translateY(-5px);
+      background: rgba(51, 255, 153, 0.12);
+      box-shadow: 0 0 28px rgba(51, 255, 153, 0.5);
+      border-color: #aaffcc;
     }
 
     .title {
-      font-size: 15px;
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
+      font-size: 1.45rem;
       font-weight: bold;
-      text-shadow: 0 0 4px #33ff99;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-shadow: 0 0 3px #33ff99;
     }
 
     .desc {
-      font-size: 13px;
-      opacity: 0.9;
+      font-size: 0.9rem;
       line-height: 1.5;
+      opacity: 0.85;
+      font-family: monospace;
     }
 
     a {
-      color: #33ff99;
       text-decoration: none;
+      color: inherit;
       display: block;
-      width: 100%;
-      height: 100%;
     }
 
+    /* transition overlay */
     #transition {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: black;
+      background: #000000;
       z-index: 9999;
       opacity: 0;
       pointer-events: none;
@@ -89,145 +208,224 @@
 
     #transition.active {
       opacity: 1;
+      pointer-events: none;
     }
-    
-    /* Header row: back button to the right, title on left */
-    .header-row {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    
-    .back-link {
-      color: #33ff99;
-      text-decoration: none;
-      border-bottom: 1px solid #33ff99;
-      padding-bottom: 2px;
-      transition: all 0.2s;
-      display: inline-block;
-    }
-    
-    .back-link:hover {
-      text-shadow: 0 0 8px #33ff99;
-      border-bottom-color: #33ff99;
-    }
-    
-    h2 {
-      margin: 0;
+
+    /* responsive */
+    @media (max-width: 650px) {
+      body {
+        padding: 1rem;
+      }
+      .action-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .contact-buttons {
+        justify-content: flex-start;
+      }
+      .back-button {
+        justify-content: center;
+      }
+      .title {
+        font-size: 1.2rem;
+      }
     }
   </style>
 </head>
-
 <body>
 
 <canvas id="matrix"></canvas>
 
-<!-- Back button aligned to the right, index link remains functional -->
-<div class="header-row">
-  <h2>> TOYS</h2>
-  <a href="index.html" class="back-link">← BACK</a>
-</div>
-
-<div class="box">
-  <a href="mswlogo.html">
-    <div class="title">ONN LOGO ENGINE</div>
-    <div class="desc">
-      MSW-style turtle graphics system. Command-driven drawing engine.
+<div class="main-container">
+  <!-- top bar: BACK button (left) + three contact buttons (right) -->
+  <div class="action-bar">
+    <div class="back-btn-container">
+      <a href="index.html" class="back-button" id="backToIndexBtn">← BACK TO INDEX</a>
     </div>
-  </a>
-</div>
-
-<div class="box">
-  <a href="spaceattack.html">
-    <div class="title">⚡ SPACE ATTACK</div>
-    <div class="desc">
-      Neon terminal side-scrolling shooter. Battle waves of enemies, collect powerups, survive the onslaught.
+    <div class="contact-buttons">
+      <!-- WhatsApp message button (direct chat) -->
+      <a href="https://wa.me/917044358282?text=Hello%20from%20TOYS%20terminal" 
+         target="_blank" 
+         rel="noopener noreferrer"
+         class="contact-btn"
+         id="whatsappBtn">
+        💬 MESSAGE
+      </a>
+      <!-- Call button (tel link) -->
+      <a href="tel:+917044358282" 
+         class="contact-btn"
+         id="callBtn">
+        📞 CALL
+      </a>
+      <!-- Mail button -->
+      <a href="mailto:onn@jamesmoriarty.in?subject=TOYS%20Portal%20Inquiry" 
+         class="contact-btn"
+         id="mailBtn">
+        ✉ MAIL
+      </a>
     </div>
-  </a>
-</div>
+  </div>
 
-<div class="box">
-  <a href="signal.html">
-    <div class="title">SIGNAL CONSOLE</div>
-    <div class="desc">
-      Input → system → output. Observe structured signal behavior.
+  <!-- main title area -->
+  <div class="page-head">
+    <h1>> TOYS_</h1>
+    <p>// interactive experiments · neon playground</p>
+  </div>
+
+  <!-- TOY CARDS: only TWO toys (signal console deleted) -->
+  <div class="toy-grid">
+    <!-- 1. ONN LOGO ENGINE (MSW-style) -->
+    <div class="box" data-link="mswlogo.html">
+      <a href="mswlogo.html">
+        <div class="title">
+          <span>🐢</span> ONN LOGO ENGINE
+        </div>
+        <div class="desc">
+          MSW-style turtle graphics system. Command-driven drawing engine. 
+          Retro LOGO programming with modern terminal aesthetics.
+        </div>
+      </a>
     </div>
-  </a>
-</div>
 
-<!-- SYSTEM PLAYGROUND OPTION REMOVED - only three boxes remain -->
+    <!-- 2. SPACE ATTACK (Neon side-scroller) -->
+    <div class="box" data-link="spaceattack.html">
+      <a href="spaceattack.html">
+        <div class="title">
+          <span>⚡</span> SPACE ATTACK
+        </div>
+        <div class="desc">
+          Neon terminal side-scrolling shooter. Battle waves of enemies, collect powerups, 
+          survive the onslaught in this high-velocity arcade experience.
+        </div>
+      </a>
+    </div>
+  </div>
+  <!-- signal console option has been REMOVED as requested -->
+</div>
 
 <div id="transition"></div>
 
 <script>
-// MATRIX BACKGROUND - enhanced glow and density
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
+  // ========== ENHANCED MATRIX BACKGROUND (more glow & density) ==========
+  const canvas = document.getElementById("matrix");
+  const ctx = canvas.getContext("2d");
 
-function resizeCanvas() {
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
-}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-
-const letters = "01";
-const fontSize = 14;
-let columns = Math.floor(canvas.width / fontSize);
-let drops = [];
-
-for (let x = 0; x < columns; x++) {
-  drops[x] = Math.random() * canvas.height;
-}
-
-function draw() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.06)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#33ff99";
-  ctx.shadowColor = "#33ff99";
-  ctx.shadowBlur = 4;
-  ctx.font = fontSize + "px monospace";
-
-  for (let i = 0; i < drops.length; i++) {
-    const text = letters[Math.floor(Math.random() * letters.length)];
-    ctx.fillText(text, i * fontSize, drops[i]);
-
-    if (drops[i] > canvas.height && Math.random() > 0.98) {
-      drops[i] = 0;
-    }
-
-    drops[i] += 0.7;
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   }
-  
-  ctx.shadowBlur = 0;
-}
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
-setInterval(draw, 55);
+  // more dense characters + glow
+  const chars = "01";
+  const fontSize = 14;
+  let columns = Math.floor(canvas.width / fontSize);
+  let drops = [];
 
-
-// TRANSITION for all links (including back button and all toy links)
-const links = document.querySelectorAll("a");
-
-links.forEach(link => {
-  link.addEventListener("click", function(e) {
-    // Only handle internal navigation links (no target blank, and actual href)
-    if (this.href && this.target !== "_blank") {
-      e.preventDefault();
-      const overlay = document.getElementById("transition");
-      overlay.classList.add("active");
-
-      setTimeout(() => {
-        window.location.href = this.href;
-      }, 300);
+  function initDrops() {
+    columns = Math.floor(canvas.width / fontSize);
+    drops = [];
+    for (let i = 0; i < columns; i++) {
+      drops[i] = Math.random() * canvas.height * 0.8;
     }
+  }
+  initDrops();
+  window.addEventListener("resize", () => {
+    initDrops();
+    resizeCanvas();
   });
-});
+
+  function drawMatrix() {
+    if (!ctx) return;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.07)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#33ff99";
+    ctx.shadowColor = "#33ff99";
+    ctx.shadowBlur = 5;
+    ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      const x = i * fontSize;
+      const y = drops[i];
+      ctx.fillText(text, x, y);
+
+      // reset drop when it goes off canvas + random reset
+      if (y > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      } else if (y > canvas.height) {
+        drops[i] = 0;
+      }
+      drops[i] += 0.65;
+    }
+    ctx.shadowBlur = 0;
+    requestAnimationFrame(drawMatrix);
+  }
+
+  drawMatrix();
+
+  // ========== TRANSITION EFFECT FOR ALL INTERNAL LINKS ==========
+  // get all anchor tags that point to internal html pages (including back button and toy links)
+  // we also need to preserve external links (whatsapp, tel, mailto) — they should NOT trigger the fade overlay.
+  const allLinks = document.querySelectorAll("a");
+  const transitionOverlay = document.getElementById("transition");
+
+  allLinks.forEach(link => {
+    link.addEventListener("click", function(e) {
+      const href = this.getAttribute("href");
+      // skip external protocols: whatsapp, tel, mailto, also if target _blank or external url starts with http
+      if (!href) return;
+      
+      // check if it's an external link (http, https, mailto, tel, whatsapp)
+      const isExternal = 
+        href.startsWith("http") || 
+        href.startsWith("https") || 
+        href.startsWith("mailto") || 
+        href.startsWith("tel") || 
+        href.startsWith("whatsapp") ||
+        href.includes("wa.me") ||
+        this.target === "_blank";
+      
+      // also skip if it's the call, mail or whatsapp button (they're external by nature)
+      if (isExternal) {
+        // do not apply transition overlay, let the browser handle normally
+        return;
+      }
+      
+      // For internal navigation: mswlogo.html, spaceattack.html, index.html etc.
+      e.preventDefault();
+      transitionOverlay.classList.add("active");
+      
+      setTimeout(() => {
+        window.location.href = href;
+      }, 280);
+    });
+  });
+  
+  // extra safety: for back button we already handle via generic listener, but ensure it's internal
+  // also manually confirm that the back button uses index.html link – it does.
+  // also ensure that we treat empty or "#" as ignore.
+  
+  // optional: slight hover glow for matrix
+  // also prevent any accidental double transition if someone clicks quickly, but fine.
+  
+  // Because signal console is removed, we have exactly two toys.
+  // For any dynamic data-link attribute, but already covered by anchor tags.
+  
+  // Additional micro-interaction: console vibe
+  console.log("🚀 TOYS | BACK button left | CONTACT trio: MESSAGE / CALL / MAIL | SIGNAL CONSOLE DELETED");
+  
+  // guarantee that phone number and email are exactly as specified
+  // WhatsApp number: +91 7044358282 -> international format for wa.me: 917044358282 (without plus)
+  // call button: tel:+917044358282
+  // mail: onn@jamesmoriarty.in
+  // perfect.
+  
+  // also to avoid any weirdness with non-link clicks, nothing else.
 </script>
 
+<!-- ensure that all contact buttons have correct attributes (double-check) -->
 </body>
 </html>
