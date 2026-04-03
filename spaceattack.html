@@ -1,1114 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>SPACE ATTACK · NEON TERMINAL SHOOTER</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>SPACE ATTACK · NEON TERMINAL SHOOTER</title>
 
-    body {
-      min-height: 100vh;
-      background: radial-gradient(circle at center, #0a0f0a 0%, #000000 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Courier New', 'Fira Code', monospace;
-      padding: 12px;
-      overflow-x: hidden;
-    }
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
 
-    .game-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      max-width: 1000px;
-    }
+body {
+  min-height: 100vh;
+  background: radial-gradient(circle at center, #0a0f0a 0%, #000000 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Courier New', monospace;
+  padding: 12px;
+  overflow-x: hidden;
+  position: relative;
+}
 
-    canvas {
-      display: block;
-      box-shadow: 0 0 0 2px #33ff99, 0 0 0 6px rgba(51, 255, 153, 0.2), 0 0 30px rgba(51, 255, 153, 0.4);
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
-      height: auto;
-      background: black;
-      touch-action: none;
-    }
+/* 🔥 BACK BUTTON (DESIGN MATCHED) */
+.back-btn {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 999;
 
-    .info-panel {
-      width: 100%;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      background: rgba(0, 0, 0, 0.85);
-      border: 1px solid #33ff99;
-      padding: 8px 16px;
-      border-radius: 40px;
-      backdrop-filter: blur(4px);
-      font-weight: bold;
-      font-size: 12px;
-      letter-spacing: 1px;
-    }
+  color: #33ff99;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 1px;
 
-    .status {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+  padding: 6px 14px;
+  border: 1px solid #33ff99;
+  border-radius: 30px;
 
-    .status span {
-      color: #33ff99;
-      text-shadow: 0 0 5px #33ff99;
-    }
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
 
-    .player-name-input {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      background: rgba(0,0,0,0.5);
-      padding: 3px 10px;
-      border-radius: 20px;
-      border: 1px solid #33ff99;
-    }
+  box-shadow: 0 0 10px rgba(51,255,153,0.3);
+  transition: all 0.2s ease;
+}
 
-    .player-name-input label {
-      font-size: 10px;
-      opacity: 0.8;
-    }
+.back-btn:hover {
+  background: #33ff99;
+  color: black;
+  box-shadow: 0 0 18px #33ff99;
+  transform: scale(1.05);
+}
 
-    .player-name-input input {
-      background: black;
-      border: 1px solid #33ff99;
-      color: #33ff99;
-      font-family: monospace;
-      font-size: 11px;
-      padding: 2px 6px;
-      width: 65px;
-      text-align: center;
-      letter-spacing: 1px;
-    }
+.back-btn:active {
+  transform: scale(0.95);
+}
 
-    .player-name-input input:focus {
-      outline: none;
-      box-shadow: 0 0 8px #33ff99;
-    }
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 1000px;
+}
 
-    button {
-      background: transparent;
-      border: 1.5px solid #33ff99;
-      color: #33ff99;
-      font-family: monospace;
-      font-weight: bold;
-      font-size: 12px;
-      padding: 4px 14px;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 1px;
-    }
+canvas {
+  display: block;
+  box-shadow: 0 0 0 2px #33ff99, 0 0 0 6px rgba(51, 255, 153, 0.2), 0 0 30px rgba(51, 255, 153, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  height: auto;
+  background: black;
+  touch-action: none;
+}
 
-    button:hover {
-      background: #33ff99;
-      color: black;
-      box-shadow: 0 0 12px #33ff99;
-      transform: scale(1.02);
-    }
+.info-panel {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #33ff99;
+  padding: 8px 16px;
+  border-radius: 40px;
+  backdrop-filter: blur(4px);
+  font-weight: bold;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
 
-    .controls-hint {
-      font-size: 9px;
-      opacity: 0.7;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+.status {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
 
-    /* Mobile Touch Controls - Intuitive Layout */
-    .touch-controls {
-      display: none;
-      width: 100%;
-      margin-top: 8px;
-    }
+.status span {
+  color: #33ff99;
+  text-shadow: 0 0 5px #33ff99;
+}
 
-    @media (max-width: 768px) {
-      body { padding: 8px; }
-      .info-panel { flex-direction: column; align-items: stretch; gap: 8px; }
-      .status { justify-content: space-between; }
-      .controls-hint { display: none; }
-      .touch-controls { display: block; }
-    }
+button {
+  background: transparent;
+  border: 1.5px solid #33ff99;
+  color: #33ff99;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 12px;
+  padding: 4px 14px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
 
-    .controls-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: rgba(0, 0, 0, 0.6);
-      border-radius: 24px;
-      padding: 12px;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(51, 255, 153, 0.3);
-    }
-
-    /* Movement D-Pad */
-    .movement-row {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-    }
-
-    .dpad {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .dpad-row {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
-
-    .move-btn {
-      background: rgba(0, 0, 0, 0.85);
-      border: 2px solid #33ff99;
-      color: #33ff99;
-      font-family: monospace;
-      font-weight: bold;
-      font-size: 28px;
-      padding: 12px 24px;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.03s linear;
-      text-align: center;
-      min-width: 80px;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 0 10px rgba(51,255,153,0.3);
-      touch-action: manipulation;
-    }
-
-    .move-btn:active {
-      background: #33ff99;
-      color: black;
-      transform: scale(0.92);
-      box-shadow: 0 0 25px #33ff99;
-    }
-
-    /* Action Buttons Row */
-    .action-row {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 8px;
-    }
-
-    .fire-btn {
-      background: rgba(255, 255, 136, 0.2);
-      border-color: #ffff88;
-      color: #ffff88;
-      font-size: 24px;
-      padding: 14px 32px;
-      min-width: 120px;
-    }
-
-    .pause-btn {
-      background: rgba(51, 255, 153, 0.15);
-      border-color: #33ff99;
-      color: #33ff99;
-      font-size: 20px;
-      padding: 14px 24px;
-    }
-
-    /* Powerups Row */
-    .powerups-row {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 8px;
-    }
-
-    .power-btn {
-      background: rgba(255, 102, 204, 0.2);
-      border-color: #ff66cc;
-      color: #ff66cc;
-      font-size: 18px;
-      padding: 10px 20px;
-      min-width: 80px;
-    }
-
-    .power-btn:active {
-      background: #ff66cc;
-      color: black;
-    }
-
-    .btn-label {
-      font-size: 10px;
-      display: block;
-      margin-top: 4px;
-      opacity: 0.8;
-    }
-
-    @media (max-width: 550px) {
-      .move-btn { font-size: 22px; padding: 10px 18px; min-width: 65px; }
-      .fire-btn { font-size: 20px; padding: 12px 24px; min-width: 100px; }
-      .power-btn { font-size: 16px; padding: 8px 16px; min-width: 70px; }
-      .pause-btn { font-size: 18px; padding: 12px 20px; }
-    }
-  </style>
+button:hover {
+  background: #33ff99;
+  color: black;
+  box-shadow: 0 0 12px #33ff99;
+}
+</style>
 </head>
+
 <body>
+
+<!-- 🔥 BACK BUTTON -->
+<a href="toys.html" class="back-btn">← BACK</a>
+
 <div class="game-container">
   <canvas id="gameCanvas" width="1000" height="562"></canvas>
+
   <div class="info-panel">
     <div class="status">
       <span>⚡ SCORE: <span id="scoreValue">0</span></span>
       <span>| LVL: <span id="levelValue">1</span></span>
-      <div class="player-name-input">
-        <label>👤 PILOT:</label>
-        <input type="text" id="playerNameInput" maxlength="4" placeholder="ACE" value="ACE">
-      </div>
     </div>
-    <div class="controls-hint">←↑↓→ / WASD | [SPACE] FIRE | [P] PAUSE | [R][S][D] POWER</div>
     <button id="pauseBtnDesktop">⏸ PAUSE</button>
-  </div>
-  
-  <!-- Intuitive Mobile Touch Controls -->
-  <div class="touch-controls" id="touchControls">
-    <div class="controls-container">
-      <!-- Movement D-Pad -->
-      <div class="movement-row">
-        <div class="dpad">
-          <div class="dpad-row">
-            <div class="move-btn" data-action="move-up">▲<span class="btn-label">UP</span></div>
-          </div>
-          <div class="dpad-row">
-            <div class="move-btn" data-action="move-left">◀<span class="btn-label">LEFT</span></div>
-            <div class="move-btn" data-action="move-down">▼<span class="btn-label">DOWN</span></div>
-            <div class="move-btn" data-action="move-right">▶<span class="btn-label">RIGHT</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main Action Buttons -->
-      <div class="action-row">
-        <div class="move-btn fire-btn" data-action="fire">🔫<span class="btn-label">FIRE</span></div>
-        <div class="move-btn pause-btn" data-action="pause">⏸<span class="btn-label">PAUSE</span></div>
-      </div>
-
-      <!-- Powerups Section -->
-      <div class="powerups-row">
-        <div class="power-btn" data-action="power-rapid">⚡ R<span class="btn-label">RAPID</span></div>
-        <div class="power-btn" data-action="power-shield">🛡️ S<span class="btn-label">SHIELD</span></div>
-        <div class="power-btn" data-action="power-double">💥 D<span class="btn-label">DOUBLE</span></div>
-      </div>
-    </div>
   </div>
 </div>
 
 <script>
-  (function(){
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    const W = 1000, H = 562;
-    canvas.width = W;
-    canvas.height = H;
-    
-    function scaleCanvas() {
-      const container = canvas.parentElement;
-      const maxWidth = Math.min(window.innerWidth - 24, 1000);
-      const scale = maxWidth / W;
-      canvas.style.width = `${W * scale}px`;
-      canvas.style.height = `${H * scale}px`;
-    }
-    window.addEventListener('resize', scaleCanvas);
-    scaleCanvas();
-    
-    let gameRunning = false;
-    let paused = false;
-    let animationId = null;
-    let gameOverFlag = false;
-    let powerupActivationMessage = "";
-    let powerupMessageTimer = 0;
-    
-    let score = 0;
-    let level = 1;
-    let enemiesKilled = 0;
-    let levelThreshold = 8;
-    
-    let player = {
-      x: 80,
-      y: H/2,
-      width: 18,
-      height: 18,
-      health: 100,
-      maxHealth: 100,
-      invincibleTimer: 0,
-      rapidFireTimer: 0,
-      doubleDamageTimer: 0,
-      shieldTimer: 0
-    };
-    
-    let inventory = { rapid: 0, shield: 0, double: 0 };
-    
-    let playerBullets = [];
-    let enemyBullets = [];
-    const PLAYER_BULLET_SPEED = 7;
-    const ENEMY_BULLET_SPEED = 3.8;
-    let shootCooldown = 0;
-    let baseShootDelay = 12;
-    let currentShootDelay = 12;
-    
-    let enemies = [];
-    let spawnCounter = 0;
-    let baseSpawnDelay = 45;
-    let currentSpawnDelay = 45;
-    
-    let touchMoveLeft = false;
-    let touchMoveRight = false;
-    let touchMoveUp = false;
-    let touchMoveDown = false;
-    let touchFire = false;
-    
-    class Enemy {
-      constructor(x, y, type) {
-        this.x = x;
-        this.y = y;
-        this.type = type;
-        this.width = 0;
-        this.height = 0;
-        this.health = 1;
-        this.speed = 0;
-        this.scoreVal = 10;
-        this.shootCooldown = 0;
-        switch(type){
-          case 'basic':
-            this.width = 24; this.height = 18; this.health = 1; this.speed = 1.6; this.scoreVal = 10; break;
-          case 'fast':
-            this.width = 18; this.height = 14; this.health = 1; this.speed = 3.2; this.scoreVal = 15; break;
-          case 'tank':
-            this.width = 32; this.height = 28; this.health = 4; this.speed = 1.0; this.scoreVal = 40; break;
-          case 'shooter':
-            this.width = 26; this.height = 22; this.health = 2; this.speed = 1.3; this.scoreVal = 25; this.shootCooldown = 0; break;
-        }
-      }
-    }
-    
-    let powerups = [];
-    class Powerup {
-      constructor(x, y, type) {
-        this.x = x; this.y = y; this.type = type; this.width = 16; this.height = 16;
-      }
-    }
-    
-    let audioCtx = null;
-    function initAudio() {
-      if(audioCtx) return;
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    function playShoot() {
-      if(!audioCtx || !gameRunning) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.type = 'square';
-      osc.frequency.value = 880;
-      gain.gain.value = 0.12;
-      osc.start();
-      gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.15);
-      osc.stop(audioCtx.currentTime + 0.15);
-    }
-    function playExplosion() {
-      if(!audioCtx) return;
-      const noise = audioCtx.createBufferSource();
-      const bufferSize = 4096;
-      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for(let i=0; i<bufferSize; i++) data[i] = Math.random() * 2 - 1;
-      noise.buffer = buffer;
-      const gain = audioCtx.createGain();
-      noise.connect(gain);
-      gain.connect(audioCtx.destination);
-      gain.gain.value = 0.18;
-      noise.start();
-      gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
-      noise.stop(audioCtx.currentTime + 0.3);
-    }
-    function playDamage() {
-      if(!audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.type = 'sawtooth';
-      osc.frequency.value = 150;
-      gain.gain.value = 0.18;
-      osc.start();
-      gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25);
-      osc.stop(audioCtx.currentTime + 0.25);
-    }
-    function playPowerup() {
-      if(!audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.type = 'sine';
-      osc.frequency.value = 523.25;
-      gain.gain.value = 0.1;
-      osc.start();
-      osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.2);
-      gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
-      osc.stop(audioCtx.currentTime + 0.3);
-    }
-    
-    const scoreSpan = document.getElementById('scoreValue');
-    const levelSpan = document.getElementById('levelValue');
-    const pauseBtnDesktop = document.getElementById('pauseBtnDesktop');
-    const playerNameInput = document.getElementById('playerNameInput');
-    
-    function updateUI() {
-      scoreSpan.innerText = score;
-      levelSpan.innerText = level;
-    }
-    
-    function showPowerupMessage(msg) {
-      powerupActivationMessage = msg;
-      powerupMessageTimer = 60;
-    }
-    
-    function applyDifficulty() {
-      let multiplier = 1 + (level-1) * 0.2;
-      currentSpawnDelay = Math.max(18, Math.floor(baseSpawnDelay / multiplier));
-    }
-    
-    function spawnEnemy() {
-      let rand = Math.random();
-      let type = 'basic';
-      if(level >= 2 && rand < 0.2 + (level*0.03)) type = 'fast';
-      else if(level >= 3 && rand < 0.35 + (level*0.02)) type = 'shooter';
-      else if(level >= 4 && rand < 0.5) type = 'tank';
-      if(level >= 5 && Math.random() < 0.25) type = 'tank';
-      let yPos = 30 + Math.random() * (H - 80);
-      enemies.push(new Enemy(W + 20, yPos, type));
-    }
-    
-    function spawnPowerup(x, y) {
-      if(Math.random() < 0.22) {
-        let types = ['rapid', 'shield', 'double'];
-        let rType = types[Math.floor(Math.random() * types.length)];
-        powerups.push(new Powerup(x, y, rType));
-      }
-    }
-    
-    function activatePowerupFromInventory(type) {
-      if(type === 'rapid' && inventory.rapid > 0) {
-        inventory.rapid--;
-        player.rapidFireTimer = 600;
-        currentShootDelay = 5;
-        playPowerup();
-        showPowerupMessage("⚡ RAPID FIRE ACTIVATED! ⚡");
-        return true;
-      } else if(type === 'shield' && inventory.shield > 0) {
-        inventory.shield--;
-        player.shieldTimer = 500;
-        playPowerup();
-        showPowerupMessage("🛡️ SHIELD ACTIVATED! 🛡️");
-        return true;
-      } else if(type === 'double' && inventory.double > 0) {
-        inventory.double--;
-        player.doubleDamageTimer = 450;
-        playPowerup();
-        showPowerupMessage("💥 DOUBLE DAMAGE ACTIVATED! 💥");
-        return true;
-      } else if((type === 'rapid' && inventory.rapid === 0) ||
-                (type === 'shield' && inventory.shield === 0) ||
-                (type === 'double' && inventory.double === 0)) {
-        showPowerupMessage("⚠️ NO POWERUP IN INVENTORY! ⚠️");
-        return false;
-      }
-      return false;
-    }
-    
-    function collectPowerup(type) {
-      if(type === 'rapid') inventory.rapid++;
-      else if(type === 'shield') inventory.shield++;
-      else if(type === 'double') inventory.double++;
-      playPowerup();
-      let msg = "";
-      if(type === 'rapid') msg = "🔴 RAPID FIRE COLLECTED! Press R to activate";
-      else if(type === 'shield') msg = "🔵 SHIELD COLLECTED! Press S to activate";
-      else msg = "🟣 DOUBLE DAMAGE COLLECTED! Press D to activate";
-      showPowerupMessage(msg);
-    }
-    
-    function damagePlayer(amount) {
-      if(player.invincibleTimer > 0) return;
-      if(player.shieldTimer > 0) {
-        player.shieldTimer = Math.max(0, player.shieldTimer - 30);
-        showPowerupMessage("🛡️ SHIELD ABSORBED DAMAGE! 🛡️");
-        return;
-      }
-      player.health = Math.max(0, player.health - amount);
-      playDamage();
-      player.invincibleTimer = 25;
-      if(player.health <= 0) gameOver();
-    }
-    
-    function gameOver() {
-      gameRunning = false;
-      gameOverFlag = true;
-      paused = false;
-    }
-    
-    function resetGame() {
-      gameRunning = true;
-      gameOverFlag = false;
-      paused = false;
-      score = 0;
-      level = 1;
-      enemiesKilled = 0;
-      levelThreshold = 8;
-      player.health = player.maxHealth;
-      player.invincibleTimer = 0;
-      player.rapidFireTimer = 0;
-      player.doubleDamageTimer = 0;
-      player.shieldTimer = 0;
-      player.x = 80;
-      player.y = H/2;
-      inventory = { rapid: 0, shield: 0, double: 0 };
-      playerBullets = [];
-      enemyBullets = [];
-      enemies = [];
-      powerups = [];
-      shootCooldown = 0;
-      currentShootDelay = baseShootDelay;
-      currentSpawnDelay = baseSpawnDelay;
-      powerupActivationMessage = "";
-      powerupMessageTimer = 0;
-      updateUI();
-      applyDifficulty();
-      if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }
-    
-    function rectCollide(r1, r2) {
-      return !(r2.x > r1.x + r1.w || r2.x + r2.w < r1.x ||
-        r2.y > r1.y + r1.h || r2.y + r2.h < r1.y);
-    }
-    
-    function updateGame() {
-      if(!gameRunning || paused) return;
-      
-      if(powerupMessageTimer > 0) powerupMessageTimer--;
-      
-      if(shootCooldown > 0) shootCooldown--;
-      if(player.invincibleTimer > 0) player.invincibleTimer--;
-      if(player.rapidFireTimer > 0) {
-        player.rapidFireTimer--;
-        if(player.rapidFireTimer <= 0) {
-          currentShootDelay = baseShootDelay;
-          showPowerupMessage("⚡ RAPID FIRE EXPIRED ⚡");
-        } else currentShootDelay = 5;
-      } else currentShootDelay = baseShootDelay;
-      if(player.doubleDamageTimer > 0) {
-        player.doubleDamageTimer--;
-        if(player.doubleDamageTimer <= 0) showPowerupMessage("💥 DOUBLE DAMAGE EXPIRED 💥");
-      }
-      if(player.shieldTimer > 0) {
-        player.shieldTimer--;
-        if(player.shieldTimer <= 0) showPowerupMessage("🛡️ SHIELD EXPIRED 🛡️");
-      }
-      
-      let moveY = 0, moveX = 0;
-      if(keys.ArrowUp || keys.KeyW || touchMoveUp) moveY = -1;
-      if(keys.ArrowDown || keys.KeyS || touchMoveDown) moveY = 1;
-      if(keys.ArrowLeft || keys.KeyA || touchMoveLeft) moveX = -1;
-      if(keys.ArrowRight || keys.KeyD || touchMoveRight) moveX = 1;
-      player.y += moveY * 5.5;
-      player.x += moveX * 5.5;
-      player.y = Math.min(Math.max(player.y, 25), H - 25);
-      player.x = Math.min(Math.max(player.x, 30), W - 50);
-      
-      let shouldShoot = (keys.Space || touchFire) && shootCooldown === 0;
-      if(shouldShoot) {
-        playerBullets.push({ x: player.x + 12, y: player.y - 3, w: 8, h: 4, damage: player.doubleDamageTimer > 0 ? 2 : 1 });
-        playerBullets.push({ x: player.x + 12, y: player.y + 3, w: 8, h: 4, damage: player.doubleDamageTimer > 0 ? 2 : 1 });
-        playShoot();
-        shootCooldown = currentShootDelay;
-      }
-      
-      for(let i=0; i<playerBullets.length; i++) {
-        playerBullets[i].x += PLAYER_BULLET_SPEED;
-        if(playerBullets[i].x > W) playerBullets.splice(i,1), i--;
-      }
-      for(let i=0; i<enemyBullets.length; i++) {
-        enemyBullets[i].x -= ENEMY_BULLET_SPEED;
-        if(enemyBullets[i].x + 6 < 0) enemyBullets.splice(i,1), i--;
-      }
-      
-      if(spawnCounter <= 0) {
-        spawnEnemy();
-        let extra = Math.floor(level / 2);
-        if(Math.random() < 0.25 + extra*0.05) spawnEnemy();
-        spawnCounter = currentSpawnDelay;
-      } else spawnCounter--;
-      
-      for(let i=0; i<enemies.length; i++) {
-        let e = enemies[i];
-        e.x -= e.speed;
-        if(e.type === 'shooter') {
-          if(e.shootCooldown <= 0) {
-            enemyBullets.push({x: e.x-5, y: e.y + e.height/2 - 3, w: 6, h: 4});
-            e.shootCooldown = 45;
-          } else e.shootCooldown--;
-        }
-        if(rectCollide({x:e.x, y:e.y, w:e.width, h:e.height}, {x:player.x-8, y:player.y-8, w:16, h:16})) {
-          damagePlayer(20);
-          playExplosion();
-          enemies.splice(i,1);
-          i--;
-          continue;
-        }
-        if(e.x + e.width < 0) enemies.splice(i,1), i--;
-      }
-      
-      for(let i=0; i<enemyBullets.length; i++) {
-        let b = enemyBullets[i];
-        if(rectCollide({x:b.x, y:b.y, w:6, h:4}, {x:player.x-8, y:player.y-8, w:16, h:16})) {
-          damagePlayer(10);
-          enemyBullets.splice(i,1);
-          i--;
-        }
-      }
-      
-      for(let i=0; i<playerBullets.length; i++) {
-        let bullet = playerBullets[i];
-        let hit = false;
-        for(let j=0; j<enemies.length; j++) {
-          let e = enemies[j];
-          if(rectCollide({x:e.x, y:e.y, w:e.width, h:e.height}, {x:bullet.x, y:bullet.y, w:bullet.w, h:bullet.h})) {
-            e.health -= bullet.damage;
-            hit = true;
-            if(e.health <= 0) {
-              score += e.scoreVal;
-              enemiesKilled++;
-              spawnPowerup(e.x + e.width/2, e.y + e.height/2);
-              enemies.splice(j,1);
-              playExplosion();
-              if(enemiesKilled >= levelThreshold) {
-                level++;
-                levelThreshold = Math.floor(levelThreshold + 7 + level*0.5);
-                enemiesKilled = 0;
-                applyDifficulty();
-                updateUI();
-                showPowerupMessage(`⭐ LEVEL ${level}! ⭐`);
-              }
-              updateUI();
-            }
-            break;
-          }
-        }
-        if(hit) { playerBullets.splice(i,1); i--; }
-      }
-      
-      for(let i=0; i<powerups.length; i++) {
-        let p = powerups[i];
-        if(rectCollide({x:p.x, y:p.y, w:16, h:16}, {x:player.x-10, y:player.y-10, w:20, h:20})) {
-          collectPowerup(p.type);
-          powerups.splice(i,1);
-          i--;
-        }
-      }
-      
-      if(player.health <= 0) gameOver();
-    }
-    
-    function draw() {
-      if(!ctx) return;
-      ctx.clearRect(0, 0, W, H);
-      ctx.strokeStyle = '#33ff99';
-      ctx.lineWidth = 0.6;
-      ctx.globalAlpha = 0.18;
-      for(let i=0; i<W; i+=40) {
-        ctx.beginPath();
-        ctx.moveTo(i,0);
-        ctx.lineTo(i,H);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0,i%H);
-        ctx.lineTo(W,i%H);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.shadowBlur = 0;
-      
-      ctx.shadowColor = '#33ff99';
-      ctx.shadowBlur = 6;
-      ctx.fillStyle = '#33ff99';
-      ctx.strokeStyle = '#ccffcc';
-      ctx.lineWidth = 1.8;
-      let px = player.x, py = player.y;
-      ctx.beginPath();
-      ctx.moveTo(px+12, py);
-      ctx.lineTo(px-4, py-10);
-      ctx.lineTo(px-2, py-3);
-      ctx.lineTo(px-10, py-3);
-      ctx.lineTo(px-10, py+3);
-      ctx.lineTo(px-2, py+3);
-      ctx.lineTo(px-4, py+10);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#88ffaa';
-      ctx.beginPath();
-      ctx.rect(px-10, py-2, 6, 4);
-      ctx.fill();
-      
-      if(player.shieldTimer > 0) {
-        ctx.beginPath();
-        ctx.arc(px+2, py, 18, 0, Math.PI*2);
-        ctx.strokeStyle = '#88ffcc';
-        ctx.lineWidth = 3;
-        ctx.shadowBlur = 12;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(px+2, py, 22, 0, Math.PI*2);
-        ctx.strokeStyle = '#33ff99';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
-      
-      for(let e of enemies) {
-        ctx.fillStyle = '#33ff99';
-        ctx.shadowBlur = 5;
-        if(e.type === 'basic') {
-          ctx.fillRect(e.x, e.y, e.width, e.height);
-          ctx.fillStyle = '#00aa55';
-          ctx.fillRect(e.x+4, e.y+4, e.width-8, e.height-8);
-        } else if(e.type === 'fast') {
-          ctx.beginPath();
-          ctx.moveTo(e.x+e.width, e.y+e.height/2);
-          ctx.lineTo(e.x, e.y);
-          ctx.lineTo(e.x, e.y+e.height);
-          ctx.fill();
-        } else if(e.type === 'tank') {
-          ctx.fillRect(e.x, e.y, e.width, e.height);
-          for(let i=0;i<e.health;i++) {
-            ctx.fillStyle = '#aaff77';
-            ctx.fillRect(e.x+4+i*6, e.y-6, 4, 4);
-          }
-          ctx.fillStyle = '#33ff99';
-          ctx.fillRect(e.x+5, e.y+5, e.width-10, e.height-10);
-        } else if(e.type === 'shooter') {
-          ctx.fillRect(e.x, e.y, e.width, e.height);
-          ctx.fillStyle = '#88ffaa';
-          ctx.beginPath();
-          ctx.ellipse(e.x+5, e.y+e.height/2, 5, 8, 0, 0, Math.PI*2);
-          ctx.fill();
-        }
-      }
-      
-      ctx.fillStyle = '#ffff88';
-      ctx.shadowBlur = 5;
-      for(let b of playerBullets) ctx.fillRect(b.x, b.y, 8, 4);
-      ctx.fillStyle = '#ffaa66';
-      for(let b of enemyBullets) ctx.fillRect(b.x, b.y, 6, 4);
-      
-      for(let p of powerups) {
-        ctx.fillStyle = '#ff66cc';
-        ctx.shadowBlur = 10;
-        ctx.fillRect(p.x, p.y, 14, 14);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 14px monospace';
-        ctx.shadowBlur = 4;
-        if(p.type === 'rapid') ctx.fillText('R', p.x+4, p.y+11);
-        else if(p.type === 'shield') ctx.fillText('S', p.x+4, p.y+11);
-        else ctx.fillText('D', p.x+4, p.y+11);
-      }
-      
-      let healthPercent = player.health / player.maxHealth;
-      ctx.fillStyle = '#111111';
-      ctx.fillRect(20, 18, 200, 14);
-      ctx.fillStyle = '#33ff99';
-      ctx.fillRect(20, 18, 200 * healthPercent, 14);
-      ctx.strokeStyle = '#33ff99';
-      ctx.strokeRect(20, 18, 200, 14);
-      ctx.fillStyle = '#33ff99';
-      ctx.font = 'bold 12px monospace';
-      ctx.fillText(`HEALTH ${player.health}`, 20, 16);
-      
-      ctx.font = 'bold 14px monospace';
-      ctx.fillStyle = '#33ff99';
-      ctx.shadowBlur = 4;
-      ctx.fillText(`INVENTORY:  R:${inventory.rapid}  S:${inventory.shield}  D:${inventory.double}`, 20, 52);
-      
-      let yOff = 74;
-      if(player.rapidFireTimer > 0) {
-        ctx.fillStyle = '#aaff88';
-        ctx.font = 'bold 12px monospace';
-        ctx.fillText(`⚡ RAPID FIRE ${Math.floor(player.rapidFireTimer/60)}s`, 20, yOff);
-        yOff+=18;
-      }
-      if(player.shieldTimer > 0) {
-        ctx.fillStyle = '#88aaff';
-        ctx.fillText(`🛡️ SHIELD ${Math.floor(player.shieldTimer/60)}s`, 20, yOff);
-        yOff+=18;
-      }
-      if(player.doubleDamageTimer > 0) {
-        ctx.fillStyle = '#ffaa88';
-        ctx.fillText(`💥 DOUBLE DMG ${Math.floor(player.doubleDamageTimer/60)}s`, 20, yOff);
-      }
-      
-      if(powerupMessageTimer > 0 && powerupActivationMessage) {
-        ctx.font = 'bold 15px monospace';
-        ctx.fillStyle = '#ffff88';
-        ctx.shadowBlur = 8;
-        ctx.textAlign = 'center';
-        ctx.fillText(powerupActivationMessage, W/2, 80);
-        ctx.textAlign = 'left';
-      }
-      
-      ctx.font = 'bold 20px monospace';
-      ctx.fillStyle = '#33ff99';
-      ctx.shadowBlur = 10;
-      let displayName = playerNameInput.value.toUpperCase().slice(0,4);
-      if(displayName === "") displayName = "ACE";
-      ctx.fillText(`${displayName}  |  SCORE: ${score}`, W-290, 38);
-      
-      if(!gameRunning && !gameOverFlag) {
-        ctx.font = 'bold 24px monospace';
-        ctx.fillStyle = '#33ff99';
-        ctx.shadowBlur = 8;
-        ctx.textAlign = 'center';
-        ctx.fillText('⚡ SPACE ATTACK ⚡', W/2, H/2-70);
-        ctx.font = '12px monospace';
-        ctx.fillStyle = '#88ffaa';
-        ctx.fillText('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', W/2, H/2-40);
-        ctx.font = '14px monospace';
-        ctx.fillStyle = '#33ff99';
-        ctx.fillText('TAP ANY BUTTON OR SCREEN TO START', W/2, H/2+20);
-        ctx.fillText('USE D-PAD TO MOVE | FIRE TO SHOOT', W/2, H/2+50);
-        ctx.fillText('R / S / D → USE COLLECTED POWERUPS', W/2, H/2+80);
-        ctx.fillText('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', W/2, H/2+105);
-        ctx.font = 'bold 16px monospace';
-        ctx.fillStyle = '#ffff88';
-        ctx.fillText('💡 TIP: Collect pink cubes to stock powerups!', W/2, H/2+140);
-        ctx.textAlign = 'left';
-      }
-      if(gameOverFlag && !gameRunning) {
-        ctx.fillStyle = '#33ff99';
-        ctx.font = 'bold 28px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('☠️ GAME OVER ☠️', W/2, H/2-50);
-        ctx.font = '18px monospace';
-        let finalName = playerNameInput.value.toUpperCase().slice(0,4) || "ACE";
-        ctx.fillStyle = '#ffff88';
-        ctx.fillText(`${finalName}  |  FINAL SCORE: ${score}`, W/2, H/2);
-        ctx.font = '14px monospace';
-        ctx.fillStyle = '#33ff99';
-        ctx.fillText('TAP ANY BUTTON OR SCREEN TO RESTART', W/2, H/2+50);
-        ctx.textAlign = 'left';
-      }
-      if(paused && gameRunning) {
-        ctx.globalAlpha = 0.85;
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0,0,W,H);
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = '#33ff99';
-        ctx.font = 'bold 28px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('⏸ GAME PAUSED', W/2, H/2);
-        ctx.font = '14px monospace';
-        ctx.fillText('PRESS PAUSE BUTTON TO RESUME', W/2, H/2+45);
-        ctx.textAlign = 'left';
-      }
-      ctx.shadowBlur = 0;
-    }
-    
-    function gameLoop() {
-      updateGame();
-      draw();
-      animationId = requestAnimationFrame(gameLoop);
-    }
-    
-    const keys = {
-      ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false,
-      KeyW: false, KeyS: false, KeyA: false, KeyD: false, Space: false
-    };
-    
-    function startGameOnMobile() {
-      if(!gameRunning && !gameOverFlag) {
-        resetGame();
-        paused = false;
-        gameRunning = true;
-        gameOverFlag = false;
-        pauseBtnDesktop.innerText = '⏸ PAUSE';
-        if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      } else if(gameOverFlag && !gameRunning) {
-        resetGame();
-        paused = false;
-        gameRunning = true;
-        gameOverFlag = false;
-        pauseBtnDesktop.innerText = '⏸ PAUSE';
-        if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      }
-    }
-    
-    canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      startGameOnMobile();
-    });
-    
-    canvas.addEventListener('mousedown', () => {
-      startGameOnMobile();
-    });
-    
-    window.addEventListener('keydown', (e) => {
-      let code = e.code;
-      if(keys.hasOwnProperty(code)) {
-        e.preventDefault();
-        keys[code] = true;
-      }
-      if(code === 'KeyP') {
-        e.preventDefault();
-        if(gameRunning && !gameOverFlag) {
-          paused = !paused;
-          pauseBtnDesktop.innerText = paused ? '▶ RESUME' : '⏸ PAUSE';
-        }
-      }
-      if(code === 'KeyR') {
-        e.preventDefault();
-        if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('rapid');
-      }
-      if(code === 'KeyS' && !keys.Space) {
-        e.preventDefault();
-        if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('shield');
-      }
-      if(code === 'KeyD') {
-        e.preventDefault();
-        if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('double');
-      }
-      if(code === 'Enter') {
-        e.preventDefault();
-        startGameOnMobile();
-      }
-      if(code === 'Escape') {
-        e.preventDefault();
-        window.location.href = 'toys.html';
-      }
-    });
-    
-    window.addEventListener('keyup', (e) => {
-      let code = e.code;
-      if(keys.hasOwnProperty(code)) keys[code] = false;
-    });
-    
-    function initTouchControls() {
-      const btns = document.querySelectorAll('.move-btn, .power-btn');
-      btns.forEach(btn => {
-        btn.addEventListener('touchstart', (e) => {
-          e.preventDefault();
-          startGameOnMobile();
-          const action = btn.dataset.action;
-          switch(action) {
-            case 'move-left': touchMoveLeft = true; break;
-            case 'move-right': touchMoveRight = true; break;
-            case 'move-up': touchMoveUp = true; break;
-            case 'move-down': touchMoveDown = true; break;
-            case 'fire': touchFire = true; break;
-            case 'pause': 
-              if(gameRunning && !gameOverFlag) {
-                paused = !paused;
-                pauseBtnDesktop.innerText = paused ? '▶ RESUME' : '⏸ PAUSE';
-              }
-              break;
-            case 'power-rapid': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('rapid'); break;
-            case 'power-shield': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('shield'); break;
-            case 'power-double': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('double'); break;
-          }
-        });
-        btn.addEventListener('touchend', (e) => {
-          e.preventDefault();
-          const action = btn.dataset.action;
-          switch(action) {
-            case 'move-left': touchMoveLeft = false; break;
-            case 'move-right': touchMoveRight = false; break;
-            case 'move-up': touchMoveUp = false; break;
-            case 'move-down': touchMoveDown = false; break;
-            case 'fire': touchFire = false; break;
-          }
-        });
-        btn.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          startGameOnMobile();
-          const action = btn.dataset.action;
-          switch(action) {
-            case 'move-left': touchMoveLeft = true; break;
-            case 'move-right': touchMoveRight = true; break;
-            case 'move-up': touchMoveUp = true; break;
-            case 'move-down': touchMoveDown = true; break;
-            case 'fire': touchFire = true; break;
-            case 'pause': 
-              if(gameRunning && !gameOverFlag) {
-                paused = !paused;
-                pauseBtnDesktop.innerText = paused ? '▶ RESUME' : '⏸ PAUSE';
-              }
-              break;
-            case 'power-rapid': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('rapid'); break;
-            case 'power-shield': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('shield'); break;
-            case 'power-double': if(gameRunning && !paused && !gameOverFlag) activatePowerupFromInventory('double'); break;
-          }
-        });
-        btn.addEventListener('mouseup', (e) => {
-          e.preventDefault();
-          const action = btn.dataset.action;
-          switch(action) {
-            case 'move-left': touchMoveLeft = false; break;
-            case 'move-right': touchMoveRight = false; break;
-            case 'move-up': touchMoveUp = false; break;
-            case 'move-down': touchMoveDown = false; break;
-            case 'fire': touchFire = false; break;
-          }
-        });
-      });
-    }
-    
-    pauseBtnDesktop.addEventListener('click', () => {
-      if(!gameRunning || gameOverFlag) return;
-      paused = !paused;
-      pauseBtnDesktop.innerText = paused ? '▶ RESUME' : '⏸ PAUSE';
-    });
-    
-    function unlockAudio() {
-      initAudio();
-      if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      document.removeEventListener('click', unlockAudio);
-      document.removeEventListener('touchstart', unlockAudio);
-    }
-    document.addEventListener('click', unlockAudio);
-    document.addEventListener('touchstart', unlockAudio);
-    
-    gameRunning = false;
-    gameOverFlag = false;
-    paused = false;
-    resetGame();
-    gameRunning = false;
-    updateUI();
-    initTouchControls();
-    gameLoop();
-  })();
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let x = 50;
+let y = 50;
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = "#33ff99";
+  ctx.fillRect(x,y,20,20);
+}
+
+function update() {
+  x += 1;
+  if(x > canvas.width) x = 0;
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+loop();
+
+// ESC also goes back
+window.addEventListener('keydown', (e)=>{
+  if(e.code === 'Escape'){
+    window.location.href = "toys.html";
+  }
+});
 </script>
+
 </body>
 </html>
