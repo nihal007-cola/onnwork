@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>SPACE ATTACK </title>
+  <title>SPACE ATTACK · SIDEWAYS MATRIX RAIN</title>
   <style>
     * {
       margin: 0;
@@ -24,6 +24,33 @@
       overflow-x: hidden;
     }
 
+    /* SIDEWAYS MATRIX OVERLAY - rain from LEFT and RIGHT */
+    .matrix-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 2000;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.9s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+    .matrix-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .matrix-overlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease-out, visibility 0s 0.85s;
+    }
+
     .game-container {
       display: flex;
       flex-direction: column;
@@ -31,6 +58,12 @@
       gap: 10px;
       width: 100%;
       max-width: 1000px;
+      opacity: 0;
+      animation: fadeInUI 0.3s ease-out forwards;
+      animation-delay: 3.2s;
+    }
+    @keyframes fadeInUI {
+      to { opacity: 1; }
     }
 
     canvas {
@@ -44,7 +77,6 @@
       touch-action: none;
     }
 
-    /* Unified top bar with back button + game info */
     .game-top-bar {
       width: 100%;
       display: flex;
@@ -168,7 +200,6 @@
       flex-wrap: wrap;
     }
 
-    /* Mobile Touch Controls - Intuitive Layout */
     .touch-controls {
       display: none;
       width: 100%;
@@ -196,7 +227,6 @@
       border: 1px solid rgba(51, 255, 153, 0.3);
     }
 
-    /* Movement D-Pad */
     .movement-row {
       display: flex;
       justify-content: center;
@@ -241,7 +271,6 @@
       box-shadow: 0 0 25px #33ff99;
     }
 
-    /* Action Buttons Row */
     .action-row {
       display: flex;
       justify-content: center;
@@ -266,7 +295,6 @@
       padding: 14px 24px;
     }
 
-    /* Powerups Row */
     .powerups-row {
       display: flex;
       justify-content: center;
@@ -304,8 +332,13 @@
   </style>
 </head>
 <body>
+
+<!-- SIDEWAYS MATRIX RAIN OVERLAY - rain from LEFT and RIGHT edges converging -->
+<div id="matrixOverlay" class="matrix-overlay">
+  <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
+</div>
+
 <div class="game-container">
-  <!-- Top bar: back button (left) + game status & controls (right) - same design language -->
   <div class="game-top-bar">
     <button class="back-button" id="backToToysBtn">◀ BACK</button>
     <div class="info-panel">
@@ -324,10 +357,8 @@
 
   <canvas id="gameCanvas" width="1000" height="562"></canvas>
   
-  <!-- Intuitive Mobile Touch Controls (identical to original but enhanced) -->
   <div class="touch-controls" id="touchControls">
     <div class="controls-container">
-      <!-- Movement D-Pad -->
       <div class="movement-row">
         <div class="dpad">
           <div class="dpad-row">
@@ -340,14 +371,10 @@
           </div>
         </div>
       </div>
-
-      <!-- Main Action Buttons -->
       <div class="action-row">
         <div class="move-btn fire-btn" data-action="fire">🔫<span class="btn-label">FIRE</span></div>
         <div class="move-btn pause-btn" data-action="pause">⏸<span class="btn-label">PAUSE</span></div>
       </div>
-
-      <!-- Powerups Section -->
       <div class="powerups-row">
         <div class="power-btn" data-action="power-rapid">⚡ R<span class="btn-label">RAPID</span></div>
         <div class="power-btn" data-action="power-shield">🛡️ S<span class="btn-label">SHIELD</span></div>
@@ -359,6 +386,277 @@
 
 <script>
   (function(){
+    // ============================================================
+    // SIDEWAYS MATRIX RAIN + METAMORPHOSIS (from LEFT and RIGHT)
+    // ============================================================
+    const overlay = document.getElementById('matrixOverlay');
+    const matrixCanvas = document.getElementById('matrixCanvas');
+    let matrixCtx = matrixCanvas.getContext('2d');
+    let matrixAnimationId = null;
+    let metamorphosisPhase = 0; // 0: sideways rain, 1: gathering letters, 2: morph, 3: fade out
+    
+    let screenWidth, screenHeight;
+    let leftRainStreams = [];    // rain from left edge moving RIGHT
+    let rightRainStreams = [];   // rain from right edge moving LEFT
+    
+    const CHAR_SET = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const TARGET_PHRASE = "◈ SPACE ATTACK ◈  READY  ◈";
+    
+    class SideRainStream {
+      constructor(side, y, speed, depth) {
+        this.side = side; // 'left' or 'right'
+        this.y = y;
+        this.speed = speed;
+        this.depth = depth; // 0-1 for perspective
+        this.chars = [];
+        this.offsets = [];
+        const length = 12 + Math.floor(Math.random() * 10);
+        for(let i=0; i<length; i++) {
+          this.chars.push(CHAR_SET[Math.floor(Math.random() * CHAR_SET.length)]);
+          this.offsets.push(i * 18);
+        }
+        this.progress = 0; // 0 to 1 (movement across screen)
+      }
+      
+      update() {
+        this.progress += this.speed * (0.6 + this.depth * 0.8);
+        if(this.side === 'left') {
+          if(this.progress > 1.2) return false;
+        } else {
+          if(this.progress > 1.2) return false;
+        }
+        return true;
+      }
+      
+      draw(ctx, w, h) {
+        const scaleFactor = 0.55 + this.depth * 0.9;
+        const fontSize = 20 * scaleFactor;
+        const alpha = 0.4 + this.depth * 0.6;
+        let xPos;
+        if(this.side === 'left') {
+          xPos = this.progress * w * 0.9;
+        } else {
+          xPos = w - (this.progress * w * 0.9);
+        }
+        if(xPos < -50 || xPos > w + 50) return;
+        
+        for(let idx=0; idx<this.chars.length; idx++) {
+          const yOffset = this.offsets[idx];
+          const yPos = this.y + yOffset - (this.progress * 35);
+          if(yPos > 0 && yPos < h + 40) {
+            ctx.save();
+            ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+            ctx.shadowBlur = 12 * (this.depth + 0.3);
+            ctx.shadowColor = `rgba(51, 255, 153, ${alpha * 0.9})`;
+            const gradient = ctx.createLinearGradient(xPos-15, yPos, xPos+15, yPos-10);
+            gradient.addColorStop(0, `rgba(80, 255, 150, ${alpha})`);
+            gradient.addColorStop(1, `rgba(30, 200, 100, ${alpha * 0.7})`);
+            ctx.fillStyle = gradient;
+            ctx.fillText(this.chars[idx], xPos, yPos);
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = `rgba(255, 220, 120, ${alpha * 0.5})`;
+            ctx.fillText(this.chars[idx], xPos-1.5, yPos-1.5);
+            ctx.restore();
+          }
+        }
+      }
+    }
+    
+    let metamorphLetters = [];
+    let morphStartTime = 0;
+    
+    function initSidewaysRain() {
+      screenWidth = window.innerWidth;
+      screenHeight = window.innerHeight;
+      matrixCanvas.width = screenWidth;
+      matrixCanvas.height = screenHeight;
+      leftRainStreams = [];
+      rightRainStreams = [];
+      const numStreams = Math.floor(screenWidth / 45) + 8;
+      for(let i=0; i<numStreams; i++) {
+        const yStart = Math.random() * screenHeight;
+        const speed = 0.008 + Math.random() * 0.012;
+        const depth = Math.random();
+        if(Math.random() > 0.5) {
+          leftRainStreams.push(new SideRainStream('left', yStart, speed, depth));
+        } else {
+          rightRainStreams.push(new SideRainStream('right', yStart, speed, depth));
+        }
+      }
+      // extra density
+      for(let i=0;i<6;i++) {
+        leftRainStreams.push(new SideRainStream('left', Math.random() * screenHeight, 0.009 + Math.random()*0.01, Math.random()));
+        rightRainStreams.push(new SideRainStream('right', Math.random() * screenHeight, 0.009 + Math.random()*0.01, Math.random()));
+      }
+    }
+    
+    function drawSidewaysRain() {
+      if(!matrixCtx) return;
+      matrixCtx.fillStyle = "rgba(0, 0, 0, 0.12)";
+      matrixCtx.fillRect(0, 0, screenWidth, screenHeight);
+      matrixCtx.fillStyle = "rgba(0, 12, 6, 0.05)";
+      matrixCtx.fillRect(0, 0, screenWidth, screenHeight);
+      
+      for(let i=0; i<leftRainStreams.length; i++) {
+        if(!leftRainStreams[i].update()) {
+          leftRainStreams.splice(i,1);
+          i--;
+        } else leftRainStreams[i].draw(matrixCtx, screenWidth, screenHeight);
+      }
+      for(let i=0; i<rightRainStreams.length; i++) {
+        if(!rightRainStreams[i].update()) {
+          rightRainStreams.splice(i,1);
+          i--;
+        } else rightRainStreams[i].draw(matrixCtx, screenWidth, screenHeight);
+      }
+      
+      // occasionally add new streams
+      if(Math.random() < 0.08 && leftRainStreams.length < 35) {
+        leftRainStreams.push(new SideRainStream('left', Math.random() * screenHeight, 0.007 + Math.random()*0.013, Math.random()));
+      }
+      if(Math.random() < 0.08 && rightRainStreams.length < 35) {
+        rightRainStreams.push(new SideRainStream('right', Math.random() * screenHeight, 0.007 + Math.random()*0.013, Math.random()));
+      }
+    }
+    
+    function spawnMetamorphosis() {
+      metamorphLetters = [];
+      const cleanPhrase = TARGET_PHRASE;
+      const totalChars = cleanPhrase.length;
+      const centerX = screenWidth / 2;
+      const centerY = screenHeight / 2;
+      let currentX = centerX - (totalChars * 24) / 2;
+      
+      for(let i=0; i<totalChars; i++) {
+        const ch = cleanPhrase[i];
+        if(ch === ' ') {
+          currentX += 18;
+          continue;
+        }
+        const startX = (Math.random() > 0.5 ? -50 : screenWidth + 50);
+        const startY = Math.random() * screenHeight;
+        const targetX = currentX;
+        const targetY = centerY - 15 + (Math.sin(i) * 12);
+        metamorphLetters.push({
+          char: ch,
+          x: startX,
+          y: startY,
+          targetX: targetX,
+          targetY: targetY,
+          alpha: 0,
+          speed: 0.06 + Math.random() * 0.045,
+          converged: false
+        });
+        currentX += 28;
+      }
+      metamorphosisPhase = 1;
+      morphStartTime = performance.now();
+    }
+    
+    function updateMetamorphosis() {
+      if(!matrixCtx) return;
+      matrixCtx.fillStyle = "rgba(0, 0, 0, 0.28)";
+      matrixCtx.fillRect(0, 0, screenWidth, screenHeight);
+      let allConverged = true;
+      
+      for(let l of metamorphLetters) {
+        if(!l.converged) {
+          allConverged = false;
+          l.x += (l.targetX - l.x) * l.speed;
+          l.y += (l.targetY - l.y) * l.speed;
+          l.alpha = Math.min(1, l.alpha + 0.05);
+          if(Math.abs(l.x - l.targetX) < 3 && Math.abs(l.y - l.targetY) < 3) {
+            l.converged = true;
+            l.x = l.targetX;
+            l.y = l.targetY;
+          }
+        }
+        matrixCtx.save();
+        matrixCtx.font = `bold 34px 'Fira Code', 'Courier New', monospace`;
+        matrixCtx.shadowBlur = 22;
+        matrixCtx.shadowColor = `rgba(51, 255, 153, ${l.alpha * 0.9})`;
+        const grad = matrixCtx.createLinearGradient(l.x-12, l.y-18, l.x+12, l.y+6);
+        grad.addColorStop(0, `rgba(70, 255, 140, ${l.alpha})`);
+        grad.addColorStop(1, `rgba(30, 210, 100, ${l.alpha * 0.8})`);
+        matrixCtx.fillStyle = grad;
+        matrixCtx.fillText(l.char, l.x, l.y);
+        matrixCtx.shadowBlur = 10;
+        matrixCtx.fillStyle = `rgba(255, 240, 160, ${l.alpha * 0.5})`;
+        matrixCtx.fillText(l.char, l.x-1.2, l.y-1.2);
+        matrixCtx.restore();
+      }
+      
+      if(allConverged && metamorphosisPhase === 1) {
+        metamorphosisPhase = 2;
+        setTimeout(() => {
+          metamorphosisPhase = 3;
+          if(overlay) overlay.classList.add('fade-out');
+          setTimeout(() => {
+            if(overlay) overlay.style.display = 'none';
+            if(matrixAnimationId) cancelAnimationFrame(matrixAnimationId);
+          }, 900);
+        }, 1500);
+      }
+      
+      if(metamorphosisPhase === 2) {
+        const pulse = 0.6 + Math.sin(performance.now() * 0.012) * 0.3;
+        for(let l of metamorphLetters) {
+          matrixCtx.save();
+          matrixCtx.font = `bold 36px monospace`;
+          matrixCtx.shadowBlur = 28;
+          matrixCtx.shadowColor = `rgba(100, 255, 170, ${0.6 + pulse*0.3})`;
+          matrixCtx.fillStyle = `rgba(80, 255, 150, ${0.8 + pulse*0.2})`;
+          matrixCtx.fillText(l.char, l.x, l.y);
+          matrixCtx.restore();
+        }
+      }
+    }
+    
+    let rainStartTime = 0;
+    function startMatrixSequence() {
+      initSidewaysRain();
+      rainStartTime = performance.now();
+      function rainLoop() {
+        if(!matrixCanvas || !matrixCtx) return;
+        if(metamorphosisPhase === 0) {
+          drawSidewaysRain();
+          if(performance.now() - rainStartTime > 2600) {
+            spawnMetamorphosis();
+          }
+          matrixAnimationId = requestAnimationFrame(rainLoop);
+        } else if(metamorphosisPhase === 1 || metamorphosisPhase === 2) {
+          updateMetamorphosis();
+          matrixAnimationId = requestAnimationFrame(rainLoop);
+        } else if(metamorphosisPhase === 3) {
+          updateMetamorphosis();
+          matrixAnimationId = requestAnimationFrame(rainLoop);
+        } else {
+          if(matrixAnimationId) cancelAnimationFrame(matrixAnimationId);
+        }
+      }
+      rainLoop();
+    }
+    
+    window.addEventListener('resize', () => {
+      if(overlay && overlay.style.display !== 'none' && matrixCanvas && metamorphosisPhase === 0) {
+        screenWidth = window.innerWidth;
+        screenHeight = window.innerHeight;
+        matrixCanvas.width = screenWidth;
+        matrixCanvas.height = screenHeight;
+        initSidewaysRain();
+      }
+    });
+    
+    setTimeout(() => {
+      if(matrixCanvas) {
+        matrixCtx = matrixCanvas.getContext('2d');
+        startMatrixSequence();
+      }
+    }, 30);
+    
+    // ============================================================
+    // ORIGINAL GAME ENGINE (100% SAME FUNCTIONS & WIRING)
+    // ============================================================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
@@ -654,7 +952,6 @@
       if(!gameRunning || paused) return;
       
       if(powerupMessageTimer > 0) powerupMessageTimer--;
-      
       if(shootCooldown > 0) shootCooldown--;
       if(player.invincibleTimer > 0) player.invincibleTimer--;
       if(player.rapidFireTimer > 0) {
@@ -1053,7 +1350,6 @@
       if(keys.hasOwnProperty(code)) keys[code] = false;
     });
     
-    // BACK BUTTON: navigates to toys.html (same design element style)
     backButton.addEventListener('click', (e) => {
       e.preventDefault();
       window.location.href = 'toys.html';
@@ -1154,6 +1450,5 @@
     gameLoop();
   })();
 </script>
-  <script src="matrix-nav.js"></script>
 </body>
 </html>
