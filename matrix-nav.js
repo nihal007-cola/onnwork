@@ -1,4 +1,4 @@
-```javascript
+javascript
 // MATRIX NAV ENGINE - LETTER RAIN TRANSITION (3-second matrix effect)
 
 (function() {
@@ -209,4 +209,4 @@
   // Log initialization
   console.log("🌧️ LETTER RAIN NAV ENGINE | 3-second matrix rain transition active 🌧️");
 })();
-```
+
