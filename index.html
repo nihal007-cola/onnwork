@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
+      margin: 0;
       background: black;
-      color: #00ff88;
+      color: #33ff99;
       font-family: monospace;
       overflow-x: hidden;
+      overflow-y: auto;
     }
 
     canvas {
@@ -22,108 +22,162 @@
       z-index: 0;
     }
 
-    /* center glow */
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at center, rgba(0,255,136,0.08), transparent 70%);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* HEADER */
-    .sticky-header {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 100;
-      background: rgba(0,0,0,0.25);
-      border-bottom: 1px solid #00ff88;
-    }
-
-    .header {
-      max-width: 1100px;
-      margin: auto;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo { width: 90px; }
-
-    .header-text {
-      text-shadow: 0 0 6px #00ff88;
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      0%,100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    .header-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .header-buttons a {
-      border: 1px solid #00ff88;
-      padding: 6px 10px;
-      text-decoration: none;
-      color: #00ff88;
-      border-radius: 4px;
-    }
-
-    /* MAIN PANEL */
     .content {
       position: relative;
       z-index: 2;
-      max-width: 800px;
-      margin: 110px auto 40px;
       padding: 20px;
+      max-width: 800px;
+      margin: 15px auto;
 
-      background: rgba(0,0,0,0.35);
-      border: 1px solid #00ff88;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(0, 255, 100, 0.2);
+      box-shadow: 0 0 25px rgba(0, 255, 100, 0.1);
+      backdrop-filter: blur(4px);
+    }
 
-      box-shadow:
-        0 0 25px #00ff88,
-        inset 0 0 25px rgba(0,255,136,0.15);
+    .logo {
+      width: 120px;
+      margin-bottom: 10px;
+    }
 
-      background-image:
-        linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px);
-
-      border-radius: 6px;
+    .terminal p {
+      margin: 4px 0;
+      font-size: 14px;
+      text-shadow: 0 0 5px rgba(0,255,100,0.4);
     }
 
     #dynamic-terminal {
-      min-height: 160px;
-      line-height: 1.5;
-      text-shadow: 0 0 6px #00ff88;
-      margin-bottom: 20px;
+      font-family: monospace;
+      color: #33ff99;
+      font-size: 14px;
+      margin-bottom: 24px;
+      background: transparent;
+      text-shadow: 0 0 5px rgba(0,255,100,0.4);
+      min-height: 180px;
+      height: 180px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
 
-    .btn {
-      display: block;
-      width: 100%;
-      height: 70px;
-      border: 1px solid #00ff88;
-      margin: 10px 0;
-      text-align: center;
-      line-height: 70px;
-      text-decoration: none;
-      color: #00ff88;
-      transition: 0.2s;
+    .terminal-line {
+      margin: 4px 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.4;
     }
 
-    .btn:hover {
-      box-shadow: 0 0 20px #00ff88, 0 0 35px #00ff88;
-      transform: scale(1.02);
+    .blink-active {
+      animation: terminalBlink 0.5s step-end infinite;
+    }
+
+    @keyframes terminalBlink {
+      0%, 100% { opacity: 1; text-shadow: 0 0 5px #33ff99, 0 0 8px #33ff99; }
+      50% { opacity: 0.2; text-shadow: none; }
     }
 
     .section-title {
       margin-top: 20px;
+      font-size: 15px;
+    }
+
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .icon-box {
+      border: 2px solid #33ff99;
+      padding: 18px;
+      text-align: center;
+      font-size: 24px;
+      text-decoration: none;
+      color: #33ff99;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .icon-box:hover {
+      background: rgba(0, 255, 100, 0.15);
+      box-shadow: 0 0 15px rgba(0,255,100,0.6);
+    }
+
+    .icon-box:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 25px rgba(0,255,100,1);
+    }
+
+    .icon-box:nth-child(1) {
+      border-color: #25D366;
+      color: #25D366;
+    }
+
+    .icon-box:nth-child(1):hover {
+      background: rgba(37, 211, 102, 0.15);
+      box-shadow: 0 0 15px rgba(37,211,102,0.7);
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      border: 1px solid #33ff99;
+      padding: 14px;
+      text-align: center;
+      text-decoration: none;
+      color: #33ff99;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      background: rgba(0, 255, 100, 0.15);
+      box-shadow: 0 0 15px rgba(0,255,100,0.6);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 25px rgba(0,255,100,1);
+    }
+
+    #transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+
+    #transition.active {
+      opacity: 1;
+    }
+
+    @media (max-width: 600px) {
+      .logo {
+        width: 100px;
+      }
+      #dynamic-terminal, .terminal-line {
+        font-size: 12px;
+      }
+      #dynamic-terminal {
+        min-height: 160px;
+        height: 160px;
+      }
     }
   </style>
 </head>
@@ -132,35 +186,31 @@
 
 <canvas id="matrix"></canvas>
 
-<div class="sticky-header">
-  <div class="header">
-    <img src="logo.png" class="logo">
-
-    <div class="header-text">> MISS ME? GET IN TOUCH:</div>
-
-    <div class="header-buttons">
-      <a href="https://wa.me/917044358282">💬</a>
-      <a href="tel:+917044358282">📞</a>
-      <a href="mailto:onn@jamesmoriarty.in">✉️</a>
-    </div>
-  </div>
-</div>
-
 <div class="content">
+
+  <img src="logo.png" class="logo">
+
   <div id="dynamic-terminal"></div>
 
-  <div class="btn">💬</div>
-  <div class="btn">📞</div>
-  <div class="btn">✉️</div>
+  <div class="grid">
+    <a class="icon-box" href="https://wa.me/917044358282" target="_blank">💬</a>
+    <a class="icon-box" href="tel:+917044358282">📞</a>
+    <a class="icon-box" href="mailto:onn@jamesmoriarty.in">✉️</a>
+  </div>
 
   <div class="section-title">> OR EXPLORE:</div>
 
-  <a class="btn" href="product.html">PRODUCTS</a>
-  <a class="btn" href="services.html">SERVICES</a>
-  <a class="btn" href="toys.html">TOYS</a>
-  <a class="btn" href="terms.html">TERMS & CONDITIONS</a>
-  <a class="btn" href="privacy.html">PRIVACY POLICY</a>
+  <div class="buttons">
+    <a class="btn" href="product.html">PRODUCTS</a>
+    <a class="btn" href="services.html">SERVICES</a>
+    <a class="btn" href="toys.html">TOYS</a>
+    <a class="btn" href="terms.html">TERMS & CONDITIONS</a>
+    <a class="btn" href="privacy.html">PRIVACY POLICY</a>
+  </div>
+
 </div>
+
+<div id="transition"></div>
 
 <script>
 const canvas = document.getElementById("matrix");
@@ -174,65 +224,92 @@ resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
 const letters = "01ONNWORKLAB";
-const fontSize = 10;
-let columns = Math.floor(window.innerWidth / fontSize);
-let drops = Array(columns).fill(1);
+const fontSize = 12;
+let columns;
+let drops;
+
+function initMatrix() {
+  columns = Math.floor(canvas.width / fontSize);
+  drops = [];
+  for (let x = 0; x < columns; x++) {
+    drops[x] = 1;
+  }
+}
+initMatrix();
 
 function draw() {
-  ctx.fillStyle = "rgba(0,0,0,0.12)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.03)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.fillStyle = "#00ff88";
   ctx.font = fontSize + "px monospace";
-  ctx.shadowColor = "#00ff88";
-  ctx.shadowBlur = 12;
 
-  for(let i=0;i<drops.length;i++){
-    const text = letters[Math.floor(Math.random()*letters.length)];
-    ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+  for (let i = 0; i < drops.length; i++) {
+    const text = letters.charAt(Math.floor(Math.random() * letters.length));
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-    if(drops[i]*fontSize > canvas.height && Math.random()>0.975){
-      drops[i]=0;
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+      drops[i] = 0;
     }
     drops[i]++;
   }
 }
-setInterval(draw, 25);
+setInterval(draw, 35);
 
-/* TERMINAL */
-const terminal = document.getElementById("dynamic-terminal");
+// TERMINAL
+const terminalContainer = document.getElementById("dynamic-terminal");
 
-const lines = [
+const bootLines = [
   "booting onnwork lab...",
   "systems running...",
   "location: kolkata",
   "status: building"
 ];
 
-function typeLine(text, i=0){
-  if(i===0){
-    const div=document.createElement("div");
-    terminal.appendChild(div);
-    let j=0;
-    function type(){
-      if(j<text.length){
-        div.textContent+=text[j++];
-        setTimeout(type,30);
-      }
+// ✅ FIXED HERE
+const finalLineText = "> MISS ME? GET IN TOUCH:";
+
+let currentTimeouts = [];
+let blinkInterval = null;
+let blinkLineElement = null;
+
+const rand = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+
+function typeLine(line) {
+  return new Promise(resolve => {
+    const el = document.createElement("div");
+    el.className = "terminal-line";
+    terminalContainer.appendChild(el);
+
+    let i = 0;
+    function type() {
+      if (i < line.length) {
+        el.textContent += line[i++];
+        setTimeout(type, rand(20, 80));
+      } else resolve();
     }
     type();
-  }
+  });
 }
 
-(async()=>{
-  for(let l of lines){
-    typeLine(l);
-    await new Promise(r=>setTimeout(r,400));
-  }
-})();
-</script>
+function run() {
+  terminalContainer.innerHTML = "";
 
-<script src="matrix-nav.js"></script>
+  (async () => {
+    for (let l of bootLines) {
+      await typeLine(l);
+    }
+
+    const final = document.createElement("div");
+    final.className = "terminal-line blink-active";
+    final.textContent = finalLineText;
+
+    terminalContainer.appendChild(final);
+  })();
+}
+
+run();
+</script>
 
 </body>
 </html>
