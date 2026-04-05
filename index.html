@@ -6,60 +6,120 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       background: black;
-      color: #33ff99;
-      font-family: monospace;
+      color: #33ff96;
+      font-family: 'Courier New', monospace;
       overflow-x: hidden;
       overflow-y: auto;
     }
 
-    canvas {
+    canvas#matrix-bg {
       position: fixed;
       top: 0;
       left: 0;
+      width: 100%;
+      height: 100%;
       z-index: 0;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* TRANSLUCENT OVERLAY CANVAS - sits between matrix bg and content */
+    canvas#translucent-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0.85;
+      pointer-events: none;
+      background: radial-gradient(circle at center, rgba(0, 20, 10, 0.6) 0%, rgba(0, 0, 0, 0.85) 100%);
+    }
+
+    /* STICKY HEADER */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #33ff99;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      height: 40px;
+      width: auto;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 12px;
+    }
+
+    .contact-icon {
+      color: #33ff99;
+      text-decoration: none;
+      font-size: 20px;
+      padding: 5px 10px;
+      border: 1px solid #33ff99;
+      border-radius: 30px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .contact-icon span {
+      font-size: 12px;
+    }
+
+    .contact-icon:hover {
+      background: #33ff99;
+      color: black;
+      box-shadow: 0 0 10px #33ff99;
     }
 
     .content {
       position: relative;
       z-index: 2;
-      padding: 20px;
+      padding: 30px 20px;
       max-width: 800px;
-      margin: 15px auto;
-
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(0, 255, 100, 0.2);
-      box-shadow: 0 0 25px rgba(0, 255, 100, 0.1);
-      backdrop-filter: blur(4px);
-    }
-
-    .logo {
-      width: 120px;
-      margin-bottom: 10px;
-    }
-
-    .terminal p {
-      margin: 4px 0;
-      font-size: 14px;
-      text-shadow: 0 0 5px rgba(0,255,100,0.4);
+      margin: 0 auto;
     }
 
     #dynamic-terminal {
       font-family: monospace;
       color: #33ff99;
       font-size: 14px;
-      margin-bottom: 24px;
-      background: transparent;
-      text-shadow: 0 0 5px rgba(0,255,100,0.4);
-      min-height: 180px;
-      height: 180px;
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
+      margin-bottom: 30px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(2px);
+      padding: 20px;
+      border: 1px solid #33ff99;
+      border-radius: 8px;
+      min-height: 200px;
+      box-shadow: 0 0 20px rgba(51, 255, 153, 0.15);
     }
 
     .terminal-line {
@@ -70,126 +130,111 @@
     }
 
     .blink-active {
-      animation: terminalBlink 0.5s step-end infinite;
+      animation: terminalBlink 0.8s step-end infinite;
     }
 
     @keyframes terminalBlink {
-      0%, 100% { opacity: 1; text-shadow: 0 0 5px #33ff99, 0 0 8px #33ff99; }
-      50% { opacity: 0.2; text-shadow: none; }
-    }
-
-    .section-title {
-      margin-top: 20px;
-      font-size: 15px;
+      0%, 100% { opacity: 1; text-shadow: 0 0 5px #33ff99; }
+      50% { opacity: 0.3; text-shadow: none; }
     }
 
     .grid {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 10px;
+      justify-content: center;
+      gap: 20px;
+      margin: 30px 0;
     }
 
     .icon-box {
       border: 2px solid #33ff99;
       padding: 18px;
       text-align: center;
-      font-size: 24px;
+      font-size: 28px;
       text-decoration: none;
       color: #33ff99;
       transition: all 0.25s ease;
-      position: relative;
-      overflow: hidden;
+      border-radius: 60px;
+      width: 70px;
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
     }
 
     .icon-box:hover {
-      background: rgba(0, 255, 100, 0.15);
-      box-shadow: 0 0 15px rgba(0,255,100,0.6);
+      background: rgba(0, 255, 100, 0.2);
+      box-shadow: 0 0 15px #33ff99;
+      transform: scale(1.05);
     }
 
-    .icon-box:active {
-      transform: scale(0.95);
-      box-shadow: 0 0 25px rgba(0,255,100,1);
-    }
-
-    .icon-box:nth-child(1) {
-      border-color: #25D366;
-      color: #25D366;
-    }
-
-    .icon-box:nth-child(1):hover {
-      background: rgba(37, 211, 102, 0.15);
-      box-shadow: 0 0 15px rgba(37,211,102,0.7);
+    .section-title {
+      margin: 30px 0 15px 0;
+      font-size: 18px;
+      border-left: 3px solid #33ff99;
+      padding-left: 12px;
+      text-shadow: 0 0 5px rgba(51, 255, 153, 0.5);
     }
 
     .buttons {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 20px;
+      gap: 12px;
     }
 
     .btn {
       border: 1px solid #33ff99;
-      padding: 14px;
+      padding: 14px 20px;
       text-align: center;
       text-decoration: none;
       color: #33ff99;
       transition: all 0.25s ease;
-      position: relative;
-      overflow: hidden;
+      border-radius: 8px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
     }
 
     .btn:hover {
       background: rgba(0, 255, 100, 0.15);
-      box-shadow: 0 0 15px rgba(0,255,100,0.6);
+      box-shadow: 0 0 15px #33ff99;
+      transform: translateX(5px);
     }
 
-    .btn:active {
-      transform: scale(0.97);
-      box-shadow: 0 0 25px rgba(0,255,100,1);
-    }
-
-    #transition {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      z-index: 9999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.35s ease;
-    }
-
-    #transition.active {
-      opacity: 1;
-    }
-
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
+      .sticky-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      .contact-icon span {
+        display: none;
+      }
+      .contact-icon {
+        font-size: 18px;
+        padding: 5px 12px;
+      }
       .logo {
-        width: 100px;
-      }
-      #dynamic-terminal, .terminal-line {
-        font-size: 12px;
-      }
-      #dynamic-terminal {
-        min-height: 160px;
-        height: 160px;
+        height: 32px;
       }
     }
   </style>
 </head>
-
 <body>
 
-<canvas id="matrix"></canvas>
+<canvas id="matrix-bg"></canvas>
+<canvas id="translucent-overlay"></canvas>
+
+<div class="sticky-header">
+  <div class="header-left">
+    <img src="logo.png" class="logo" alt="ONN Logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'black\'/%3E%3Ctext x=\'50\' y=\'68\' font-size=\'48\' text-anchor=\'middle\' fill=\'%2333ff99\'%3EONN%3C/text%3E%3C/svg%3E'">
+  </div>
+  <div class="header-right">
+    <a href="https://wa.me/917044358282" target="_blank" class="contact-icon">💬 <span>CHAT</span></a>
+    <a href="tel:+917044358282" class="contact-icon">📞 <span>CALL</span></a>
+    <a href="mailto:onn@jamesmoriarty.in" class="contact-icon">✉️ <span>MAIL</span></a>
+  </div>
+</div>
 
 <div class="content">
-
-  <img src="logo.png" class="logo">
-
   <div id="dynamic-terminal"></div>
 
   <div class="grid">
@@ -198,118 +243,147 @@
     <a class="icon-box" href="mailto:onn@jamesmoriarty.in">✉️</a>
   </div>
 
-  <div class="section-title">> OR EXPLORE:</div>
+  <div class="section-title">> EXPLORE:</div>
 
   <div class="buttons">
-    <a class="btn" href="product.html">PRODUCTS</a>
-    <a class="btn" href="services.html">SERVICES</a>
-    <a class="btn" href="toys.html">TOYS</a>
-    <a class="btn" href="terms.html">TERMS & CONDITIONS</a>
-    <a class="btn" href="privacy.html">PRIVACY POLICY</a>
+    <a class="btn" href="product.html">📦 PRODUCTS</a>
+    <a class="btn" href="services.html">🤝 SERVICES</a>
+    <a class="btn" href="toys.html">🎮 TOYS</a>
+    <a class="btn" href="terms.html">📜 TERMS & CONDITIONS</a>
+    <a class="btn" href="privacy.html">🔒 PRIVACY POLICY</a>
   </div>
-
 </div>
 
-<div id="transition"></div>
-
 <script>
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
+  // MATRIX BACKGROUND
+  const canvas = document.getElementById("matrix-bg");
+  const ctx = canvas.getContext("2d");
 
-function resizeCanvas() {
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
-}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-
-const letters = "01ONNWORKLAB";
-const fontSize = 12;
-let columns;
-let drops;
-
-function initMatrix() {
-  columns = Math.floor(canvas.width / fontSize);
-  drops = [];
-  for (let x = 0; x < columns; x++) {
-    drops[x] = 1;
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   }
-}
-initMatrix();
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
-function draw() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.03)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const letters = "01ONNWORKLAB";
+  const fontSize = 14;
+  let columns = Math.floor(canvas.width / fontSize);
+  let drops = [];
 
-  ctx.fillStyle = "#00ff88";
-  ctx.font = fontSize + "px monospace";
-
-  for (let i = 0; i < drops.length; i++) {
-    const text = letters.charAt(Math.floor(Math.random() * letters.length));
-    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-      drops[i] = 0;
+  function initMatrix() {
+    columns = Math.floor(canvas.width / fontSize);
+    drops = [];
+    for (let x = 0; x < columns; x++) {
+      drops[x] = Math.random() * -100;
     }
-    drops[i]++;
   }
-}
-setInterval(draw, 35);
+  initMatrix();
 
-// TERMINAL
-const terminalContainer = document.getElementById("dynamic-terminal");
-
-const bootLines = [
-  "booting onnwork lab...",
-  "systems running...",
-  "location: kolkata",
-  "status: building"
-];
-
-// ✅ FIXED HERE
-const finalLineText = "> MISS ME? GET IN TOUCH:";
-
-let currentTimeouts = [];
-let blinkInterval = null;
-let blinkLineElement = null;
-
-const rand = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
-
-function typeLine(line) {
-  return new Promise(resolve => {
-    const el = document.createElement("div");
-    el.className = "terminal-line";
-    terminalContainer.appendChild(el);
-
-    let i = 0;
-    function type() {
-      if (i < line.length) {
-        el.textContent += line[i++];
-        setTimeout(type, rand(20, 80));
-      } else resolve();
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#33ff99";
+    ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters.charAt(Math.floor(Math.random() * letters.length));
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
     }
-    type();
+    requestAnimationFrame(drawMatrix);
+  }
+  drawMatrix();
+
+  window.addEventListener("resize", () => {
+    initMatrix();
   });
-}
 
-function run() {
-  terminalContainer.innerHTML = "";
+  // TRANSLUCENT OVERLAY - dynamic resize to follow content height
+  const overlayCanvas = document.getElementById("translucent-overlay");
+  const overlayCtx = overlayCanvas.getContext("2d");
 
-  (async () => {
-    for (let l of bootLines) {
-      await typeLine(l);
+  function resizeOverlay() {
+    overlayCanvas.width = window.innerWidth;
+    overlayCanvas.height = window.innerHeight;
+    drawOverlay();
+  }
+
+  function drawOverlay() {
+    if (!overlayCtx) return;
+    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+    const gradient = overlayCtx.createRadialGradient(
+      overlayCanvas.width / 2, 
+      overlayCanvas.height / 2, 
+      50, 
+      overlayCanvas.width / 2, 
+      overlayCanvas.height / 2, 
+      overlayCanvas.height / 1.5
+    );
+    gradient.addColorStop(0, "rgba(0, 25, 12, 0.55)");
+    gradient.addColorStop(0.6, "rgba(0, 10, 5, 0.75)");
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0.9)");
+    overlayCtx.fillStyle = gradient;
+    overlayCtx.fillRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+    
+    // Add subtle scanlines
+    overlayCtx.fillStyle = "rgba(51, 255, 153, 0.03)";
+    for (let i = 0; i < overlayCanvas.height; i += 4) {
+      overlayCtx.fillRect(0, i, overlayCanvas.width, 1);
     }
+  }
 
-    const final = document.createElement("div");
-    final.className = "terminal-line blink-active";
-    final.textContent = finalLineText;
+  window.addEventListener("resize", () => {
+    resizeOverlay();
+  });
+  resizeOverlay();
 
-    terminalContainer.appendChild(final);
-  })();
-}
+  // TERMINAL ANIMATION
+  const terminalContainer = document.getElementById("dynamic-terminal");
+  const bootLines = [
+    "> booting onnwork lab...",
+    "> systems online",
+    "> location: kolkata",
+    "> status: operational",
+    "",
+    "> Welcome to Offices of Nawnit Nihal",
+    "> Production • Technology • Automation"
+  ];
 
-run();
+  function typeLine(line, element) {
+    return new Promise(resolve => {
+      let i = 0;
+      function type() {
+        if (i < line.length) {
+          element.textContent += line[i];
+          i++;
+          setTimeout(type, 30 + Math.random() * 40);
+        } else {
+          resolve();
+        }
+      }
+      type();
+    });
+  }
+
+  async function runTerminal() {
+    terminalContainer.innerHTML = "";
+    for (let line of bootLines) {
+      const el = document.createElement("div");
+      el.className = "terminal-line";
+      terminalContainer.appendChild(el);
+      await typeLine(line, el);
+    }
+    const finalEl = document.createElement("div");
+    finalEl.className = "terminal-line blink-active";
+    finalEl.textContent = "> CONNECT VIA WHATSAPP, CALL OR MAIL ↑";
+    terminalContainer.appendChild(finalEl);
+  }
+
+  runTerminal();
 </script>
-
+<script src="matrix-nav.js"></script>
 </body>
 </html>
