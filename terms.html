@@ -1,195 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>TERMS & CONDITIONS</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>TERMS & CONDITIONS · ONN LAB</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
-    body {
-      margin: 0;
-      background: black;
-      color: #33ff99;
-      font-family: monospace;
-      padding: 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      opacity: 0.12;
-    }
-
-    h2 {
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .box {
-      border: 1px solid rgba(0,255,100,0.3);
-      padding: 15px;
-      margin-top: 15px;
-      background: rgba(0,0,0,0.5);
-      box-shadow: 0 0 10px rgba(0,255,100,0.1);
-      transition: all 0.25s ease;
-      position: relative;
-      z-index: 2;
-    }
-
-    .box:hover {
-      box-shadow: 0 0 20px rgba(0,255,100,0.4);
-      background: rgba(0,255,100,0.05);
-    }
-
-    .desc {
-      font-size: 13px;
-      opacity: 0.85;
-      line-height: 1.6;
-      white-space: pre-line;
-    }
-
-    a {
-      color: #33ff99;
-      text-decoration: none;
-      display: inline-block;
-      margin-bottom: 20px;
-      position: relative;
-      z-index: 2;
-    }
-
-    #transition {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      z-index: 9999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.35s ease;
-    }
-
-    #transition.active {
-      opacity: 1;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: black; color: #33ff99; font-family: 'Courier New', monospace; overflow-x: hidden; }
+    canvas#matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.35; pointer-events: none; }
+    .sticky-header { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #33ff99; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .logo { height: 40px; width: auto; }
+    .nav-links { display: flex; gap: 12px; }
+    .nav-link { color: #33ff99; text-decoration: none; font-size: 14px; font-family: monospace; border: 1px solid #33ff99; padding: 5px 12px; border-radius: 20px; transition: all 0.2s ease; }
+    .nav-link:hover { background: #33ff99; color: black; box-shadow: 0 0 10px #33ff99; }
+    .header-right { display: flex; gap: 12px; }
+    .contact-icon { color: #33ff99; text-decoration: none; font-size: 20px; padding: 5px 10px; border: 1px solid #33ff99; border-radius: 30px; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 5px; }
+    .contact-icon span { font-size: 12px; }
+    .contact-icon:hover { background: #33ff99; color: black; box-shadow: 0 0 10px #33ff99; }
+    .content { position: relative; z-index: 2; padding: 30px 20px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 28px; margin-bottom: 10px; border-left: 4px solid #33ff99; padding-left: 15px; }
+    .sub { margin-bottom: 30px; opacity: 0.7; font-size: 14px; }
+    .legal-box { border: 1px solid #33ff99; background: rgba(0,0,0,0.7); padding: 25px; border-radius: 12px; line-height: 1.6; font-size: 13px; }
+    .legal-box p { margin-bottom: 12px; }
+    @media (max-width: 700px) {
+      .sticky-header { flex-direction: column; text-align: center; }
+      .contact-icon span { display: none; }
+      h1 { font-size: 22px; }
     }
   </style>
 </head>
-
 <body>
-
-<canvas id="matrix"></canvas>
-
-<a href="index.html">← BACK</a>
-
-<h2>> TERMS & CONDITIONS</h2>
-
-<div class="box">
-  <div class="desc">
-Terms & Conditions – Offices ONN  
-Last updated: December 6, 2025  
-
-Offices ONN provides workflow and messaging automation services for businesses, primarily using Google Sheets, Google Apps Script, and the WhatsApp Business Cloud API. By using our service, you agree to the terms below.  
-
-1. Purpose of the service  
-Our tools help you send business messages such as WIP reminders, production follow-ups, and payment reminders to your contacts using WhatsApp and email.  
-
-2. Your responsibility  
-You are responsible for the accuracy of data you upload (names, numbers, jobslips, amounts, etc.).  
-You are responsible for obtaining any required consent from your contacts before sending WhatsApp messages to them.  
-You must respect opt-outs (if someone asks you to stop, you stop).  
-
-3. Acceptable use  
-You agree not to use Offices ONN to send:  
-Spam or abusive content  
-Illegal, fraudulent, or misleading messages  
-Content that violates WhatsApp, Meta, or applicable laws  
-
-4. No guarantee  
-We aim to keep the automation reliable, but we do not guarantee:  
-That every message will be delivered or read  
-That data will never be lost due to third-party dependencies (e.g., Google, Meta)  
-
-5. Limitation of liability  
-Offices ONN operates on a best-effort basis. We are not liable for indirect or consequential losses, including loss of business, arising from the use of this service.  
-
-6. Changes to these terms  
-We may update these terms from time to time. The latest version will always be available on this page.  
-
-7. Contact  
-For questions regarding these terms:  
-Name: Nawnit Nihal  
-Email: onn@jamesmoriarty.in  
+<canvas id="matrix-bg"></canvas>
+<div class="sticky-header">
+  <div class="header-left">
+    <img src="logo.png" class="logo" alt="ONN Logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'black\'/%3E%3Ctext x=\'50\' y=\'68\' font-size=\'48\' text-anchor=\'middle\' fill=\'%2333ff99\'%3EONN%3C/text%3E%3C/svg%3E'">
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">HOME</a>
+      <a href="#" id="backButton" class="nav-link">← BACK</a>
+    </div>
+  </div>
+  <div class="header-right">
+    <a href="https://wa.me/917044358282" target="_blank" class="contact-icon">💬 <span>CHAT</span></a>
+    <a href="tel:+917044358282" class="contact-icon">📞 <span>CALL</span></a>
+    <a href="mailto:onn@jamesmoriarty.in" class="contact-icon">✉️ <span>MAIL</span></a>
   </div>
 </div>
-
-<!-- TRANSITION -->
-<div id="transition"></div>
-
+<div class="content">
+  <h1>> TERMS & CONDITIONS</h1>
+  <div class="sub">// last updated: december 2025</div>
+  <div class="legal-box">
+    <p><strong>Offices ONN</strong> provides workflow and messaging automation services for businesses, primarily using Google Sheets, Google Apps Script, and the WhatsApp Business Cloud API. By using our service, you agree to the terms below.</p>
+    <p><strong>1. Purpose of the service</strong><br>Our tools help you send business messages such as WIP reminders, production follow-ups, and payment reminders to your contacts using WhatsApp and email.</p>
+    <p><strong>2. Your responsibility</strong><br>You are responsible for the accuracy of data you upload (names, numbers, jobslips, amounts, etc.). You are responsible for obtaining any required consent from your contacts before sending WhatsApp messages to them. You must respect opt-outs.</p>
+    <p><strong>3. Acceptable use</strong><br>You agree not to use Offices ONN to send: Spam or abusive content, Illegal, fraudulent, or misleading messages, Content that violates WhatsApp, Meta, or applicable laws.</p>
+    <p><strong>4. No guarantee</strong><br>We aim to keep the automation reliable, but we do not guarantee that every message will be delivered or read, or that data will never be lost due to third-party dependencies.</p>
+    <p><strong>5. Limitation of liability</strong><br>Offices ONN operates on a best-effort basis. We are not liable for indirect or consequential losses, including loss of business, arising from the use of this service.</p>
+    <p><strong>6. Changes to these terms</strong><br>We may update these terms from time to time. The latest version will always be available on this page.</p>
+    <p><strong>7. Contact</strong><br>Name: Nawnit Nihal<br>Email: onn@jamesmoriarty.in</p>
+  </div>
+</div>
 <script>
-// MATRIX (SUBTLE)
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-
-function resizeCanvas() {
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
-}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-
-const letters = "01";
-const fontSize = 14;
-let columns = Math.floor(canvas.width / fontSize);
-let drops = [];
-
-for (let x = 0; x < columns; x++) {
-  drops[x] = Math.random() * canvas.height;
-}
-
-function draw() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.07)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#00ff88";
-  ctx.font = fontSize + "px monospace";
-
-  for (let i = 0; i < drops.length; i++) {
-    const text = letters[Math.floor(Math.random() * letters.length)];
-    ctx.fillText(text, i * fontSize, drops[i]);
-
-    if (drops[i] > canvas.height && Math.random() > 0.98) {
-      drops[i] = 0;
-    }
-
-    drops[i] += 0.6;
+  const canvas = document.getElementById("matrix-bg");
+  const ctx = canvas.getContext("2d");
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+  const letters = "01ONNWORKLAB";
+  const fontSize = 14;
+  let columns = Math.floor(canvas.width / fontSize);
+  let drops = [];
+  function initMatrix() {
+    columns = Math.floor(canvas.width / fontSize);
+    drops = [];
+    for (let x = 0; x < columns; x++) drops[x] = Math.random() * -100;
   }
-}
-
-setInterval(draw, 60);
-
-
-// PAGE TRANSITION
-const links = document.querySelectorAll("a");
-
-links.forEach(link => {
-  link.addEventListener("click", function(e) {
-    if (this.href && this.target !== "_blank") {
-      e.preventDefault();
-      const overlay = document.getElementById("transition");
-      overlay.classList.add("active");
-
-      setTimeout(() => {
-        window.location.href = this.href;
-      }, 300);
+  initMatrix();
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#33ff99";
+    ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters.charAt(Math.floor(Math.random() * letters.length));
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
     }
+    requestAnimationFrame(drawMatrix);
+  }
+  drawMatrix();
+  window.addEventListener("resize", () => initMatrix());
+  document.getElementById("backButton").addEventListener("click", function(e) {
+    e.preventDefault();
+    if (document.referrer && document.referrer.includes(window.location.host)) window.history.back();
+    else window.location.href = "index.html";
   });
-});
 </script>
 <script src="matrix-nav.js"></script>
 </body>
