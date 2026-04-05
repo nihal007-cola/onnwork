@@ -3,395 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ONN LOGO ENGINE · 3D MATRIX METAMORPHOSIS</title>
+  <title>ONN LOGO ENGINE · TURTLE GRAPHICS</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐢</text></svg>">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background: #000000;
-      color: #33ff99;
-      font-family: 'Courier New', 'Fira Code', monospace;
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-      position: fixed;
-    }
-
-    /* 3D MATRIX OVERLAY */
-    .matrix-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      z-index: 1000;
-      pointer-events: none;
-      opacity: 1;
-      transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    }
-    .matrix-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-    .matrix-overlay.fade-out {
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.8s ease-out, visibility 0s 0.85s;
-    }
-
-    /* MAIN UI - appears after metamorphosis */
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      width: 100vw;
-      position: relative;
-      background: #000000;
-      opacity: 0;
-      animation: fadeInUI 0.3s ease-out forwards;
-      animation-delay: 3.2s;
-    }
-    @keyframes fadeInUI {
-      to { opacity: 1; }
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding: 12px 20px;
-      background: rgba(0, 0, 0, 0.85);
-      border-bottom: 1px solid #33ff9944;
-      backdrop-filter: blur(4px);
-      z-index: 10;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .logo-title {
-      font-size: 1rem;
-      letter-spacing: -1px;
-      text-shadow: 0 0 6px #33ff99;
-      font-weight: bold;
-    }
-    .back-link {
-      color: #33ff99;
-      text-decoration: none;
-      font-size: 0.8rem;
-      border-bottom: 1px dotted #33ff99;
-      transition: 0.2s;
-    }
-    .back-link:active {
-      text-shadow: 0 0 6px #33ff99;
-    }
-
-    .main-dashboard {
-      display: flex;
-      flex: 1;
-      gap: 12px;
-      padding: 12px;
-      overflow: hidden;
-      min-height: 0;
-    }
-
-    .console-panel {
-      flex: 1.2;
-      display: flex;
-      flex-direction: column;
-      background: rgba(0, 0, 0, 0.9);
-      border: 2px solid #33ff99;
-      box-shadow: 0 0 18px rgba(51, 255, 153, 0.25), inset 0 0 8px rgba(51,255,153,0.1);
-      border-radius: 8px;
-      overflow: hidden;
-      backdrop-filter: blur(2px);
-    }
-    .console-header {
-      padding: 8px 12px;
-      background: #051a0c;
-      border-bottom: 1px solid #33ff9944;
-      font-weight: bold;
-      font-size: 0.7rem;
-      letter-spacing: 1px;
-    }
-    .console-history {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      font-size: 11px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .line {
-      border-left: 2px solid #33ff99;
-      padding-left: 8px;
-      margin-bottom: 3px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: monospace;
-      opacity: 0.92;
-    }
-    .input-area {
-      padding: 10px;
-      border-top: 1px solid #33ff9944;
-      background: #010a03;
-    }
-    #cmd {
-      width: 100%;
-      background: black;
-      border: 1.5px solid #33ff99;
-      padding: 10px;
-      color: #33ff99;
-      font-family: monospace;
-      font-size: 13px;
-      outline: none;
-      border-radius: 6px;
-      font-weight: bold;
-    }
-    #cmd:focus {
-      box-shadow: 0 0 12px #33ff99;
-      background: #021a0a;
-    }
-
-    .drawing-arena {
-      flex: 2;
-      display: flex;
-      flex-direction: column;
-      background: #030303;
-      border: 2px solid #33ff99;
-      border-radius: 12px;
-      box-shadow: 0 0 24px rgba(51, 255, 153, 0.3);
-      overflow: hidden;
-      backdrop-filter: blur(1px);
-    }
-    .arena-header {
-      background: #051a0c;
-      padding: 6px 12px;
-      border-bottom: 1px solid #33ff9944;
-      font-size: 0.7rem;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      letter-spacing: 0.5px;
-    }
-    .canvas-wrapper {
-      flex: 1;
-      position: relative;
-      background: #000000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: crosshair;
-      touch-action: none;
-    }
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      background: #000000;
-      box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
-      cursor: crosshair;
-      touch-action: none;
-    }
-    .canvas-wrapper::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      background: repeating-linear-gradient(0deg, rgba(0,255,100,0.008) 0px, rgba(0,255,100,0.008) 2px, transparent 2px, transparent 6px);
-      z-index: 2;
-    }
-
-    .reference-panel {
-      flex: 0.8;
-      background: rgba(0, 0, 0, 0.85);
-      border: 1px solid #33ff9944;
-      border-radius: 8px;
-      padding: 10px;
-      overflow-y: auto;
-      backdrop-filter: blur(2px);
-      -webkit-overflow-scrolling: touch;
-    }
-    .hint {
-      font-size: 10px;
-      margin-bottom: 8px;
-      border-left: 2px solid #33ff99;
-      padding-left: 8px;
-      font-family: monospace;
-    }
-    .hint strong {
-      color: #66ffaa;
-    }
-
-    ::-webkit-scrollbar {
-      width: 4px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0a1f12;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #33ff99;
-      border-radius: 4px;
-    }
-
-    /* MOBILE CONTROLS */
-    .mobile-bottom-bar {
-      display: none;
-      background: #000000;
-      border-top: 2px solid #33ff99;
-      padding: 12px;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 20;
-    }
-    
-    .mobile-input-group {
-      display: flex;
-      gap: 10px;
-      width: 100%;
-    }
-    
-    .mobile-input {
-      flex: 1;
-      background: #0a0f0a;
-      border: 2px solid #33ff99;
-      color: #33ff99;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      padding: 12px;
-      border-radius: 10px;
-      outline: none;
-      font-weight: bold;
-    }
-    
-    .mobile-input:focus {
-      box-shadow: 0 0 15px #33ff99;
-      background: #021a0a;
-    }
-    
-    .mobile-submit {
-      background: #33ff99;
-      color: #000000;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-family: monospace;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    
-    .mobile-submit:active {
-      transform: scale(0.95);
-    }
-    
-    .quick-commands {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-    }
-    
-    .quick-cmd {
-      background: rgba(0, 0, 0, 0.8);
-      border: 1px solid #33ff99;
-      color: #33ff99;
-      padding: 8px 14px;
-      border-radius: 25px;
-      font-family: monospace;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    
-    .quick-cmd:active {
-      background: #33ff99;
-      color: #000000;
-      transform: scale(0.95);
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: black; color: #33ff99; font-family: 'Courier New', monospace; overflow-x: hidden; }
+    canvas#matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.35; pointer-events: none; }
+    .sticky-header { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #33ff99; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .logo { height: 40px; width: auto; }
+    .nav-links { display: flex; gap: 12px; }
+    .nav-link { color: #33ff99; text-decoration: none; font-size: 14px; font-family: monospace; border: 1px solid #33ff99; padding: 5px 12px; border-radius: 20px; transition: all 0.2s ease; }
+    .nav-link:hover { background: #33ff99; color: black; box-shadow: 0 0 10px #33ff99; }
+    .header-right { display: flex; gap: 12px; }
+    .contact-icon { color: #33ff99; text-decoration: none; font-size: 20px; padding: 5px 10px; border: 1px solid #33ff99; border-radius: 30px; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 5px; }
+    .contact-icon span { font-size: 12px; }
+    .contact-icon:hover { background: #33ff99; color: black; box-shadow: 0 0 10px #33ff99; }
+    .app-container { position: relative; z-index: 2; display: flex; flex-direction: column; height: calc(100vh - 65px); padding: 12px; gap: 12px; }
+    .main-panel { display: flex; flex: 1; gap: 12px; min-height: 0; }
+    .console-panel { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.8); border: 2px solid #33ff99; border-radius: 12px; overflow: hidden; }
+    .console-header { background: #051a0c; padding: 8px 12px; border-bottom: 1px solid #33ff99; font-weight: bold; font-size: 12px; }
+    .console-history { flex: 1; overflow-y: auto; padding: 10px; font-size: 11px; }
+    .line { border-left: 2px solid #33ff99; padding-left: 8px; margin-bottom: 5px; font-family: monospace; }
+    .input-area { padding: 10px; border-top: 1px solid #33ff99; }
+    #cmd { width: 100%; background: black; border: 1.5px solid #33ff99; padding: 10px; color: #33ff99; font-family: monospace; font-size: 13px; outline: none; border-radius: 6px; }
+    #cmd:focus { box-shadow: 0 0 12px #33ff99; }
+    .drawing-panel { flex: 2; display: flex; flex-direction: column; background: #030303; border: 2px solid #33ff99; border-radius: 12px; overflow: hidden; }
+    .arena-header { background: #051a0c; padding: 6px 12px; border-bottom: 1px solid #33ff99; font-size: 12px; display: flex; justify-content: space-between; }
+    .canvas-wrapper { flex: 1; position: relative; background: black; }
+    canvas#turtleCanvas { width: 100%; height: 100%; display: block; background: black; cursor: crosshair; }
+    .ref-panel { flex: 0.7; background: rgba(0,0,0,0.8); border: 1px solid #33ff99; border-radius: 12px; padding: 12px; overflow-y: auto; font-size: 11px; }
+    .hint { margin-bottom: 8px; border-left: 2px solid #33ff99; padding-left: 8px; }
+    .mobile-bar { display: none; background: black; border-top: 2px solid #33ff99; padding: 12px; flex-direction: column; gap: 10px; }
+    .mobile-input-group { display: flex; gap: 10px; }
+    .mobile-input { flex: 1; background: #0a0f0a; border: 2px solid #33ff99; color: #33ff99; font-family: monospace; font-size: 14px; padding: 10px; border-radius: 10px; outline: none; }
+    .mobile-submit { background: #33ff99; color: black; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; }
+    .quick-cmds { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .quick-cmd { background: rgba(0,0,0,0.8); border: 1px solid #33ff99; color: #33ff99; padding: 6px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; }
     @media (max-width: 850px) {
-      .main-dashboard {
-        flex-direction: column;
-        gap: 10px;
-        padding: 10px;
-        padding-bottom: 0;
-      }
-      .console-panel { flex: 1; min-height: 140px; }
-      .drawing-arena { flex: 2; min-height: 220px; }
-      .reference-panel { flex: 0.4; max-height: 100px; }
-      .top-bar { padding: 8px 12px; }
-      .logo-title { font-size: 0.85rem; }
+      .main-panel { flex-direction: column; }
+      .ref-panel { max-height: 100px; }
       .input-area { display: none; }
-      .mobile-bottom-bar { display: flex; }
+      .mobile-bar { display: flex; }
+      .app-container { height: auto; min-height: 100vh; }
     }
   </style>
 </head>
 <body>
-
-<!-- 3D MATRIX RAIN + METAMORPHOSIS LAYER -->
-<div id="matrixOverlay" class="matrix-overlay">
-  <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
-</div>
-
-<div class="app-container">
-  <div class="top-bar">
-    <span class="logo-title">🐢 ONN LOGO ENGINE · 3D METAMORPHOSIS</span>
-    <a href="#" class="back-link" id="backBtn">← BACK to toys</a>
+<canvas id="matrix-bg"></canvas>
+<div class="sticky-header">
+  <div class="header-left">
+    <img src="logo.png" class="logo" alt="ONN Logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'black\'/%3E%3Ctext x=\'50\' y=\'68\' font-size=\'48\' text-anchor=\'middle\' fill=\'%2333ff99\'%3EONN%3C/text%3E%3C/svg%3E'">
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">HOME</a>
+      <a href="toys.html" class="nav-link">← TOYS</a>
+    </div>
   </div>
-
-  <div class="main-dashboard">
+  <div class="header-right">
+    <a href="https://wa.me/917044358282" target="_blank" class="contact-icon">💬 <span>CHAT</span></a>
+    <a href="tel:+917044358282" class="contact-icon">📞 <span>CALL</span></a>
+    <a href="mailto:onn@jamesmoriarty.in" class="contact-icon">✉️ <span>MAIL</span></a>
+  </div>
+</div>
+<div class="app-container">
+  <div class="main-panel">
     <div class="console-panel">
-      <div class="console-header">⚡ TERMINAL :: COMMAND HISTORY</div>
+      <div class="console-header">🐢 TERMINAL :: COMMAND HISTORY</div>
       <div class="console-history" id="consoleHistory"></div>
       <div class="input-area">
-        <input type="text" id="cmd" placeholder="fd 80 rt 90 repeat 4 [fd 100 rt 90]" autofocus spellcheck="false">
+        <input type="text" id="cmd" placeholder="fd 80 rt 90 repeat 4 [fd 100 rt 90]" spellcheck="false">
       </div>
     </div>
-
-    <div class="drawing-arena">
-      <div class="arena-header">
-        <span>🎨 TURTLE CANVAS — DRAWING ZONE</span>
-        <span style="font-size:10px;">🐢 active pen: <span id="penStatus">DOWN</span></span>
-      </div>
-      <div class="canvas-wrapper">
-        <canvas id="turtleCanvas"></canvas>
-      </div>
+    <div class="drawing-panel">
+      <div class="arena-header"><span>🎨 TURTLE CANVAS</span><span>PEN: <span id="penStatus">DOWN</span></span></div>
+      <div class="canvas-wrapper"><canvas id="turtleCanvas"></canvas></div>
     </div>
-
-    <div class="reference-panel">
+    <div class="ref-panel">
       <div class="hint"><strong>fd 100</strong> → forward</div>
       <div class="hint"><strong>bk 50</strong> → backward</div>
       <div class="hint"><strong>rt 90</strong> → right turn</div>
       <div class="hint"><strong>lt 90</strong> → left turn</div>
       <div class="hint"><strong>pu/pd</strong> → pen up/down</div>
-      <div class="hint"><strong>home</strong> → reset</div>
-      <div class="hint"><strong>clear</strong> → erase</div>
-      <div class="hint"><strong>repeat 4 [fd 80 rt 90]</strong></div>
+      <div class="hint"><strong>home</strong> → reset position</div>
+      <div class="hint"><strong>clear</strong> → erase all</div>
+      <div class="hint"><strong>repeat 4 [fd 80 rt 90]</strong> → loop</div>
     </div>
   </div>
-
-  <!-- MOBILE BOTTOM BAR -->
-  <div class="mobile-bottom-bar" id="mobileBar">
+  <div class="mobile-bar">
     <div class="mobile-input-group">
-      <input type="text" id="mobileCommand" class="mobile-input" placeholder="fd 100, rt 90, repeat 4 [fd 50 rt 90]" spellcheck="false" enterkeyhint="send" autocomplete="off">
+      <input type="text" id="mobileCommand" class="mobile-input" placeholder="fd 100, rt 90" spellcheck="false">
       <button class="mobile-submit" id="mobileSubmit">RUN</button>
     </div>
-    <div class="quick-commands">
+    <div class="quick-cmds">
       <button class="quick-cmd" data-cmd="fd 50">↑ FD 50</button>
       <button class="quick-cmd" data-cmd="bk 50">↓ BK 50</button>
       <button class="quick-cmd" data-cmd="rt 90">↻ RT 90</button>
@@ -403,522 +106,194 @@
     </div>
   </div>
 </div>
-
 <script>
-  (function() {
-    // ============================================================
-    // 3D MATRIX RAIN WITH PERSPECTIVE & METAMORPHOSIS
-    // ============================================================
-    const overlay = document.getElementById('matrixOverlay');
-    const matrixCanvas = document.getElementById('matrixCanvas');
-    let matrixCtx = matrixCanvas.getContext('2d');
-    let matrixAnimationId = null;
-    let metamorphosisPhase = 0; // 0: 3D rain, 1: gathering particles, 2: morphing letters, 3: fade out
-    
-    // 3D Rain columns with perspective
-    let rainColumns = [];
-    let screenWidth, screenHeight;
-    const BASE_FONT_SIZE = 22;
-    const PERSPECTIVE_DEPTH = 0.65; // 3D feeling
-    
-    class RainColumn {
-      constructor(x, zDepth) {
-        this.x = x;
-        this.z = zDepth; // 0 = front, 1 = far back
-        this.drops = [];
-        this.speedBase = 2.5 + (1 - zDepth) * 5;
-        this.charSet = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        for (let i = 0; i < 18; i++) {
-          this.drops.push({
-            y: Math.random() * -200,
-            char: this.charSet[Math.floor(Math.random() * this.charSet.length)],
-            speed: this.speedBase + Math.random() * 2
-          });
+  // MATRIX BG
+  const bgCanvas = document.getElementById("matrix-bg");
+  const bgCtx = bgCanvas.getContext("2d");
+  function resizeBg() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+  resizeBg();
+  window.addEventListener("resize", resizeBg);
+  const bgLetters = "01ONNWORKLAB";
+  const bgFontSize = 14;
+  let bgColumns = Math.floor(bgCanvas.width / bgFontSize);
+  let bgDrops = [];
+  function initBg() {
+    bgColumns = Math.floor(bgCanvas.width / bgFontSize);
+    bgDrops = [];
+    for (let x = 0; x < bgColumns; x++) bgDrops[x] = Math.random() * -100;
+  }
+  initBg();
+  function drawBg() {
+    bgCtx.fillStyle = "rgba(0, 0, 0, 0.04)";
+    bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+    bgCtx.fillStyle = "#33ff99";
+    bgCtx.font = `bold ${bgFontSize}px 'Courier New', monospace`;
+    for (let i = 0; i < bgDrops.length; i++) {
+      const text = bgLetters.charAt(Math.floor(Math.random() * bgLetters.length));
+      bgCtx.fillText(text, i * bgFontSize, bgDrops[i] * bgFontSize);
+      if (bgDrops[i] * bgFontSize > bgCanvas.height && Math.random() > 0.975) bgDrops[i] = 0;
+      bgDrops[i]++;
+    }
+    requestAnimationFrame(drawBg);
+  }
+  drawBg();
+  window.addEventListener("resize", () => initBg());
+
+  // TURTLE ENGINE
+  const canvas = document.getElementById("turtleCanvas");
+  const ctx = canvas.getContext("2d");
+  let turtle = { x: 0, y: 0, angle: 0, pen: true };
+  const consoleHistory = document.getElementById("consoleHistory");
+  const penStatusSpan = document.getElementById("penStatus");
+  const desktopCmd = document.getElementById("cmd");
+  const mobileCommand = document.getElementById("mobileCommand");
+  const mobileSubmit = document.getElementById("mobileSubmit");
+
+  function updatePenIndicator() { penStatusSpan.innerText = turtle.pen ? "DOWN ✍️" : "UP ✏️"; }
+  function drawGrid() {
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.strokeStyle = "#33ff99";
+    ctx.lineWidth = 0.8;
+    for (let i = 0; i < canvas.width; i += 40) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function setupStyle() { ctx.lineWidth = 3.5; ctx.strokeStyle = "#33ff99"; ctx.shadowColor = "#33ff99"; ctx.shadowBlur = 4; ctx.lineCap = "round"; }
+  function drawTurtle() {
+    ctx.save();
+    ctx.fillStyle = "#33ff99";
+    ctx.strokeStyle = "#ccffcc";
+    ctx.lineWidth = 1.8;
+    const size = 11;
+    const rad = turtle.angle * Math.PI / 180;
+    const headX = turtle.x + Math.cos(rad) * size;
+    const headY = turtle.y + Math.sin(rad) * size;
+    const leftAngle = rad + 2.3;
+    const rightAngle = rad - 2.3;
+    const leftX = turtle.x + Math.cos(leftAngle) * (size * 0.75);
+    const leftY = turtle.y + Math.sin(leftAngle) * (size * 0.75);
+    const rightX = turtle.x + Math.cos(rightAngle) * (size * 0.75);
+    const rightY = turtle.y + Math.sin(rightAngle) * (size * 0.75);
+    ctx.beginPath();
+    ctx.moveTo(headX, headY);
+    ctx.lineTo(leftX, leftY);
+    ctx.lineTo(rightX, rightY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(turtle.x + Math.cos(rad) * 5.5, turtle.y + Math.sin(rad) * 5.5, 2.2, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(turtle.x + Math.cos(rad) * 6, turtle.y + Math.sin(rad) * 6, 1.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); drawGrid(); setupStyle(); drawTurtle(); }
+  function moveTurtle(dist) {
+    const rad = turtle.angle * Math.PI / 180;
+    const newX = turtle.x + Math.cos(rad) * dist;
+    const newY = turtle.y + Math.sin(rad) * dist;
+    if (turtle.pen) { ctx.beginPath(); ctx.moveTo(turtle.x, turtle.y); ctx.lineTo(newX, newY); ctx.stroke(); }
+    turtle.x = Math.min(Math.max(newX, 5), canvas.width - 5);
+    turtle.y = Math.min(Math.max(newY, 5), canvas.height - 5);
+    drawTurtle();
+  }
+  function execCmd(cmd, val) {
+    switch(cmd) {
+      case "fd": if(val !== null) moveTurtle(val); break;
+      case "bk": if(val !== null) moveTurtle(-val); break;
+      case "rt": if(val !== null) { turtle.angle += val; drawTurtle(); } break;
+      case "lt": if(val !== null) { turtle.angle -= val; drawTurtle(); } break;
+      case "pu": turtle.pen = false; updatePenIndicator(); drawTurtle(); break;
+      case "pd": turtle.pen = true; updatePenIndicator(); drawTurtle(); break;
+      case "home": turtle.x = canvas.width/2; turtle.y = canvas.height/2; turtle.angle = 0; drawTurtle(); break;
+      case "clear": clearCanvas(); break;
+      default: return false;
+    }
+    return true;
+  }
+  function addLine(text) { const div = document.createElement("div"); div.className = "line"; div.textContent = text; consoleHistory.appendChild(div); consoleHistory.scrollTop = consoleHistory.scrollHeight; while(consoleHistory.children.length > 200) consoleHistory.removeChild(consoleHistory.firstChild); }
+  function tokenize(input) { return input.replace(/\[/g, ' [ ').replace(/\]/g, ' ] ').trim().split(/\s+/).filter(t => t.length > 0); }
+  function interpret(tokens, start=0, end=null) {
+    let idx = start;
+    const limit = end === null ? tokens.length : end;
+    while(idx < limit) {
+      const token = tokens[idx];
+      if(token === "repeat") {
+        if(idx+2 >= limit) { addLine("repeat syntax error"); return idx+1; }
+        const count = parseInt(tokens[idx+1],10);
+        if(isNaN(count)) { addLine("repeat: invalid number"); return idx+2; }
+        if(tokens[idx+2] !== "[") { addLine("repeat: missing '['"); return idx+2; }
+        let depth = 1;
+        let close = idx+3;
+        while(close < limit && depth > 0) {
+          if(tokens[close] === "[") depth++;
+          if(tokens[close] === "]") depth--;
+          close++;
         }
+        if(depth !== 0) { addLine("repeat: unmatched brackets"); return close; }
+        const block = tokens.slice(idx+3, close-1);
+        for(let i=0;i<count;i++) interpret(block,0,block.length);
+        idx = close;
+        continue;
       }
-      
-      update() {
-        for (let drop of this.drops) {
-          drop.y += drop.speed * (0.6 + (1 - this.z) * 0.8);
-          if (drop.y > screenHeight + 50) {
-            drop.y = -50;
-            drop.char = this.charSet[Math.floor(Math.random() * this.charSet.length)];
-          }
-        }
+      const lower = token.toLowerCase();
+      if(["fd","bk","rt","lt"].includes(lower)) {
+        if(idx+1 >= limit) { addLine(`missing argument for ${token}`); idx++; continue; }
+        const arg = parseFloat(tokens[idx+1]);
+        if(isNaN(arg)) { addLine(`expected number after ${token}`); idx+=2; continue; }
+        execCmd(lower, arg);
+        idx+=2;
+        continue;
       }
-      
-      draw(ctx, w, h) {
-        const scaleFactor = 0.6 + (1 - this.z) * 0.9;
-        const fontSize = BASE_FONT_SIZE * scaleFactor;
-        const alpha = 0.4 + (1 - this.z) * 0.6;
-        const glowIntensity = 8 + (1 - this.z) * 12;
-        
-        for (let drop of this.drops) {
-          const yPos = drop.y;
-          if (yPos > 0 && yPos < h) {
-            ctx.save();
-            ctx.font = `bold ${fontSize}px 'Courier New', 'Fira Code', monospace`;
-            ctx.shadowBlur = glowIntensity;
-            ctx.shadowColor = `rgba(51, 255, 153, ${alpha * 0.9})`;
-            const gradient = ctx.createLinearGradient(this.x, yPos - fontSize, this.x, yPos + fontSize/2);
-            gradient.addColorStop(0, `rgba(80, 255, 150, ${alpha})`);
-            gradient.addColorStop(1, `rgba(30, 200, 100, ${alpha * 0.7})`);
-            ctx.fillStyle = gradient;
-            ctx.fillText(drop.char, this.x, yPos);
-            // secondary glow
-            ctx.shadowBlur = 12;
-            ctx.fillStyle = `rgba(100, 255, 170, ${alpha * 0.4})`;
-            ctx.fillText(drop.char, this.x - 1, yPos - 1);
-            ctx.restore();
-          }
-        }
-      }
+      if(["pu","pd","home","clear"].includes(lower)) { execCmd(lower); idx++; continue; }
+      if(token === "]") break;
+      addLine(`unknown: ${token}`);
+      idx++;
     }
-    
-    // Letter particles for metamorphosis (3D floating letters that assemble)
-    let metamorphLetters = [];
-    const TARGET_PHRASE = "◈ ONN LOGO ◈  TURTLE  ◈ READY ◈";
-    let morphStartTime = 0;
-    let morphActive = false;
-    
-    function init3DRain() {
-      screenWidth = window.innerWidth;
-      screenHeight = window.innerHeight;
-      matrixCanvas.width = screenWidth;
-      matrixCanvas.height = screenHeight;
-      rainColumns = [];
-      const numColumns = Math.floor(screenWidth / 24) + 5;
-      for (let i = 0; i < numColumns; i++) {
-        const x = i * (screenWidth / numColumns) + (Math.random() * 12);
-        const zDepth = Math.random(); // random depth
-        rainColumns.push(new RainColumn(x, zDepth));
-      }
-    }
-    
-    function draw3DRain() {
-      if (!matrixCtx) return;
-      matrixCtx.fillStyle = "rgba(0, 0, 0, 0.12)";
-      matrixCtx.fillRect(0, 0, screenWidth, screenHeight);
-      
-      // Draw depth fog effect
-      matrixCtx.fillStyle = "rgba(0, 10, 5, 0.05)";
-      matrixCtx.fillRect(0, 0, screenWidth, screenHeight);
-      
-      for (let col of rainColumns) {
-        col.update();
-        col.draw(matrixCtx, screenWidth, screenHeight);
-      }
-      
-      // Add occasional 3D scanlines
-      matrixCtx.fillStyle = "rgba(51, 255, 153, 0.02)";
-      for (let i = 0; i < 6; i++) {
-        matrixCtx.fillRect(0, screenHeight * 0.2 + i * 70, screenWidth, 2);
-      }
-    }
-    
-    // Create metamorphosis particles from the rain
-    function spawnMetamorphosis() {
-      metamorphLetters = [];
-      const cleanPhrase = TARGET_PHRASE;
-      const totalChars = cleanPhrase.length;
-      const centerX = screenWidth / 2;
-      const centerY = screenHeight / 2 - 20;
-      let currentX = centerX - (totalChars * 22) / 2;
-      
-      for (let i = 0; i < totalChars; i++) {
-        const ch = cleanPhrase[i];
-        if (ch === ' ') {
-          currentX += 16;
-          continue;
-        }
-        // 3D random start positions (exploded from rain)
-        const startX = Math.random() * screenWidth;
-        const startY = Math.random() * screenHeight;
-        const targetX = currentX;
-        const targetY = centerY + (Math.sin(i) * 8);
-        metamorphLetters.push({
-          char: ch,
-          x: startX,
-          y: startY,
-          targetX: targetX,
-          targetY: targetY,
-          scale: 1.2 + Math.random() * 0.8,
-          alpha: 0,
-          speed: 0.07 + Math.random() * 0.04,
-          angle: Math.random() * Math.PI * 2,
-          wobble: Math.random() * 100,
-          converged: false
-        });
-        currentX += 28;
-      }
-      morphActive = true;
-      metamorphosisPhase = 1;
-      morphStartTime = performance.now();
-    }
-    
-    function updateMetamorphosis() {
-      if (!matrixCtx) return;
-      matrixCtx.fillStyle = "rgba(0, 0, 0, 0.25)";
-      matrixCtx.fillRect(0, 0, screenWidth, screenHeight);
-      
-      let allConverged = true;
-      const now = performance.now();
-      const timeFactor = Math.sin(now * 0.008) * 0.1;
-      
-      for (let l of metamorphLetters) {
-        if (!l.converged) {
-          allConverged = false;
-          // 3D easing with slight wobble
-          l.x += (l.targetX - l.x) * l.speed;
-          l.y += (l.targetY - l.y) * l.speed;
-          l.alpha = Math.min(1, l.alpha + 0.045);
-          const dx = Math.abs(l.x - l.targetX);
-          const dy = Math.abs(l.y - l.targetY);
-          if (dx < 2.5 && dy < 2.5) {
-            l.converged = true;
-            l.x = l.targetX;
-            l.y = l.targetY;
-          }
-        }
-        
-        // 3D shadow & glow effect for each letter
-        matrixCtx.save();
-        const glowAlpha = l.alpha * 0.9;
-        const scaleVal = l.converged ? (1 + timeFactor * 0.1) : l.scale;
-        matrixCtx.font = `bold ${32 * scaleVal}px 'Fira Code', 'Courier New', monospace`;
-        matrixCtx.shadowBlur = 20;
-        matrixCtx.shadowColor = `rgba(51, 255, 153, ${glowAlpha * 0.9})`;
-        
-        // 3D perspective transform simulation
-        const gradient = matrixCtx.createLinearGradient(l.x - 10, l.y - 20, l.x + 15, l.y + 5);
-        gradient.addColorStop(0, `rgba(70, 255, 140, ${glowAlpha})`);
-        gradient.addColorStop(1, `rgba(30, 210, 100, ${glowAlpha * 0.8})`);
-        matrixCtx.fillStyle = gradient;
-        
-        // additional neon stroke
-        matrixCtx.fillText(l.char, l.x, l.y);
-        matrixCtx.shadowBlur = 8;
-        matrixCtx.fillStyle = `rgba(255, 255, 200, ${l.alpha * 0.5})`;
-        matrixCtx.fillText(l.char, l.x - 1, l.y - 1);
-        matrixCtx.restore();
-      }
-      
-      if (allConverged && metamorphosisPhase === 1) {
-        metamorphosisPhase = 2; // shimmer and hold
-        setTimeout(() => {
-          metamorphosisPhase = 3; // fade out overlay
-          if (overlay) overlay.classList.add('fade-out');
-          setTimeout(() => {
-            if (overlay) overlay.style.display = 'none';
-            if (matrixAnimationId) cancelAnimationFrame(matrixAnimationId);
-          }, 900);
-        }, 1400);
-      }
-      
-      if (metamorphosisPhase === 2) {
-        // Pulsing glow before disappearing
-        const pulse = 0.7 + Math.sin(now * 0.012) * 0.25;
-        for (let l of metamorphLetters) {
-          matrixCtx.save();
-          matrixCtx.font = `bold 34px 'Fira Code', monospace`;
-          matrixCtx.shadowBlur = 25;
-          matrixCtx.shadowColor = `rgba(100, 255, 170, ${0.6 + pulse * 0.3})`;
-          matrixCtx.fillStyle = `rgba(80, 255, 150, ${0.8 + pulse * 0.2})`;
-          matrixCtx.fillText(l.char, l.x, l.y);
-          matrixCtx.restore();
-        }
-      }
-    }
-    
-    // RAIN LOOP + AUTO METAMORPHOSIS TRIGGER
-    let rainStartTime = 0;
-    function startEpicMatrix() {
-      init3DRain();
-      rainStartTime = performance.now();
-      
-      function rainLoop() {
-        if (!matrixCanvas || !matrixCtx) return;
-        if (metamorphosisPhase === 0) {
-          draw3DRain();
-          // After 2.6 seconds of 3D rain -> start metamorphosis assembly
-          if (performance.now() - rainStartTime > 2600) {
-            spawnMetamorphosis();
-          }
-          matrixAnimationId = requestAnimationFrame(rainLoop);
-        } 
-        else if (metamorphosisPhase === 1 || metamorphosisPhase === 2) {
-          updateMetamorphosis();
-          matrixAnimationId = requestAnimationFrame(rainLoop);
-        }
-        else if (metamorphosisPhase === 3) {
-          updateMetamorphosis(); // final fade draws
-          matrixAnimationId = requestAnimationFrame(rainLoop);
-        }
-        else {
-          if (matrixAnimationId) cancelAnimationFrame(matrixAnimationId);
-        }
-      }
-      rainLoop();
-    }
-    
-    window.addEventListener('resize', () => {
-      if (overlay && overlay.style.display !== 'none' && matrixCanvas && metamorphosisPhase === 0) {
-        screenWidth = window.innerWidth;
-        screenHeight = window.innerHeight;
-        matrixCanvas.width = screenWidth;
-        matrixCanvas.height = screenHeight;
-        init3DRain();
-      }
-    });
-    
-    // INIT MATRIX EPIC SHOW
-    setTimeout(() => {
-      if (matrixCanvas) {
-        matrixCtx = matrixCanvas.getContext('2d');
-        startEpicMatrix();
-      }
-    }, 50);
-    
-    // ============================================================
-    // TURTLE GRAPHICS ENGINE (ORIGINAL FUNCTIONS & WIRING)
-    // ============================================================
-    const canvas = document.getElementById("turtleCanvas");
-    const ctx = canvas.getContext("2d");
-    
-    let turtle = {
-      x: 0,
-      y: 0,
-      angle: 0,
-      pen: true
-    };
-    
-    const consoleHistory = document.getElementById("consoleHistory");
-    const penStatusSpan = document.getElementById("penStatus");
-    const desktopCmd = document.getElementById("cmd");
-    const mobileCommand = document.getElementById("mobileCommand");
-    const mobileSubmit = document.getElementById("mobileSubmit");
-    
-    function updatePenIndicator() {
-      penStatusSpan.innerText = turtle.pen ? "DOWN ✍️" : "UP ✏️";
-      penStatusSpan.style.color = turtle.pen ? "#33ff99" : "#ffaa33";
-    }
-    
-    function drawGrid() {
-      ctx.save();
-      ctx.globalAlpha = 0.12;
-      ctx.strokeStyle = "#33ff99";
-      ctx.lineWidth = 0.8;
-      for (let i = 0; i < canvas.width; i += 40) {
-        ctx.beginPath();
-        ctx.moveTo(i, 0);
-        ctx.lineTo(i, canvas.height);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0, i);
-        ctx.lineTo(canvas.width, i);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-    
-    function setupCanvasStyle() {
-      ctx.lineWidth = 3.5;
-      ctx.strokeStyle = "#33ff99";
-      ctx.shadowColor = "#33ff99";
-      ctx.shadowBlur = 4;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.fillStyle = "#33ff99";
-      ctx.globalAlpha = 1.0;
-    }
-    
-    function drawTurtleCursor() {
-      ctx.save();
-      ctx.shadowBlur = 4;
-      ctx.fillStyle = "#33ff99";
-      ctx.strokeStyle = "#ccffcc";
-      ctx.lineWidth = 1.8;
-      const size = 11;
-      const angleRad = turtle.angle * Math.PI / 180;
-      const headX = turtle.x + Math.cos(angleRad) * size;
-      const headY = turtle.y + Math.sin(angleRad) * size;
-      const leftAngle = angleRad + 2.3;
-      const rightAngle = angleRad - 2.3;
-      const leftX = turtle.x + Math.cos(leftAngle) * (size * 0.75);
-      const leftY = turtle.y + Math.sin(leftAngle) * (size * 0.75);
-      const rightX = turtle.x + Math.cos(rightAngle) * (size * 0.75);
-      const rightY = turtle.y + Math.sin(rightAngle) * (size * 0.75);
-      ctx.beginPath();
-      ctx.moveTo(headX, headY);
-      ctx.lineTo(leftX, leftY);
-      ctx.lineTo(rightX, rightY);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(turtle.x + Math.cos(angleRad) * 5.5, turtle.y + Math.sin(angleRad) * 5.5, 2.2, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffffff";
-      ctx.fill();
-      ctx.fillStyle = "#000";
-      ctx.beginPath();
-      ctx.arc(turtle.x + Math.cos(angleRad) * 6, turtle.y + Math.sin(angleRad) * 6, 1.1, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-    
-    function clearCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawGrid();
-      setupCanvasStyle();
-      drawTurtleCursor();
-    }
-    
-    function moveTurtle(distance) {
-      const rad = turtle.angle * Math.PI / 180;
-      const newX = turtle.x + Math.cos(rad) * distance;
-      const newY = turtle.y + Math.sin(rad) * distance;
-      if (turtle.pen) {
-        ctx.beginPath();
-        ctx.moveTo(turtle.x, turtle.y);
-        ctx.lineTo(newX, newY);
-        ctx.stroke();
-      }
-      turtle.x = Math.min(Math.max(newX, 5), canvas.width - 5);
-      turtle.y = Math.min(Math.max(newY, 5), canvas.height - 5);
-      drawTurtleCursor();
-    }
-    
-    function execCommand(cmd, val = null) {
-      switch(cmd) {
-        case "fd": if(val !== null) moveTurtle(val); break;
-        case "bk": if(val !== null) moveTurtle(-val); break;
-        case "rt": if(val !== null) turtle.angle += val; drawTurtleCursor(); break;
-        case "lt": if(val !== null) turtle.angle -= val; drawTurtleCursor(); break;
-        case "pu": turtle.pen = false; updatePenIndicator(); drawTurtleCursor(); break;
-        case "pd": turtle.pen = true; updatePenIndicator(); drawTurtleCursor(); break;
-        case "home": turtle.x = canvas.width / 2; turtle.y = canvas.height / 2; turtle.angle = 0; drawTurtleCursor(); break;
-        case "clear": clearCanvas(); break;
-        default: return false;
-      }
-      return true;
-    }
-    
-    function addConsoleLine(text) {
-      const lineDiv = document.createElement("div");
-      lineDiv.className = "line";
-      lineDiv.textContent = text;
-      consoleHistory.appendChild(lineDiv);
-      consoleHistory.scrollTop = consoleHistory.scrollHeight;
-      while(consoleHistory.children.length > 220) consoleHistory.removeChild(consoleHistory.firstChild);
-    }
-    
-    function tokenizeLogo(input) {
-      let processed = input.replace(/\[/g, ' [ ').replace(/\]/g, ' ] ');
-      return processed.trim().split(/\s+/).filter(t => t.length > 0);
-    }
-    
-    function interpretTokens(tokens, startIdx = 0, endIdx = null) {
-      let idx = startIdx;
-      const limit = endIdx === null ? tokens.length : endIdx;
-      while (idx < limit) {
-        const token = tokens[idx];
-        if (token === "repeat") {
-          if (idx + 2 >= limit) { addConsoleLine("repeat syntax error"); return idx + 1; }
-          const repeatCount = parseInt(tokens[idx + 1], 10);
-          if (isNaN(repeatCount)) { addConsoleLine("repeat: invalid number"); return idx + 2; }
-          if (tokens[idx + 2] !== "[") { addConsoleLine("repeat: missing '['"); return idx + 2; }
-          let bracketDepth = 1;
-          let closingPos = idx + 3;
-          while (closingPos < limit && bracketDepth > 0) {
-            if (tokens[closingPos] === "[") bracketDepth++;
-            if (tokens[closingPos] === "]") bracketDepth--;
-            closingPos++;
-          }
-          if (bracketDepth !== 0) { addConsoleLine("repeat: unmatched brackets"); return closingPos; }
-          const blockTokens = tokens.slice(idx + 3, closingPos - 1);
-          for (let i = 0; i < repeatCount; i++) interpretTokens(blockTokens, 0, blockTokens.length);
-          idx = closingPos;
-          continue;
-        }
-        const lower = token.toLowerCase();
-        if (["fd", "bk", "rt", "lt"].includes(lower)) {
-          if (idx + 1 >= limit) { addConsoleLine(`missing argument for ${token}`); idx++; continue; }
-          const arg = parseFloat(tokens[idx + 1]);
-          if (isNaN(arg)) { addConsoleLine(`expected number after ${token}`); idx += 2; continue; }
-          execCommand(lower, arg);
-          idx += 2;
-          continue;
-        }
-        if (["pu", "pd", "home", "clear"].includes(lower)) { execCommand(lower); idx++; continue; }
-        if (token === "]") break;
-        addConsoleLine(`unknown: ${token}`);
-        idx++;
-      }
-      return idx;
-    }
-    
-    function runLogoCommand(rawInput) {
-      const trimmed = rawInput.trim();
-      if (trimmed === "") return;
-      addConsoleLine(`> ${trimmed}`);
-      const tokens = tokenizeLogo(trimmed);
-      if (tokens.length === 0) return;
-      try { interpretTokens(tokens); } catch(e) { addConsoleLine(`ERROR: ${e.message}`); }
-      drawTurtleCursor();
-      updatePenIndicator();
-    }
-    
-    function resizeCanvasAndCenter() {
-      const wrapper = document.querySelector(".canvas-wrapper");
-      const rect = wrapper.getBoundingClientRect();
-      const oldWidth = canvas.width;
-      const oldHeight = canvas.height;
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      if (oldWidth > 0 && oldHeight > 0 && turtle.x > 0 && turtle.y > 0) {
-        const scaleX = canvas.width / oldWidth;
-        const scaleY = canvas.height / oldHeight;
-        turtle.x = turtle.x * scaleX;
-        turtle.y = turtle.y * scaleY;
-      } else { turtle.x = canvas.width / 2; turtle.y = canvas.height / 2; }
-      turtle.x = Math.min(Math.max(turtle.x, 10), canvas.width - 10);
-      turtle.y = Math.min(Math.max(turtle.y, 10), canvas.height - 10);
-      drawGrid();
-      setupCanvasStyle();
-      drawTurtleCursor();
-    }
-    
-    function attachCanvasResize() {
-      const wrapper = document.querySelector(".canvas-wrapper");
-      if (!wrapper) return;
-      const resizeHandler = () => { resizeCanvasAndCenter(); updatePenIndicator(); };
-      window.addEventListener("resize", () => { setTimeout(resizeHandler, 20); });
-      resizeHandler();
-      const obs = new ResizeObserver(() => resizeHandler());
-      obs.observe(wrapper);
-    }
-    
-    function initUI() {
-      attachCanvasResize();
-      resizeCanvasAndCenter();
-      setupCanvasStyle();
-      drawGrid();
-      turtle.angle = 0;
-      turtle.pen = true;
-      drawTurtleCursor();
-      updatePenIndicator();
-      addConsoleLine("🐢 ONN LOGO ENGINE — 3D MATRIX METAMORPHOSIS READY");
-      addConsoleLine("✨ 3D RAIN → LETTERS FORM → TURTLE POWER");
-      addConsoleLine("🎨 Commands: fd, bk, rt, lt, pu, pd, home, clear, repeat");
-      
-      desktopCmd.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); const val = desktopCmd.value; if (val) runLogoCommand(val); desktopCmd.value = ""; desktopCmd.focus(); } });
-      mobileCommand.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); const val = mobileCommand.value; if (val) runLogoCommand(val); mobileCommand.value = ""; mobileCommand.blur(); } });
-      mobileSubmit.addEventListener("click", (e) => { e.preventDefault(); const val = mobileCommand.value; if (val) runLogoCommand(val); mobileCommand.value = ""; mobileCommand.blur(); });
-      document.querySelectorAll(".quick-cmd").forEach(btn => { btn.addEventListener("click", (e) => { e.preventDefault(); const cmd = btn.dataset.cmd; if(cmd) runLogoCommand(cmd); }); });
-      const backBtn = document.getElementById("backBtn"); backBtn.addEventListener("click", (e) => { e.preventDefault(); if(document.referrer && document.referrer.includes(window.location.host)) window.history.back(); else window.location.href = "toys.html"; });
-    }
-    initUI();
-  })();
+    return idx;
+  }
+  function runCommand(raw) {
+    const trimmed = raw.trim();
+    if(trimmed === "") return;
+    addLine(`> ${trimmed}`);
+    const tokens = tokenize(trimmed);
+    if(tokens.length === 0) return;
+    try { interpret(tokens); } catch(e) { addLine(`ERROR: ${e.message}`); }
+    drawTurtle();
+    updatePenIndicator();
+  }
+  function resizeCanvas() {
+    const wrapper = document.querySelector(".canvas-wrapper");
+    const rect = wrapper.getBoundingClientRect();
+    const oldW = canvas.width;
+    const oldH = canvas.height;
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    if(oldW > 0 && oldH > 0 && turtle.x > 0 && turtle.y > 0) {
+      turtle.x = turtle.x * (canvas.width / oldW);
+      turtle.y = turtle.y * (canvas.height / oldH);
+    } else { turtle.x = canvas.width/2; turtle.y = canvas.height/2; }
+    turtle.x = Math.min(Math.max(turtle.x,10), canvas.width-10);
+    turtle.y = Math.min(Math.max(turtle.y,10), canvas.height-10);
+    clearCanvas();
+  }
+  window.addEventListener("resize", () => setTimeout(resizeCanvas, 50));
+  resizeCanvas();
+  updatePenIndicator();
+  addLine("🐢 ONN LOGO ENGINE READY");
+  addLine("Commands: fd, bk, rt, lt, pu, pd, home, clear, repeat");
+  desktopCmd.addEventListener("keydown", (e) => { if(e.key === "Enter") { e.preventDefault(); runCommand(desktopCmd.value); desktopCmd.value = ""; desktopCmd.focus(); } });
+  mobileSubmit.addEventListener("click", () => { runCommand(mobileCommand.value); mobileCommand.value = ""; mobileCommand.blur(); });
+  mobileCommand.addEventListener("keydown", (e) => { if(e.key === "Enter") { e.preventDefault(); runCommand(mobileCommand.value); mobileCommand.value = ""; mobileCommand.blur(); } });
+  document.querySelectorAll(".quick-cmd").forEach(btn => { btn.addEventListener("click", () => { runCommand(btn.dataset.cmd); }); });
 </script>
+<script src="matrix-nav.js"></script>
 </body>
 </html>
