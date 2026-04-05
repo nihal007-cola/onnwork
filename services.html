@@ -1,192 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>THINGS I MIGHT DO FOR YOU</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>SERVICES · ONN LAB</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
-    body {
-      margin: 0;
-      background: black;
-      color: #33ff99;
-      font-family: monospace;
-      padding: 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      opacity: 0.12;
-    }
-
-    h2 {
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .box {
-      border: 1px solid rgba(0,255,100,0.3);
-      padding: 15px;
-      margin-top: 15px;
-      background: rgba(0,0,0,0.5);
-      box-shadow: 0 0 10px rgba(0,255,100,0.1);
-      transition: all 0.25s ease;
-      position: relative;
-      z-index: 2;
-    }
-
-    .box:hover {
-      box-shadow: 0 0 20px rgba(0,255,100,0.4);
-      background: rgba(0,255,100,0.05);
-    }
-
-    .title {
-      font-size: 15px;
-      margin-bottom: 6px;
-    }
-
-    .desc {
-      font-size: 13px;
-      opacity: 0.85;
-      line-height: 1.5;
-    }
-
-    a {
-      color: #33ff99;
-      text-decoration: none;
-      display: inline-block;
-      margin-bottom: 20px;
-      position: relative;
-      z-index: 2;
-    }
-
-    #transition {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      z-index: 9999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.35s ease;
-    }
-
-    #transition.active {
-      opacity: 1;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: black; color: #33ff99; font-family: 'Courier New', monospace; overflow-x: hidden; }
+    canvas#matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.35; pointer-events: none; }
+    .sticky-header { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #33ff99; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .logo { height: 40px; width: auto; }
+    .nav-links { display: flex; gap: 12px; }
+    .nav-link { color: #33ff99; text-decoration: none; font-size: 14px; font-family: monospace; border: 1px solid #33ff99; padding: 5px 12px; border-radius: 20px; transition: all 0.2s ease; }
+    .nav-link:hover { background: #33ff99; color: black; box-shadow: 0 0 10px #33ff99; }
+    .header-right { display: flex; gap: 12px; }
+    .contact-icon { color: #33ff99; text-decoration: none; font-size: 20px; padding: 5px 10px; border: 1px solid #33ff99; border-radius: 30px; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 5px; }
+    .contact-icon span { font-size: 12px; }
+    .contact-icon:hover { background: #33ff99; color: black; box-shadow: 0 0 10px #33ff99; }
+    .content { position: relative; z-index: 2; padding: 30px 20px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 28px; margin-bottom: 10px; border-left: 4px solid #33ff99; padding-left: 15px; }
+    .sub { margin-bottom: 30px; opacity: 0.7; font-size: 14px; }
+    .box { border: 1px solid #33ff99; background: rgba(0,0,0,0.7); padding: 20px; margin-bottom: 18px; border-radius: 12px; transition: all 0.25s ease; }
+    .box:hover { transform: translateX(8px); background: rgba(51,255,153,0.1); box-shadow: 0 0 18px rgba(51,255,153,0.3); }
+    .title { font-size: 20px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+    .desc { font-size: 13px; line-height: 1.5; opacity: 0.85; }
+    @media (max-width: 700px) {
+      .sticky-header { flex-direction: column; text-align: center; }
+      .contact-icon span { display: none; }
+      .title { font-size: 16px; }
+      h1 { font-size: 22px; }
     }
   </style>
 </head>
-
 <body>
-
-<canvas id="matrix"></canvas>
-
-<a href="index.html">← BACK</a>
-
-<h2>> THINGS I MIGHT DO FOR YOU</h2>
-
-<div class="box">
-  <div class="title">Production Capacity Allocation</div>
-  <div class="desc">
-    Connecting brands with the right manufacturing units based on capacity, capability, and timelines. 
-    Focused on menswear production with practical matchmaking across verified factories.
+<canvas id="matrix-bg"></canvas>
+<div class="sticky-header">
+  <div class="header-left">
+    <img src="logo.png" class="logo" alt="ONN Logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'black\'/%3E%3Ctext x=\'50\' y=\'68\' font-size=\'48\' text-anchor=\'middle\' fill=\'%2333ff99\'%3EONN%3C/text%3E%3C/svg%3E'">
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">HOME</a>
+      <a href="#" id="backButton" class="nav-link">← BACK</a>
+    </div>
+  </div>
+  <div class="header-right">
+    <a href="https://wa.me/917044358282" target="_blank" class="contact-icon">💬 <span>CHAT</span></a>
+    <a href="tel:+917044358282" class="contact-icon">📞 <span>CALL</span></a>
+    <a href="mailto:onn@jamesmoriarty.in" class="contact-icon">✉️ <span>MAIL</span></a>
   </div>
 </div>
+<div class="content">
+  <h1>> SERVICES_</h1>
+  <div class="sub">// things i might do for you</div>
 
-<div class="box">
-  <div class="title">Order Sourcing for Factories</div>
-  <div class="desc">
-    Supporting factories in acquiring consistent order flow by linking them with relevant brands. 
-    Structured approach to align production strengths with market demand.
+  <div class="box">
+    <div class="title">🏭 Production Capacity Allocation</div>
+    <div class="desc">Connecting brands with the right manufacturing units based on capacity, capability, and timelines. Focused on menswear production with practical matchmaking across verified factories.</div>
+  </div>
+
+  <div class="box">
+    <div class="title">📦 Order Sourcing for Factories</div>
+    <div class="desc">Supporting factories in acquiring consistent order flow by linking them with relevant brands. Structured approach to align production strengths with market demand.</div>
+  </div>
+
+  <div class="box">
+    <div class="title">📊 Production & Merchandising Support</div>
+    <div class="desc">Assistance in structuring production and merchandising processes. SOP-driven execution to improve clarity, tracking, and operational efficiency.</div>
+  </div>
+
+  <div class="box">
+    <div class="title">✅ Quality Assurance</div>
+    <div class="desc">Basic quality control systems and checks to ensure production consistency. Focus on practical implementation rather than over-engineered compliance.</div>
   </div>
 </div>
-
-<div class="box">
-  <div class="title">Production & Merchandising Support</div>
-  <div class="desc">
-    Assistance in structuring production and merchandising processes. 
-    SOP-driven execution to improve clarity, tracking, and operational efficiency.
-  </div>
-</div>
-
-<div class="box">
-  <div class="title">Quality Assurance</div>
-  <div class="desc">
-    Basic quality control systems and checks to ensure production consistency. 
-    Focus on practical implementation rather than over-engineered compliance.
-  </div>
-</div>
-
-<!-- TRANSITION -->
-<div id="transition"></div>
-
 <script>
-// MATRIX (SUBTLE)
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-
-function resizeCanvas() {
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
-}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-
-const letters = "01";
-const fontSize = 14;
-let columns = Math.floor(canvas.width / fontSize);
-let drops = [];
-
-for (let x = 0; x < columns; x++) {
-  drops[x] = Math.random() * canvas.height;
-}
-
-function draw() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.07)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#00ff88";
-  ctx.font = fontSize + "px monospace";
-
-  for (let i = 0; i < drops.length; i++) {
-    const text = letters[Math.floor(Math.random() * letters.length)];
-    ctx.fillText(text, i * fontSize, drops[i]);
-
-    if (drops[i] > canvas.height && Math.random() > 0.98) {
-      drops[i] = 0;
-    }
-
-    drops[i] += 0.6;
+  const canvas = document.getElementById("matrix-bg");
+  const ctx = canvas.getContext("2d");
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+  const letters = "01ONNWORKLAB";
+  const fontSize = 14;
+  let columns = Math.floor(canvas.width / fontSize);
+  let drops = [];
+  function initMatrix() {
+    columns = Math.floor(canvas.width / fontSize);
+    drops = [];
+    for (let x = 0; x < columns; x++) drops[x] = Math.random() * -100;
   }
-}
-
-setInterval(draw, 60);
-
-
-// PAGE TRANSITION
-const links = document.querySelectorAll("a");
-
-links.forEach(link => {
-  link.addEventListener("click", function(e) {
-    if (this.href && this.target !== "_blank") {
-      e.preventDefault();
-      const overlay = document.getElementById("transition");
-      overlay.classList.add("active");
-
-      setTimeout(() => {
-        window.location.href = this.href;
-      }, 300);
+  initMatrix();
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#33ff99";
+    ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters.charAt(Math.floor(Math.random() * letters.length));
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
     }
+    requestAnimationFrame(drawMatrix);
+  }
+  drawMatrix();
+  window.addEventListener("resize", () => initMatrix());
+  document.getElementById("backButton").addEventListener("click", function(e) {
+    e.preventDefault();
+    if (document.referrer && document.referrer.includes(window.location.host)) window.history.back();
+    else window.location.href = "index.html";
   });
-});
 </script>
 <script src="matrix-nav.js"></script>
 </body>
