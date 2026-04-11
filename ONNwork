@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONNwork</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI;
+  background:linear-gradient(135deg,#e8f0ff,#d6e4ff);
+}
+
+/* 🔥 HEADER */
+.header{
+  position:sticky;
+  top:0;
+  background:#071a3a;
+  padding:12px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  z-index:100;
+}
+
+.left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:white;
+  font-weight:900;
+  font-size:20px;
+}
+
+.logo{
+  height:32px;
+}
+
+.right button{
+  margin-left:8px;
+  padding:8px 14px;
+  border:none;
+  border-radius:8px;
+  font-weight:800;
+  background:#1fbf6b;
+  color:white;
+  cursor:pointer;
+}
+
+/* MAIN */
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+  margin-top:20px;
+}
+
+.group{
+  background:linear-gradient(135deg,#ffffff,#f0f6ff);
+  padding:20px;
+  border-radius:14px;
+  text-align:center;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  transition:.2s;
+}
+
+.group:hover{
+  transform:translateY(-4px);
+}
+
+/* MODALS */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.box{
+  background:white;
+  padding:20px;
+  border-radius:14px;
+  width:90%;
+  max-width:420px;
+}
+
+.btn{
+  margin:6px;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  background:#071a3a;
+  color:white;
+  cursor:pointer;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔥 NEW HEADER -->
+<div class="header">
+
+  <div class="left">
+    <img src="https://drive.google.com/uc?export=view&id=1V5acb_idqSOzg-nc7MjifOzNB3GvzOFY" class="logo">
+    ONNwork
+  </div>
+
+  <div class="right">
+    <button onclick="wa()">WhatsApp</button>
+    <button onclick="call()">Call</button>
+    <button onclick="mail()">Mail</button>
+  </div>
+
+</div>
+
+<div class="container">
+
+<div class="grid" id="groups"></div>
+
+</div>
+
+<!-- GROUP MODAL -->
+<div class="modal" id="groupModal">
+  <div class="box">
+    <h3 id="groupTitle"></h3>
+    <div id="subFeatures"></div>
+    <button class="btn" onclick="closeGroup()">Close</button>
+  </div>
+</div>
+
+<!-- LEAD MODAL -->
+<div class="modal" id="leadModal">
+  <div class="box">
+    <h3 id="featureTitle"></h3>
+
+    <input id="name" placeholder="Your Name">
+    <input id="phone" placeholder="Phone Number">
+
+    <button class="btn" onclick="submitLead()">Interested</button>
+    <button class="btn" onclick="closeLead()">Close</button>
+  </div>
+</div>
+
+<script>
+
+const TELEGRAM_BOT = "YOUR_BOT_TOKEN";
+const CHAT_ID = "YOUR_CHAT_ID";
+
+const groups = {
+"Inventory":["Real-time inventory","Stock alerts","Inventory sync","Stock control","Inventory accuracy","Live stock visibility"],
+"Sales":["Auto billing","Sales dashboard","Faster checkout","Order management","Profit analytics","Customer insights"],
+"Operations":["Workflow automation","Process control","Operational speed","Efficiency boost","Staff tracking","Time saving"],
+"Analytics":["Smart analytics","Growth tracking","Business insights","Better reporting","Data visibility","Central dashboard"],
+"Automation":["Data automation","Reduced manual work","Automated updates","System automation","Workflow sync","Cloud sync"],
+"Security":["Audit logs","Reduced leakage","Business transparency","Remote monitoring","Central control","Smart business"],
+"Mobility":["Mobile control","Remote monitoring","Live reporting","Scalable system","ERP integration","Central control"],
+"Management":["Better decision making","Operational clarity","Performance tracking","Organized business","Better planning","Growth insights"],
+"Finance":["Profit analytics","Reduced leakage","Better reporting","Smart alerts","Business intelligence","Real-time control"],
+"System":["Smart operations","Process efficiency","Central control","Inventory management","ERP integration","Data visibility"]
+};
+
+const container = document.getElementById("groups");
+
+Object.keys(groups).forEach(g=>{
+  let div=document.createElement("div");
+  div.className="group";
+  div.innerText=g;
+  div.onclick=()=>openGroup(g);
+  container.appendChild(div);
+});
+
+let currentFeature="";
+
+function openGroup(g){
+  document.getElementById("groupModal").style.display="flex";
+  document.getElementById("groupTitle").innerText=g;
+
+  let area=document.getElementById("subFeatures");
+  area.innerHTML="";
+
+  groups[g].forEach(f=>{
+    let btn=document.createElement("button");
+    btn.className="btn";
+    btn.innerText=f;
+    btn.onclick=()=>{
+      currentFeature=f;
+      closeGroup();
+      openLead(f);
+    };
+    area.appendChild(btn);
+  });
+}
+
+function closeGroup(){
+  document.getElementById("groupModal").style.display="none";
+}
+
+function openLead(f){
+  document.getElementById("leadModal").style.display="flex";
+  document.getElementById("featureTitle").innerText=f;
+}
+
+function closeLead(){
+  document.getElementById("leadModal").style.display="none";
+}
+
+function submitLead(){
+  let name=document.getElementById("name").value;
+  let phone=document.getElementById("phone").value;
+
+  let text=`🔥 ONN Lead\nFeature: ${currentFeature}\nName: ${name}\nPhone: ${phone}`;
+
+  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT}/sendMessage`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      chat_id:CHAT_ID,
+      text:text
+    })
+  });
+
+  window.open(`https://wa.me/917044358282?text=Hi, I am interested in ${currentFeature}`);
+
+  alert("We will contact you 🚀");
+  closeLead();
+}
+
+/* CONTACT ACTIONS */
+function wa(){
+  window.open("https://wa.me/917044358282");
+}
+function call(){
+  window.location.href="tel:+917044358282";
+}
+function mail(){
+  window.location.href="mailto:onn@jamesmoriarty.in";
+}
+
+</script>
+
+</body>
+</html>
