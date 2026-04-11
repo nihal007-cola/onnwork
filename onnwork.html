@@ -146,6 +146,18 @@ input{
   font-weight:700;
 }
 
+/* 🔴 CLOSE BUTTON (UPDATED) */
+.btn-close{
+  padding:10px 20px;
+  margin:10px 6px;
+  border:none;
+  border-radius:20px;
+  background:#e53935;
+  color:white;
+  cursor:pointer;
+  font-weight:700;
+}
+
 /* TOAST */
 .toast{
   position:fixed;
@@ -171,7 +183,6 @@ input{
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <div class="left">
     <img src="logo.png" class="logo">
@@ -184,21 +195,15 @@ input{
   </div>
 </div>
 
-<!-- INTRO -->
 <div class="intro">
   <h1>Control your business. In real time.</h1>
 
   <p>
   ONNwork is a unified ERP platform that brings your sales, inventory, and operations into one system.
-  It replaces multiple tools—billing software, spreadsheets, and manual tracking—with a simple, real-time solution.
   </p>
 
   <p>
-  Every sale updates inventory, tracks raw material consumption, and shows you what’s selling, what’s stuck, and what needs action.
-  </p>
-
-  <p>
-  If you want more control, speed, and clarity in your business, ONNwork can help.
+  Every sale updates inventory, tracks raw material consumption, and shows you what’s selling.
   </p>
 
   <b>Reply “DEMO” to explore.</b>
@@ -214,7 +219,7 @@ input{
     <img src="logo.png" class="modal-logo">
     <h3 id="groupTitle"></h3>
     <div id="subFeatures"></div>
-    <button class="btn" onclick="closeGroup()">Close</button>
+    <button class="btn-close" onclick="closeGroup()">❌ Close</button>
   </div>
 </div>
 
@@ -228,7 +233,7 @@ input{
     <input id="phone" placeholder="Phone Number">
 
     <button class="btn" onclick="submitLead()">Interested</button>
-    <button class="btn" onclick="closeLead()">Close</button>
+    <button class="btn-close" onclick="closeLead()">❌ Close</button>
   </div>
 </div>
 
@@ -241,20 +246,20 @@ input{
 <script>
 
 /* 🔐 TELEGRAM CONFIG */
-const BOT_TOKEN = "PUT_YOUR_BOT_TOKEN";
-const CHAT_ID = "PUT_YOUR_CHAT_ID";
+const BOT_TOKEN = "PASTE_YOUR_BOT_TOKEN";
+const CHAT_ID = "PASTE_YOUR_CHAT_ID";
 
 const groups = {
-"Inventory":["Real-time inventory","Stock alerts","Inventory sync","Stock control","Inventory accuracy","Live stock visibility"],
-"Sales":["Auto billing","Sales dashboard","Faster checkout","Order management","Profit analytics","Customer insights"],
-"Operations":["Workflow automation","Process control","Operational speed","Efficiency boost","Staff tracking","Time saving"],
-"Analytics":["Smart analytics","Growth tracking","Business insights","Better reporting","Data visibility","Central dashboard"],
-"Automation":["Data automation","Reduced manual work","Automated updates","System automation","Workflow sync","Cloud sync"],
-"Security":["Audit logs","Reduced leakage","Business transparency","Remote monitoring","Central control","Smart business"],
-"Mobility":["Mobile control","Live reporting","Scalable system","ERP integration","Central control","Remote monitoring"],
-"Management":["Better decision making","Operational clarity","Performance tracking","Organized business","Better planning","Growth insights"],
-"Finance":["Profit analytics","Reduced leakage","Better reporting","Smart alerts","Business intelligence","Real-time control"],
-"System":["Smart operations","Process efficiency","Central control","Inventory management","ERP integration","Data visibility"]
+"Inventory":["Real-time inventory","Stock alerts","Inventory sync"],
+"Sales":["Auto billing","Sales dashboard","Faster checkout"],
+"Operations":["Workflow automation","Process control","Efficiency boost"],
+"Analytics":["Smart analytics","Growth tracking","Business insights"],
+"Automation":["Data automation","Reduced manual work","Cloud sync"],
+"Security":["Audit logs","Reduced leakage","Remote monitoring"],
+"Mobility":["Mobile control","Live reporting","ERP integration"],
+"Management":["Better decisions","Performance tracking","Growth insights"],
+"Finance":["Profit analytics","Smart alerts","Real-time control"],
+"System":["Smart operations","Central control","Data visibility"]
 };
 
 const container = document.getElementById("groups");
@@ -303,10 +308,20 @@ function closeLead(){
 }
 
 function submitLead(){
-  let name=document.getElementById("name").value;
-  let phone=document.getElementById("phone").value;
+  let name=document.getElementById("name").value.trim();
+  let phone=document.getElementById("phone").value.trim();
 
-  let text=`🔥 ONN Lead\nFeature: ${currentFeature}\nName: ${name}\nPhone: ${phone}`;
+  if(!name || !phone){
+    alert("Enter name & phone");
+    return;
+  }
+
+  let text =
+`🔥 ONNWORK LEAD
+Feature: ${currentFeature}
+Name: ${name}
+Phone: ${phone}
+Time: ${new Date().toLocaleString()}`;
 
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
     method:"POST",
