@@ -201,7 +201,7 @@
       margin-top: 4px;
     }
 
-    .terminal-log {
+    .terminal-log-panel {
       margin-bottom: 20px;
       padding: 16px 18px;
       background: rgba(0, 0, 0, 0.4);
@@ -217,13 +217,25 @@
       line-height: 1.6;
       display: flex;
       align-items: center;
+      justify-content: space-between;
     }
 
-    .log-line::before {
+    .log-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .log-left::before {
       content: ">";
       margin-right: 10px;
       opacity: 0.7;
       font-weight: bold;
+    }
+
+    .log-status {
+      opacity: 0.9;
+      font-size: 11px;
+      letter-spacing: 0.5px;
     }
 
     .cursor-effect {
@@ -354,15 +366,27 @@
       </div>
     </div>
 
-    <div class="terminal-log">
-      <div class="log-line">parsing production data... <span style="opacity:0.5; margin-left:auto;">[OK]</span></div>
-      <div class="log-line">syncing inventory... <span style="opacity:0.5; margin-left:auto;">[OK]</span></div>
-      <div class="log-line">building control layer... <span style="opacity:0.5; margin-left:auto;">[OK]</span></div>
-      <div class="log-line">system ready <span class="cursor-effect"></span></div>
+    <div class="terminal-log-panel">
+      <div class="log-line">
+        <span class="log-left">parsing production data...</span>
+        <span class="log-status">✔</span>
+      </div>
+      <div class="log-line">
+        <span class="log-left">syncing inventory...</span>
+        <span class="log-status">✔</span>
+      </div>
+      <div class="log-line">
+        <span class="log-left">building control layer...</span>
+        <span class="log-status">✔</span>
+      </div>
+      <div class="log-line">
+        <span class="log-left">system ready</span>
+        <span class="log-status"><span class="cursor-effect"></span></span>
+      </div>
     </div>
 
     <div class="terminal-footer">
-      > ENTER ONNWORK →
+      > ENTER ONNWORK AUTOMATIONS →
     </div>
 
   </a>
