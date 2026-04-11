@@ -201,7 +201,10 @@
       margin-top: 4px;
     }
 
-    .terminal-log-panel {
+    .log-panel-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
       margin-bottom: 20px;
       padding: 16px 18px;
       background: rgba(0, 0, 0, 0.4);
@@ -209,6 +212,22 @@
       border-left: 3px solid #33ff99;
       font-family: 'Courier New', monospace;
       box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .log-panel-link:hover {
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(51, 255, 153, 0.3);
+      border-left-width: 5px;
+      transform: scale(1.01);
+    }
+
+    .log-panel-link:hover .log-content {
+      transform: translateX(4px);
+    }
+
+    .log-content {
+      transition: transform 0.2s ease;
     }
 
     .log-line {
@@ -330,7 +349,7 @@
 
 <div class="content">
 
-  <a href="onnwork.html" id="dynamic-terminal">
+  <div id="dynamic-terminal">
 
     <div class="terminal-header">
       <div class="terminal-brand">
@@ -366,30 +385,32 @@
       </div>
     </div>
 
-    <div class="terminal-log-panel">
-      <div class="log-line">
-        <span class="log-left">parsing production data...</span>
-        <span class="log-status">✔</span>
+    <a href="onnwork.html" class="log-panel-link">
+      <div class="log-content">
+        <div class="log-line">
+          <span class="log-left">parsing production data...</span>
+          <span class="log-status">✔</span>
+        </div>
+        <div class="log-line">
+          <span class="log-left">syncing inventory...</span>
+          <span class="log-status">✔</span>
+        </div>
+        <div class="log-line">
+          <span class="log-left">building control layer...</span>
+          <span class="log-status">✔</span>
+        </div>
+        <div class="log-line">
+          <span class="log-left">system ready</span>
+          <span class="log-status"><span class="cursor-effect"></span></span>
+        </div>
       </div>
-      <div class="log-line">
-        <span class="log-left">syncing inventory...</span>
-        <span class="log-status">✔</span>
-      </div>
-      <div class="log-line">
-        <span class="log-left">building control layer...</span>
-        <span class="log-status">✔</span>
-      </div>
-      <div class="log-line">
-        <span class="log-left">system ready</span>
-        <span class="log-status"><span class="cursor-effect"></span></span>
-      </div>
-    </div>
+    </a>
 
     <div class="terminal-footer">
       > ENTER ONNWORK AUTOMATIONS →
     </div>
 
-  </a>
+  </div>
 
   <div class="grid">
     <a class="icon-box" href="https://wa.me/917044358282">💬</a>
