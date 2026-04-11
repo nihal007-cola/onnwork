@@ -6,384 +6,257 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
 
     body {
-      margin: 0;
-      background: black;
-      color: #33ff96;
-      font-family: 'Courier New', monospace;
-      overflow-x: hidden;
-      overflow-y: auto;
+      background:black;
+      color:#33ff99;
+      font-family:'Courier New', monospace;
+      overflow:hidden;
     }
 
-    canvas#matrix-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      opacity: 0.35;
-      pointer-events: none;
+    canvas {
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
     }
 
-    /* TRANSLUCENT OVERLAY CANVAS - sits between matrix bg and content */
-    canvas#translucent-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      opacity: 0.85;
-      pointer-events: none;
-      background: radial-gradient(circle at center, rgba(0, 20, 10, 0.6) 0%, rgba(0, 0, 0, 0.85) 100%);
+    #matrix-bg { z-index:0; opacity:0.35; }
+    #morph-layer { z-index:1; pointer-events:none; }
+
+    /* HEADER */
+    .header {
+      position:fixed;
+      top:0;
+      width:100%;
+      z-index:10;
+      display:flex;
+      justify-content:space-between;
+      padding:15px 25px;
+      background:rgba(0,0,0,0.8);
+      border-bottom:1px solid #33ff99;
     }
 
-    /* STICKY HEADER */
-    .sticky-header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(0, 0, 0, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid #33ff99;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
+    .logo { height:40px; }
+
+    .links a {
+      color:#33ff99;
+      margin-left:10px;
+      text-decoration:none;
+      border:1px solid #33ff99;
+      padding:6px 10px;
+      border-radius:20px;
+      transition:0.2s;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
+    .links a:hover {
+      background:#33ff99;
+      color:black;
     }
 
-    .logo {
-      height: 40px;
-      width: auto;
+    /* HERO WINDOW */
+    .portal {
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      width:85%;
+      max-width:900px;
+      padding:30px;
+      border:1px solid #33ff99;
+      border-radius:10px;
+      backdrop-filter:blur(6px);
+      background:rgba(0,0,0,0.6);
+      z-index:5;
+      cursor:pointer;
+      transition:0.3s;
+      overflow:hidden;
     }
 
-    .header-right {
-      display: flex;
-      gap: 12px;
+    .portal:hover {
+      box-shadow:0 0 30px #33ff99;
+      transform:translate(-50%,-50%) scale(1.02);
     }
 
-    .contact-icon {
-      color: #33ff99;
-      text-decoration: none;
-      font-size: 20px;
-      padding: 5px 10px;
-      border: 1px solid #33ff99;
-      border-radius: 30px;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+    .portal::before {
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(120deg, transparent, rgba(51,255,153,0.1), transparent);
+      animation:scan 3s linear infinite;
     }
 
-    .contact-icon span {
-      font-size: 12px;
+    @keyframes scan {
+      0% { transform:translateX(-100%); }
+      100% { transform:translateX(100%); }
     }
 
-    .contact-icon:hover {
-      background: #33ff99;
-      color: black;
-      box-shadow: 0 0 10px #33ff99;
+    .portal-title {
+      font-size:28px;
+      margin-bottom:10px;
+      letter-spacing:2px;
     }
 
-    .content {
-      position: relative;
-      z-index: 2;
-      padding: 30px 20px;
-      max-width: 800px;
-      margin: 0 auto;
+    .portal-sub {
+      opacity:0.8;
+      margin-bottom:20px;
     }
 
-    #dynamic-terminal {
-      font-family: monospace;
-      color: #33ff99;
-      font-size: 14px;
-      margin-bottom: 30px;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(2px);
-      padding: 20px;
-      border: 1px solid #33ff99;
-      border-radius: 8px;
-      min-height: 200px;
-      box-shadow: 0 0 20px rgba(51, 255, 153, 0.15);
+    .portal-grid {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
     }
 
-    .terminal-line {
-      margin: 4px 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.4;
+    .tag {
+      border:1px solid #33ff99;
+      padding:6px 10px;
+      border-radius:20px;
+      font-size:12px;
     }
 
-    .blink-active {
-      animation: terminalBlink 0.8s step-end infinite;
+    /* MATRIX → STMS TEXT */
+    .morph-text {
+      margin-top:20px;
+      font-size:14px;
+      line-height:1.5;
+      opacity:0.9;
     }
 
-    @keyframes terminalBlink {
-      0%, 100% { opacity: 1; text-shadow: 0 0 5px #33ff99; }
-      50% { opacity: 0.3; text-shadow: none; }
+    /* EXPLORE */
+    .explore {
+      position:absolute;
+      bottom:30px;
+      width:100%;
+      text-align:center;
+      z-index:5;
     }
 
-    .grid {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin: 30px 0;
+    .explore a {
+      display:block;
+      margin:8px auto;
+      width:260px;
+      padding:12px;
+      border:1px solid #33ff99;
+      color:#33ff99;
+      text-decoration:none;
+      border-radius:6px;
+      transition:0.2s;
     }
 
-    .icon-box {
-      border: 2px solid #33ff99;
-      padding: 18px;
-      text-align: center;
-      font-size: 28px;
-      text-decoration: none;
-      color: #33ff99;
-      transition: all 0.25s ease;
-      border-radius: 60px;
-      width: 70px;
-      display: inline-block;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(2px);
+    .explore a:hover {
+      background:rgba(0,255,100,0.15);
+      transform:translateX(5px);
     }
 
-    .icon-box:hover {
-      background: rgba(0, 255, 100, 0.2);
-      box-shadow: 0 0 15px #33ff99;
-      transform: scale(1.05);
-    }
-
-    .section-title {
-      margin: 30px 0 15px 0;
-      font-size: 18px;
-      border-left: 3px solid #33ff99;
-      padding-left: 12px;
-      text-shadow: 0 0 5px rgba(51, 255, 153, 0.5);
-    }
-
-    .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .btn {
-      border: 1px solid #33ff99;
-      padding: 14px 20px;
-      text-align: center;
-      text-decoration: none;
-      color: #33ff99;
-      transition: all 0.25s ease;
-      border-radius: 8px;
-      font-weight: bold;
-      letter-spacing: 1px;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(2px);
-    }
-
-    .btn:hover {
-      background: rgba(0, 255, 100, 0.15);
-      box-shadow: 0 0 15px #33ff99;
-      transform: translateX(5px);
-    }
-
-    @media (max-width: 700px) {
-      .sticky-header {
-        flex-direction: column;
-        text-align: center;
-      }
-      .contact-icon span {
-        display: none;
-      }
-      .contact-icon {
-        font-size: 18px;
-        padding: 5px 12px;
-      }
-      .logo {
-        height: 32px;
-      }
-    }
   </style>
 </head>
+
 <body>
 
 <canvas id="matrix-bg"></canvas>
-<canvas id="translucent-overlay"></canvas>
+<canvas id="morph-layer"></canvas>
 
-<div class="sticky-header">
-  <div class="header-left">
-    <img src="logo.png" class="logo" alt="ONN Logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'black\'/%3E%3Ctext x=\'50\' y=\'68\' font-size=\'48\' text-anchor=\'middle\' fill=\'%2333ff99\'%3EONN%3C/text%3E%3C/svg%3E'">
-  </div>
-  <div class="header-right">
-    <a href="https://wa.me/917044358282" target="_blank" class="contact-icon">💬 <span>CHAT</span></a>
-    <a href="tel:+917044358282" class="contact-icon">📞 <span>CALL</span></a>
-    <a href="mailto:onn@jamesmoriarty.in" class="contact-icon">✉️ <span>MAIL</span></a>
+<div class="header">
+  <img src="logo.png" class="logo">
+  <div class="links">
+    <a href="https://wa.me/917044358282" target="_blank">CHAT</a>
+    <a href="tel:+917044358282">CALL</a>
+    <a href="mailto:onn@jamesmoriarty.in">MAIL</a>
   </div>
 </div>
 
-<div class="content">
-  <div id="dynamic-terminal"></div>
+<!-- PORTAL -->
+<a href="onnwork.html" class="portal">
 
-  <div class="grid">
-    <a class="icon-box" href="https://wa.me/917044358282" target="_blank">💬</a>
-    <a class="icon-box" href="tel:+917044358282">📞</a>
-    <a class="icon-box" href="mailto:onn@jamesmoriarty.in">✉️</a>
+  <div class="portal-title">ONNwork Automations</div>
+  <div class="portal-sub">Control your business. In real time.</div>
+
+  <div class="portal-grid">
+    <div class="tag">ERP</div>
+    <div class="tag">Inventory</div>
+    <div class="tag">Production</div>
+    <div class="tag">Automation</div>
   </div>
 
-  <div class="section-title">> EXPLORE:</div>
+  <div class="morph-text" id="morphText"></div>
 
-  <div class="buttons">
-    <a class="btn" href="product.html">📦 PRODUCTS</a>
-    <a class="btn" href="services.html">🤝 SERVICES</a>
-    <a class="btn" href="toys.html">🎮 TOYS</a>
-    <a class="btn" href="terms.html">📜 TERMS & CONDITIONS</a>
-    <a class="btn" href="privacy.html">🔒 PRIVACY POLICY</a>
-  </div>
+</a>
+
+<!-- EXPLORE -->
+<div class="explore">
+  <a href="product.html">📦 PRODUCTS</a>
+  <a href="services.html">🤝 SERVICES</a>
+  <a href="toys.html">🎮 TOYS</a>
+  <a href="terms.html">📜 TERMS</a>
 </div>
 
 <script>
-  // MATRIX BACKGROUND
-  const canvas = document.getElementById("matrix-bg");
-  const ctx = canvas.getContext("2d");
+/* MATRIX BACKGROUND */
+const canvas = document.getElementById("matrix-bg");
+const ctx = canvas.getContext("2d");
 
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-  const letters = "01ONNWORKLAB";
-  const fontSize = 14;
-  let columns = Math.floor(canvas.width / fontSize);
-  let drops = [];
+const letters = "01ONNWORK";
+const fontSize = 14;
+const columns = canvas.width / fontSize;
+const drops = Array.from({length:columns}).map(()=>Math.random()*-100);
 
-  function initMatrix() {
-    columns = Math.floor(canvas.width / fontSize);
-    drops = [];
-    for (let x = 0; x < columns; x++) {
-      drops[x] = Math.random() * -100;
-    }
-  }
-  initMatrix();
+function drawMatrix(){
+  ctx.fillStyle="rgba(0,0,0,0.05)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  function drawMatrix() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#33ff99";
-    ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
-    for (let i = 0; i < drops.length; i++) {
-      const text = letters.charAt(Math.floor(Math.random() * letters.length));
-      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-        drops[i] = 0;
-      }
-      drops[i]++;
-    }
-    requestAnimationFrame(drawMatrix);
-  }
-  drawMatrix();
+  ctx.fillStyle="#33ff99";
+  ctx.font=fontSize+"px monospace";
 
-  window.addEventListener("resize", () => {
-    initMatrix();
+  drops.forEach((y,i)=>{
+    const text=letters[Math.floor(Math.random()*letters.length)];
+    ctx.fillText(text,i*fontSize,y*fontSize);
+
+    if(y*fontSize>canvas.height && Math.random()>0.975) drops[i]=0;
+    drops[i]++;
   });
 
-  // TRANSLUCENT OVERLAY - dynamic resize to follow content height
-  const overlayCanvas = document.getElementById("translucent-overlay");
-  const overlayCtx = overlayCanvas.getContext("2d");
+  requestAnimationFrame(drawMatrix);
+}
+drawMatrix();
 
-  function resizeOverlay() {
-    overlayCanvas.width = window.innerWidth;
-    overlayCanvas.height = window.innerHeight;
-    drawOverlay();
+/* MORPH TEXT EFFECT (THIS IS THE MAGIC) */
+
+const morphText = document.getElementById("morphText");
+
+const phases = [
+  ">> booting raw data stream...",
+  ">> unstructured flow detected...",
+  ">> mapping production variables...",
+  ">> aligning inventory nodes...",
+  ">> converting chaos → system...",
+  ">> initializing ONNwork core...",
+  ">> STMS READY"
+];
+
+let phaseIndex = 0;
+let charIndex = 0;
+
+function typeMorph() {
+  if (phaseIndex >= phases.length) return;
+
+  if (charIndex < phases[phaseIndex].length) {
+    morphText.textContent += phases[phaseIndex][charIndex];
+    charIndex++;
+    setTimeout(typeMorph, 25);
+  } else {
+    morphText.textContent += "\n";
+    phaseIndex++;
+    charIndex = 0;
+    setTimeout(typeMorph, 400);
   }
+}
 
-  function drawOverlay() {
-    if (!overlayCtx) return;
-    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-    const gradient = overlayCtx.createRadialGradient(
-      overlayCanvas.width / 2, 
-      overlayCanvas.height / 2, 
-      50, 
-      overlayCanvas.width / 2, 
-      overlayCanvas.height / 2, 
-      overlayCanvas.height / 1.5
-    );
-    gradient.addColorStop(0, "rgba(0, 25, 12, 0.55)");
-    gradient.addColorStop(0.6, "rgba(0, 10, 5, 0.75)");
-    gradient.addColorStop(1, "rgba(0, 0, 0, 0.9)");
-    overlayCtx.fillStyle = gradient;
-    overlayCtx.fillRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-    
-    // Add subtle scanlines
-    overlayCtx.fillStyle = "rgba(51, 255, 153, 0.03)";
-    for (let i = 0; i < overlayCanvas.height; i += 4) {
-      overlayCtx.fillRect(0, i, overlayCanvas.width, 1);
-    }
-  }
-
-  window.addEventListener("resize", () => {
-    resizeOverlay();
-  });
-  resizeOverlay();
-
-  // TERMINAL ANIMATION
-  const terminalContainer = document.getElementById("dynamic-terminal");
-  const bootLines = [
-    "> booting onnwork lab...",
-    "> systems online",
-    "> location: kolkata",
-    "> status: operational",
-    "",
-    "> Welcome to Offices of Nawnit Nihal",
-    "> Production • Technology • Automation"
-  ];
-
-  function typeLine(line, element) {
-    return new Promise(resolve => {
-      let i = 0;
-      function type() {
-        if (i < line.length) {
-          element.textContent += line[i];
-          i++;
-          setTimeout(type, 30 + Math.random() * 40);
-        } else {
-          resolve();
-        }
-      }
-      type();
-    });
-  }
-
-  async function runTerminal() {
-    terminalContainer.innerHTML = "";
-    for (let line of bootLines) {
-      const el = document.createElement("div");
-      el.className = "terminal-line";
-      terminalContainer.appendChild(el);
-      await typeLine(line, el);
-    }
-    const finalEl = document.createElement("div");
-    finalEl.className = "terminal-line blink-active";
-    finalEl.textContent = "> CONNECT VIA WHATSAPP, CALL OR MAIL ↑";
-    terminalContainer.appendChild(finalEl);
-  }
-
-  runTerminal();
+typeMorph();
 </script>
-<script src="matrix-nav.js"></script>
+
 </body>
 </html>
