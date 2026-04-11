@@ -4,10 +4,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ONNwork</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
 <style>
+
 body{
   margin:0;
-  font-family:Segoe UI;
+  font-family:'Inter', sans-serif;
   background:linear-gradient(135deg,#e8f0ff,#d6e4ff);
 }
 
@@ -16,49 +19,55 @@ body{
   position:sticky;
   top:0;
   background:#071a3a;
-  padding:12px 20px;
+  padding:12px 24px;
   display:flex;
   justify-content:space-between;
   align-items:center;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
 }
 
 .left{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
   color:white;
-  font-weight:900;
+  font-size:20px;
+  font-weight:800;
 }
 
 .logo{
-  height:32px;
+  height:34px;
+  display:block;
 }
 
 .right button{
-  margin-left:8px;
-  padding:8px 14px;
+  margin-left:10px;
+  padding:8px 16px;
   border:none;
-  border-radius:8px;
-  font-weight:800;
+  border-radius:20px;
+  font-weight:700;
   background:#1fbf6b;
   color:white;
   cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
 }
 
 /* INTRO */
 .intro{
   max-width:900px;
-  margin:30px auto;
+  margin:40px auto;
   text-align:center;
+  padding:0 20px;
 }
 
 .intro h1{
+  font-size:32px;
   color:#071a3a;
 }
 
 .intro p{
   color:#444;
-  line-height:1.6;
+  line-height:1.7;
 }
 
 /* GRID */
@@ -71,17 +80,22 @@ body{
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:15px;
+  gap:18px;
 }
 
 .group{
   background:white;
-  padding:18px;
-  border-radius:14px;
+  padding:20px;
+  border-radius:18px;
   text-align:center;
-  font-weight:900;
+  font-weight:800;
   cursor:pointer;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+  transition:.2s;
+}
+
+.group:hover{
+  transform:translateY(-5px);
 }
 
 /* MODAL */
@@ -92,34 +106,66 @@ body{
   display:none;
   justify-content:center;
   align-items:center;
+  z-index:1000;
 }
 
 .box{
   background:white;
-  padding:25px;
-  border-radius:14px;
+  padding:28px;
+  border-radius:20px;
   width:90%;
   max-width:420px;
   text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-logo{
+  height:40px;
+  margin-bottom:10px;
 }
 
 input{
   width:100%;
-  padding:12px;
-  margin:8px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
+  padding:14px;
+  margin:10px 0;
+  border-radius:30px;
+  border:none;
+  background:#f1f5ff;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.1);
+  font-size:14px;
 }
 
 .btn{
-  padding:10px 18px;
-  margin:8px;
+  padding:10px 20px;
+  margin:10px 6px;
   border:none;
-  border-radius:8px;
+  border-radius:20px;
   background:#071a3a;
   color:white;
   cursor:pointer;
+  font-weight:700;
 }
+
+/* TOAST */
+.toast{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:white;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  text-align:center;
+  display:none;
+  z-index:2000;
+}
+
+.toast img{
+  height:40px;
+  margin-bottom:10px;
+}
+
 </style>
 </head>
 
@@ -143,7 +189,7 @@ input{
   <h1>Control your business. In real time.</h1>
 
   <p>
-  ONNwork is a unified ERP platform that brings your sales, inventory, and operations into one system. 
+  ONNwork is a unified ERP platform that brings your sales, inventory, and operations into one system.
   It replaces multiple tools—billing software, spreadsheets, and manual tracking—with a simple, real-time solution.
   </p>
 
@@ -165,6 +211,7 @@ input{
 <!-- GROUP MODAL -->
 <div class="modal" id="groupModal">
   <div class="box">
+    <img src="logo.png" class="modal-logo">
     <h3 id="groupTitle"></h3>
     <div id="subFeatures"></div>
     <button class="btn" onclick="closeGroup()">Close</button>
@@ -174,6 +221,7 @@ input{
 <!-- LEAD MODAL -->
 <div class="modal" id="leadModal">
   <div class="box">
+    <img src="logo.png" class="modal-logo">
     <h3 id="featureTitle"></h3>
 
     <input id="name" placeholder="Your Name">
@@ -184,9 +232,15 @@ input{
   </div>
 </div>
 
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <img src="logo.png">
+  <h3>ONNwork will reach you shortly 🚀</h3>
+</div>
+
 <script>
 
-/* 🔥 TELEGRAM (HIDDEN) */
+/* 🔐 TELEGRAM CONFIG */
 const BOT_TOKEN = "PUT_YOUR_BOT_TOKEN";
 const CHAT_ID = "PUT_YOUR_CHAT_ID";
 
@@ -263,8 +317,14 @@ function submitLead(){
     })
   });
 
-  alert("We will contact you 🚀");
   closeLead();
+
+  let toast=document.getElementById("toast");
+  toast.style.display="block";
+
+  setTimeout(()=>{
+    toast.style.display="none";
+  },2500);
 }
 
 /* CONTACT */
