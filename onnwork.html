@@ -11,7 +11,7 @@ body{
   background:linear-gradient(135deg,#e8f0ff,#d6e4ff);
 }
 
-/* 🔥 HEADER */
+/* HEADER */
 .header{
   position:sticky;
   top:0;
@@ -20,7 +20,6 @@ body{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  z-index:100;
 }
 
 .left{
@@ -29,7 +28,6 @@ body{
   gap:10px;
   color:white;
   font-weight:900;
-  font-size:20px;
 }
 
 .logo{
@@ -47,7 +45,23 @@ body{
   cursor:pointer;
 }
 
-/* MAIN */
+/* INTRO */
+.intro{
+  max-width:900px;
+  margin:30px auto;
+  text-align:center;
+}
+
+.intro h1{
+  color:#071a3a;
+}
+
+.intro p{
+  color:#444;
+  line-height:1.6;
+}
+
+/* GRID */
 .container{
   max-width:1100px;
   margin:auto;
@@ -58,25 +72,19 @@ body{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:15px;
-  margin-top:20px;
 }
 
 .group{
-  background:linear-gradient(135deg,#ffffff,#f0f6ff);
-  padding:20px;
+  background:white;
+  padding:18px;
   border-radius:14px;
   text-align:center;
   font-weight:900;
   cursor:pointer;
   box-shadow:0 10px 25px rgba(0,0,0,0.1);
-  transition:.2s;
 }
 
-.group:hover{
-  transform:translateY(-4px);
-}
-
-/* MODALS */
+/* MODAL */
 .modal{
   position:fixed;
   inset:0;
@@ -88,52 +96,70 @@ body{
 
 .box{
   background:white;
-  padding:20px;
+  padding:25px;
   border-radius:14px;
   width:90%;
   max-width:420px;
-}
-
-.btn{
-  margin:6px;
-  padding:10px;
-  border-radius:8px;
-  border:none;
-  background:#071a3a;
-  color:white;
-  cursor:pointer;
+  text-align:center;
 }
 
 input{
   width:100%;
-  padding:10px;
-  margin:5px 0;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+.btn{
+  padding:10px 18px;
+  margin:8px;
+  border:none;
+  border-radius:8px;
+  background:#071a3a;
+  color:white;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 🔥 NEW HEADER -->
+<!-- HEADER -->
 <div class="header">
-
   <div class="left">
-    <img src="https://drive.google.com/uc?export=view&id=1V5acb_idqSOzg-nc7MjifOzNB3GvzOFY" class="logo">
+    <img src="logo.png" class="logo">
     ONNwork
   </div>
 
   <div class="right">
-    <button onclick="wa()">WhatsApp</button>
     <button onclick="call()">Call</button>
     <button onclick="mail()">Mail</button>
   </div>
+</div>
 
+<!-- INTRO -->
+<div class="intro">
+  <h1>Control your business. In real time.</h1>
+
+  <p>
+  ONNwork is a unified ERP platform that brings your sales, inventory, and operations into one system. 
+  It replaces multiple tools—billing software, spreadsheets, and manual tracking—with a simple, real-time solution.
+  </p>
+
+  <p>
+  Every sale updates inventory, tracks raw material consumption, and shows you what’s selling, what’s stuck, and what needs action.
+  </p>
+
+  <p>
+  If you want more control, speed, and clarity in your business, ONNwork can help.
+  </p>
+
+  <b>Reply “DEMO” to explore.</b>
 </div>
 
 <div class="container">
-
-<div class="grid" id="groups"></div>
-
+  <div class="grid" id="groups"></div>
 </div>
 
 <!-- GROUP MODAL -->
@@ -160,8 +186,9 @@ input{
 
 <script>
 
-const TELEGRAM_BOT = "YOUR_BOT_TOKEN";
-const CHAT_ID = "YOUR_CHAT_ID";
+/* 🔥 TELEGRAM (HIDDEN) */
+const BOT_TOKEN = "PUT_YOUR_BOT_TOKEN";
+const CHAT_ID = "PUT_YOUR_CHAT_ID";
 
 const groups = {
 "Inventory":["Real-time inventory","Stock alerts","Inventory sync","Stock control","Inventory accuracy","Live stock visibility"],
@@ -170,7 +197,7 @@ const groups = {
 "Analytics":["Smart analytics","Growth tracking","Business insights","Better reporting","Data visibility","Central dashboard"],
 "Automation":["Data automation","Reduced manual work","Automated updates","System automation","Workflow sync","Cloud sync"],
 "Security":["Audit logs","Reduced leakage","Business transparency","Remote monitoring","Central control","Smart business"],
-"Mobility":["Mobile control","Remote monitoring","Live reporting","Scalable system","ERP integration","Central control"],
+"Mobility":["Mobile control","Live reporting","Scalable system","ERP integration","Central control","Remote monitoring"],
 "Management":["Better decision making","Operational clarity","Performance tracking","Organized business","Better planning","Growth insights"],
 "Finance":["Profit analytics","Reduced leakage","Better reporting","Smart alerts","Business intelligence","Real-time control"],
 "System":["Smart operations","Process efficiency","Central control","Inventory management","ERP integration","Data visibility"]
@@ -227,7 +254,7 @@ function submitLead(){
 
   let text=`🔥 ONN Lead\nFeature: ${currentFeature}\nName: ${name}\nPhone: ${phone}`;
 
-  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT}/sendMessage`,{
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
@@ -236,16 +263,11 @@ function submitLead(){
     })
   });
 
-  window.open(`https://wa.me/917044358282?text=Hi, I am interested in ${currentFeature}`);
-
   alert("We will contact you 🚀");
   closeLead();
 }
 
-/* CONTACT ACTIONS */
-function wa(){
-  window.open("https://wa.me/917044358282");
-}
+/* CONTACT */
 function call(){
   window.location.href="tel:+917044358282";
 }
