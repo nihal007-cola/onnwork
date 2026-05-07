@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>TEAMVIR | Entertainment Finance Command Center</title>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -185,17 +185,20 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 12px;
         }
 
         .logo-area {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-shrink: 0;
         }
 
         .logo-area img {
             width: 45px;
             height: auto;
+            display: block;
         }
 
         .teamvir-title {
@@ -225,6 +228,7 @@
             gap: 20px;
             align-items: center;
             font-size: 0.85rem;
+            flex-wrap: wrap;
         }
 
         /* Metrics Grid */
@@ -279,11 +283,17 @@
             border: 1px solid #1e3342;
             backdrop-filter: blur(8px);
             transition: all 0.3s;
+            overflow-x: auto;
         }
 
         .chart-card:hover {
             border-color: #00ffaa40;
             box-shadow: 0 0 20px rgba(0,255,170,0.1);
+        }
+
+        .chart-card canvas {
+            max-width: 100%;
+            height: auto;
         }
 
         /* Approval Cards */
@@ -339,6 +349,8 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 16px;
+            overflow-x: auto;
+            display: block;
         }
 
         .expense-table th, .expense-table td {
@@ -417,12 +429,17 @@
             }
             .chart-row {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
             .mobile-bottom-nav {
                 display: flex;
             }
             .sticky-header {
                 padding-bottom: 8px;
+            }
+            .header-stats {
+                gap: 12px;
+                font-size: 0.7rem;
             }
             .header-stats span {
                 font-size: 0.7rem;
@@ -431,12 +448,59 @@
                 flex: auto;
                 width: 100%;
                 text-align: center;
+                padding: 40px 20px;
+            }
+            .login-left img {
+                width: 60px;
+            }
+            .login-left h1 {
+                font-size: 2.5rem;
+            }
+            .login-left p {
+                font-size: 1rem;
+            }
+            .metric-value {
+                font-size: 1.5rem;
+            }
+            .chart-card {
+                padding: 15px;
+            }
+            .comm-channel {
+                flex: 1 0 120px;
+                font-size: 0.85rem;
+            }
+            .approval-grid {
+                grid-template-columns: 1fr;
+            }
+            .logo-area img {
+                width: 35px;
+            }
+            .teamvir-title {
+                font-size: 1.2rem;
+            }
+            .live-indicator {
+                padding: 4px 10px;
+                font-size: 0.65rem;
             }
         }
 
         @media (max-width: 480px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
             .metric-value {
                 font-size: 1.8rem;
+            }
+            .header-flex {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .chart-card canvas {
+                min-height: 200px;
             }
         }
 
@@ -447,6 +511,17 @@
         @keyframes pulse-animation {
             0% { opacity: 0.6; text-shadow: 0 0 0 #00ffaa;}
             100% { opacity: 1; text-shadow: 0 0 5px #00ffaa;}
+        }
+
+        /* Ensure all content is scrollable */
+        .dashboard {
+            padding-bottom: 80px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding-bottom: 70px;
+            }
         }
     </style>
 </head>
@@ -549,7 +624,9 @@
 
         <!-- Tour Profitability Table -->
         <div class="chart-card" style="margin-top: 20px;"><h3><i class="fas fa-table-list"></i> Tour Profitability Matrix</h3>
-            <table class="expense-table" id="profitTable"><table>
+            <div style="overflow-x: auto;">
+                <table class="expense-table" id="profitTable"></table>
+            </div>
         </div>
     </div>
 
@@ -657,9 +734,9 @@
         document.getElementById('simulateUploadBtn')?.addEventListener('click',()=>{
             const fakeExtract = {vendor:"RockIt Logistics", amount:87450, gst:"18%", category:"Freight", city:"Dubai", date:"2025-05-07"};
             const tableDiv = document.getElementById('extractedTable');
-            tableDiv.innerHTML = `<table class="expense-table"><tr><th>Vendor</th><th>Amount</th><th>GST</th><th>Category</th><th>City</th><th>Date</th></tr>
+            tableDiv.innerHTML = `<div style="overflow-x: auto;"><table class="expense-table"><tr><th>Vendor</th><th>Amount</th><th>GST</th><th>Category</th><th>City</th><th>Date</th></tr>
             <tr><td>${fakeExtract.vendor}</td><td>₹${fakeExtract.amount}</td><td>${fakeExtract.gst}</td><td>${fakeExtract.category}</td><td>${fakeExtract.city}</td><td>${fakeExtract.date}</td></tr>
-            <tr><td colspan="6"><span style="color:#00ffaa;">✓ Expense report created • Audit trail generated</span></td></tr></table>`;
+            <tr><td colspan="6"><span style="color:#00ffaa;">✓ Expense report created • Audit trail generated</span></td></tr></table></div>`;
             addActivity(`OCR extracted: ${fakeExtract.vendor} ₹${fakeExtract.amount}`);
         });
 
@@ -683,12 +760,12 @@
                     { label: 'Revenue (L)', data: [180,210,290,430,310,500], backgroundColor:'#44c7aa' },
                     { label: 'Expense (L)', data: [112,135,174,298,178,330], backgroundColor:'#ff6670' },
                     { label: 'Net Margin', data: [68,75,116,132,132,170], backgroundColor:'#b3ffaa' }
-                ] }, options: { responsive: true, plugins: { legend: { position:'top', labels:{color:'white'}} } }
+                ] }, options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position:'top', labels:{color:'white'}} } }
             });
             const velCtx = document.getElementById('velocityChart').getContext('2d');
             new Chart(velCtx, {
                 type: 'line', data: { labels: ['10:00','11:00','12:00','13:00','14:00','15:00','16:00'], datasets: [{ label: 'Expense Velocity (₹k/h)', data: [112,108,135,142,138,154,167], borderColor:'#00ffaa', fill:true, backgroundColor:'rgba(0,255,170,0.1)' }] },
-                options: { responsive: true, animation: { duration: 1200 } }
+                options: { responsive: true, maintainAspectRatio: true, animation: { duration: 1200 } }
             });
         }
 
@@ -717,7 +794,7 @@
                 {venue:"New York", revenue:50200000, expense:33000000, marginPct:34.2, risk:"Critical", delay:"48h"},
             ];
             tableBody.innerHTML = `<tr><th>Venue</th><th>Revenue</th><th>Expense</th><th>Margin %</th><th>Risk Level</th><th>Approval Delays</th></tr>` +
-                data.map(r => `<tr><td>${r.venue}</td><td>₹${(r.revenue/1e5).toFixed(1)}L</td><td>₹${(r.expense/1e5).toFixed(1)}L</td><td style="color:${r.marginPct>45?'#00ffaa':'#ffaa66'}">${r.marginPct}%</td><td>${r.risk}</td><td>${r.delay}</td></tr>`).join('');
+                data.map(r => `<tr><td>${r.venue}</td><td>₹${(r.revenue/1e5).toFixed(1)}L</td><td>₹${(r.expense/1e5).toFixed(1)}L</td><td style="color:${r.marginPct>45?'#00ffaa':'#ffaa66'}">${r.marginPct}%</td><td>${r.risk}</td><td>${r.delay}</td>`).join('');
         }
 
         function simulateDynamicMetrics(){
