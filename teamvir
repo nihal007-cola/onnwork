@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>ONNwork Control Layer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#03070b;
+    color:#eaf6ff;
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+}
+
+/* BACKGROUND */
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+    radial-gradient(circle at top left, rgba(0,255,170,0.08), transparent 25%),
+    radial-gradient(circle at bottom right, rgba(0,140,255,0.08), transparent 25%);
+    z-index:-2;
+}
+
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size:40px 40px;
+    z-index:-1;
+}
+
+/* HEADER */
+
+header{
+    position:sticky;
+    top:0;
+    z-index:999;
+    background:rgba(0,0,0,0.8);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid rgba(0,255,170,0.15);
+}
+
+.header-inner{
+    max-width:1400px;
+    margin:auto;
+    padding:18px 30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.logo-wrap{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.logo-wrap img{
+    width:70px;
+}
+
+.logo-text h1{
+    font-size:28px;
+    color:#00ffaa;
+    letter-spacing:1px;
+}
+
+.logo-text p{
+    color:#77ffc7;
+    font-size:13px;
+    opacity:0.8;
+}
+
+.live-pill{
+    padding:10px 18px;
+    border-radius:999px;
+    border:1px solid #00ffaa;
+    color:#00ffaa;
+    font-weight:700;
+    box-shadow:0 0 20px rgba(0,255,170,0.15);
+}
+
+/* HERO */
+
+.hero{
+    max-width:1400px;
+    margin:auto;
+    padding:60px 30px 40px;
+}
+
+.hero h2{
+    font-size:58px;
+    line-height:1.1;
+    max-width:950px;
+    margin-bottom:20px;
+}
+
+.highlight{
+    color:#00ffaa;
+}
+
+.hero p{
+    font-size:20px;
+    color:#b6c9d8;
+    line-height:1.7;
+    max-width:900px;
+}
+
+/* METRICS */
+
+.metrics{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-top:50px;
+}
+
+.metric-card{
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(0,255,170,0.15);
+    border-radius:22px;
+    padding:28px;
+    backdrop-filter:blur(8px);
+    transition:0.3s;
+}
+
+.metric-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 0 30px rgba(0,255,170,0.12);
+}
+
+.metric-title{
+    color:#8aa4b7;
+    margin-bottom:15px;
+    font-size:14px;
+}
+
+.metric-value{
+    font-size:38px;
+    font-weight:800;
+    color:#00ffaa;
+}
+
+.metric-sub{
+    margin-top:10px;
+    color:#a7b8c7;
+}
+
+/* MAIN GRID */
+
+.main-grid{
+    max-width:1400px;
+    margin:auto;
+    padding:20px 30px 80px;
+    display:grid;
+    grid-template-columns:1fr 1.4fr 1fr;
+    gap:25px;
+}
+
+/* PANELS */
+
+.panel{
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:24px;
+    padding:25px;
+    backdrop-filter:blur(12px);
+}
+
+.panel h3{
+    margin-bottom:25px;
+    font-size:22px;
+    color:#00ffaa;
+}
+
+/* ACTIVITY */
+
+.activity-item{
+    padding:18px;
+    border-radius:16px;
+    background:rgba(255,255,255,0.03);
+    margin-bottom:15px;
+    border-left:3px solid #00ffaa;
+}
+
+.activity-time{
+    font-size:12px;
+    color:#8ca5b8;
+    margin-top:8px;
+}
+
+/* CASHFLOW */
+
+.cash-box{
+    height:260px;
+    border-radius:20px;
+    background:
+    linear-gradient(to top, rgba(0,255,170,0.2), transparent),
+    rgba(255,255,255,0.02);
+    display:flex;
+    align-items:flex-end;
+    gap:18px;
+    padding:25px;
+    margin-bottom:30px;
+}
+
+.bar{
+    flex:1;
+    background:linear-gradient(to top,#00ffaa,#006eff);
+    border-radius:14px 14px 0 0;
+}
+
+.bar1{height:45%;}
+.bar2{height:70%;}
+.bar3{height:58%;}
+.bar4{height:85%;}
+.bar5{height:60%;}
+
+.profit-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.profit-table th,
+.profit-table td{
+    padding:16px;
+    text-align:left;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+.profit-table th{
+    color:#8eb4c9;
+    font-weight:500;
+}
+
+.green{
+    color:#00ffaa;
+}
+
+/* APPROVALS */
+
+.approval{
+    background:rgba(255,255,255,0.03);
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:18px;
+}
+
+.approval h4{
+    margin-bottom:12px;
+}
+
+.approval p{
+    color:#9eb2c2;
+    margin-bottom:16px;
+    line-height:1.6;
+}
+
+.btn-row{
+    display:flex;
+    gap:10px;
+}
+
+.btn{
+    flex:1;
+    border:none;
+    padding:12px;
+    border-radius:14px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.btn-green{
+    background:#00ffaa;
+    color:#00140d;
+}
+
+.btn-dark{
+    background:#111c26;
+    color:#d7e7f3;
+}
+
+/* MOBILE PANEL */
+
+.mobile-preview{
+    max-width:380px;
+    margin:80px auto;
+    border-radius:40px;
+    border:1px solid rgba(0,255,170,0.2);
+    padding:20px;
+    background:#061019;
+    box-shadow:0 0 40px rgba(0,255,170,0.08);
+}
+
+.mobile-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.mobile-title{
+    font-size:22px;
+    font-weight:800;
+}
+
+.mobile-card{
+    background:#0d1821;
+    border-radius:22px;
+    padding:20px;
+    margin-bottom:18px;
+}
+
+.mobile-card h4{
+    margin-bottom:10px;
+}
+
+.mobile-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:20px;
+}
+
+.mobile-btn{
+    background:#00ffaa;
+    color:#00140d;
+    padding:14px;
+    border-radius:16px;
+    text-align:center;
+    font-weight:700;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1100px){
+
+    .metrics{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .main-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:700px){
+
+    .hero h2{
+        font-size:38px;
+    }
+
+    .hero p{
+        font-size:17px;
+    }
+
+    .metrics{
+        grid-template-columns:1fr;
+    }
+
+    .header-inner{
+        padding:15px;
+    }
+
+    .logo-text h1{
+        font-size:22px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="header-inner">
+
+        <div class="logo-wrap">
+
+            <img src="logo.png" alt="ONNwork">
+
+            <div class="logo-text">
+                <h1>ONNwork</h1>
+                <p>Automation • ERP • Control Layer</p>
+            </div>
+
+        </div>
+
+        <div class="live-pill">
+            ● LIVE
+        </div>
+
+    </div>
+
+</header>
+
+<section class="hero">
+
+    <h2>
+        Real-time financial control for
+        <span class="highlight">moving entertainment teams.</span>
+    </h2>
+
+    <p>
+        Monitor profitability, vendor payments, approvals, tour operations,
+        reimbursements, and live expenses from a unified command layer.
+    </p>
+
+    <div class="metrics">
+
+        <div class="metric-card">
+            <div class="metric-title">LIVE CASH POSITION</div>
+            <div class="metric-value">₹1.84Cr</div>
+            <div class="metric-sub">Updated 12 sec ago</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-title">TODAY SPEND</div>
+            <div class="metric-value">₹12.6L</div>
+            <div class="metric-sub">Hotels • Travel • Vendors</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-title">PENDING APPROVALS</div>
+            <div class="metric-value">14</div>
+            <div class="metric-sub">Requires review</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-title">ACTIVE TOUR CITIES</div>
+            <div class="metric-value">7</div>
+            <div class="metric-sub">Global operations running</div>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="main-grid">
+
+    <!-- LEFT -->
+
+    <div class="panel">
+
+        <h3>Live Activity Feed</h3>
+
+        <div class="activity-item">
+            Dubai venue advance approved
+            <div class="activity-time">2 mins ago</div>
+        </div>
+
+        <div class="activity-item">
+            Lighting vendor invoice uploaded
+            <div class="activity-time">5 mins ago</div>
+        </div>
+
+        <div class="activity-item">
+            London hospitality budget exceeded
+            <div class="activity-time">11 mins ago</div>
+        </div>
+
+        <div class="activity-item">
+            Singapore hotel settlement completed
+            <div class="activity-time">18 mins ago</div>
+        </div>
+
+    </div>
+
+    <!-- CENTER -->
+
+    <div class="panel">
+
+        <h3>Real-Time Cash Flow</h3>
+
+        <div class="cash-box">
+
+            <div class="bar bar1"></div>
+            <div class="bar bar2"></div>
+            <div class="bar bar3"></div>
+            <div class="bar bar4"></div>
+            <div class="bar bar5"></div>
+
+        </div>
+
+        <h3 style="margin-top:20px;">Tour Profitability</h3>
+
+        <table class="profit-table">
+
+            <tr>
+                <th>City</th>
+                <th>Revenue</th>
+                <th>Expense</th>
+                <th>Margin</th>
+            </tr>
+
+            <tr>
+                <td>Mumbai</td>
+                <td>₹18L</td>
+                <td>₹9L</td>
+                <td class="green">50%</td>
+            </tr>
+
+            <tr>
+                <td>Dubai</td>
+                <td>₹32L</td>
+                <td>₹14L</td>
+                <td class="green">56%</td>
+            </tr>
+
+            <tr>
+                <td>London</td>
+                <td>₹41L</td>
+                <td>₹24L</td>
+                <td class="green">41%</td>
+            </tr>
+
+        </table>
+
+    </div>
+
+    <!-- RIGHT -->
+
+    <div class="panel">
+
+        <h3>Approval Engine</h3>
+
+        <div class="approval">
+
+            <h4>Hotel Advance</h4>
+
+            <p>
+                ₹1,85,000 requested for Singapore crew accommodation.
+            </p>
+
+            <div class="btn-row">
+                <button class="btn btn-green">Approve</button>
+                <button class="btn btn-dark">Hold</button>
+            </div>
+
+        </div>
+
+        <div class="approval">
+
+            <h4>Lighting Vendor</h4>
+
+            <p>
+                Payment pending for 2 days. Operations escalation active.
+            </p>
+
+            <div class="btn-row">
+                <button class="btn btn-green">Release</button>
+                <button class="btn btn-dark">Review</button>
+            </div>
+
+        </div>
+
+        <div class="approval">
+
+            <h4>Travel Reimbursement</h4>
+
+            <p>
+                Crew travel claim submitted from London operations.
+            </p>
+
+            <div class="btn-row">
+                <button class="btn btn-green">Approve</button>
+                <button class="btn btn-dark">Audit</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- MOBILE -->
+
+<section class="mobile-preview">
+
+    <div class="mobile-top">
+
+        <div>
+            <div class="mobile-title">Mobile Control</div>
+            <div style="color:#8aa5b6;font-size:13px;">
+                ONNwork Live
+            </div>
+        </div>
+
+        <div class="live-pill" style="padding:8px 12px;font-size:12px;">
+            LIVE
+        </div>
+
+    </div>
+
+    <div class="mobile-card">
+
+        <h4>Cash Position</h4>
+
+        <div style="font-size:34px;font-weight:800;color:#00ffaa;">
+            ₹1.84Cr
+        </div>
+
+    </div>
+
+    <div class="mobile-card">
+
+        <h4>Pending Approvals</h4>
+
+        <div style="font-size:34px;font-weight:800;color:#00ffaa;">
+            14
+        </div>
+
+    </div>
+
+    <div class="mobile-buttons">
+
+        <div class="mobile-btn">Approve</div>
+        <div class="mobile-btn">Expenses</div>
+        <div class="mobile-btn">Vendors</div>
+        <div class="mobile-btn">Profit</div>
+
+    </div>
+
+</section>
+
+</body>
+</html>
